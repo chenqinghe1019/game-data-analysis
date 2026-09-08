@@ -79,6 +79,46 @@ ta_dashboard_report_workflow:
       note: "校验/保存时 qp 必须同时带 sqlVoParams 和 sqlViewParams，宏才能在 fetchSqlQuery 里解析。多参数时 date1/date2 各配一份。"
     js_template_pitfall: "在 JS 反引号模板字符串里写 SQL 时，${PartDate:date1} 必须转义成 \\${PartDate:date1}，否则被当成 JS 插值。"
 
+  reusable_ad_dashboard_pattern:
+    applicable_to: "按日期、渠道、新老用户、广告点和关卡分析激励视频的 SQL 看板。"
+    cohort_and_dimension_rules:
+      registration_day: "从 register 事件按 #user_id 取最早 $part_date；注册日期参数使用独立的 PartDate。"
+      channel: "渠道优先取用户表的注册渠道；缺失值统一显示为‘未知’。"
+      active_users: "当日活跃按 login 事件对 #user_id 去重。"
+      new_users: "reg_day = 数据日期。"
+      old_users: "reg_day < 数据日期。"
+      editor_exclusion: "渠道选择‘全部’时也应默认过滤 channel_name <> 'EDITOR_PAGE'，避免编辑器测试数据进入业务看板。"
+    ad_event_rules:
+      views: "video_play_start 的事件次数和去重用户数。"
+      completions: "video_play_end 的事件次数和去重用户数。"
+      ad_position: "广告点使用 positiontag；创建 SQL 前仍需在当前项目表结构中复核。"
+      progress: "chapter_speed 线上可能存成 0%-5%、5%-10% 等区间字符串；不要仅依据需求表中的‘数值’类型编写比较条件，先查询真实值。"
+    metric_formulas:
+      average_views: "视频观看次数 / 观看人数。"
+      average_completions: "视频完播次数 / 完播人数。"
+      completion_rate: "视频完播次数 / 视频观看次数。"
+      completion_share: "当前广告点视频完播次数 / 当日全部广告点视频完播次数。"
+      completer_share: "完播人数 / 观看人数。"
+      penetration: "完播人数 / 当日活跃人数。"
+    distribution_rule: "广告次数分布以 video_play_end 计数；从当日活跃用户集合 LEFT JOIN 每人完播次数，才能保留广告次数为 0 的用户。"
+    level_rule: "名为‘关卡开始人数’的指标应使用 level_start 的去重用户数，不使用事件次数。"
+    zero_division: "所有比率分母使用 nullif(..., 0)，最终保留两位小数。"
+
+  dynamic_variable_param:
+    variable_syntax: "通过界面添加‘可变内容 Variable’时，系统生成的占位符格式为 ${Variable5}，不是 ${Variable:variable5}。"
+    string_filter_example: "('${Variable5}'='全部' OR cast(level_id AS varchar)='${Variable5}')"
+    configuration_steps:
+      - "先在 SQL 中保留系统生成的变量占位符。"
+      - "在参数列表中填写非空默认值，例如‘全部’。"
+      - "点击参数行的编辑按钮，把显示名改成业务名称，例如‘关卡名称’，并补充填写示例。"
+      - "重新计算成功后再更新报表，否则参数配置不会进入已存报表。"
+
+  sql_graph_sync_lessons:
+    - "修改 SQL 输出字段名后，旧图表中的同名绑定可能被移除；查询成功后必须重新进入图表配置复核维度和指标。"
+    - "表格维度按阅读顺序配置，例如数据日期、关卡名称、广告点名称；其余数值字段放入指标区。"
+    - "批量拖入大量指标后要检查重复项和遗漏项，保存图表后再返回 SQL 页面更新报表。"
+    - "看板验收应等待所有卡片完成计算，并确认卡片无错误、动态参数可见、宽表可横向阅读。"
+
   github_sync_policy:
     remote: "origin"
     branch: "master"
