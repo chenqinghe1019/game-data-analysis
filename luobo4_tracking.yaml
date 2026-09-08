@@ -15,11 +15,20 @@ projects:
         user_properties: "#用户数据!A1:G26"
       repository_policy: "原始 Excel 不提交；本文件记录可检索的结构化埋点口径。"
 
+    supplementary_sources:
+      - file: "codex-clipboard-e952aafb-3c9f-41e7-a664-5c6412824638.png"
+        imported_at: "2026-09-08"
+        scope: "事件数据截图；核对基础、引导、付费、任务、签到、主线、产消并补充激励视频"
+        processing_rule: "划线内容不纳入有效事件属性；截图未覆盖的既有用户属性与已确认线上口径保留"
+        excluded_event_properties:
+          video_play_end: ["channel", "new_player"]
+          video_play_start: ["channel", "new_player"]
+
     status: "初版埋点，存在技术命名、类型及用户 ID 模式待确认项"
     summary:
-      named_event_count: 14
+      named_event_count: 16
       pending_asset_event_name_count: 8
-      event_property_row_count: 89
+      event_property_row_count: 95
       common_event_property_count: 6
       named_user_property_count: 12
       unnamed_virtual_user_property_count: 1
@@ -397,6 +406,49 @@ projects:
             source_type: null
             description: "0（未全清）1（全清）"
 
+
+      - tag: "激励视频"
+        event_name: "video_play_end"
+        display_name: "[视频]播放完成"
+        trigger: "视频播放完成时记录"
+        properties:
+          - name: "positiontag"
+            display_name: "视频点位"
+            type: "varchar"
+            source_type: "字符串"
+            description: "传具体的视频点位名称，例如：局外-视频券"
+            validation_issue: "截图右侧示例文字截断，仅保留完整可读示例"
+          - name: "level_id"
+            display_name: "关卡id"
+            type: "double"
+            source_type: "数值"
+            description: "上报当前玩家的关卡数"
+          - name: "chapter_speed"
+            display_name: "当前进度"
+            type: "double"
+            source_type: "数值"
+            description: "关卡进度以5%为一个刻度，即0-5%、5-10%"
+            validation_issue: "原表类型为数值，但说明使用区间；具体上报值编码待确认"
+      - tag: "激励视频"
+        event_name: "video_play_start"
+        display_name: "[视频]播放开始"
+        trigger: "视频播放开始时记录"
+        properties:
+          - name: "positiontag"
+            display_name: "视频点位"
+            type: "varchar"
+            source_type: "字符串"
+          - name: "level_id"
+            display_name: "关卡id"
+            type: "double"
+            source_type: "数值"
+          - name: "chapter_speed"
+            display_name: "当前进度"
+            type: "double"
+            source_type: "数值"
+        notes:
+          - "截图未填写播放开始事件的属性说明；不直接套用播放完成事件的说明，具体口径待确认。"
+
     asset_change_events:
       event_name: "asset_change"
       event_name_status: "线上事件名已确认"
@@ -455,6 +507,7 @@ projects:
           description: "产出/消耗途径，如日常任务奖励获得、抽卡消耗；可直接使用中文或英文，方便客服、运营查询"
 
     pending_confirmations:
+      - "确认激励视频 chapter_speed 的数值编码，以及播放开始事件各属性的具体上报口径。"
       - "确认项目实际采用单账号单角色还是单账号多角色。"
       - "确认 sever 是否改为 server，并确保历史与新数据字段名一致。"
       - "确认 asset_change 是否统一覆盖 8 类产出与消耗，并确认 item_type 的区分口径。"
