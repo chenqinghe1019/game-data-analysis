@@ -406,7 +406,6 @@ projects:
             source_type: null
             description: "0（未全清）1（全清）"
 
-
       - tag: "激励视频"
         event_name: "video_play_end"
         display_name: "[视频]播放完成"
@@ -425,10 +424,9 @@ projects:
             description: "上报当前玩家的关卡数"
           - name: "chapter_speed"
             display_name: "当前进度"
-            type: "double"
-            source_type: "数值"
-            description: "关卡进度以5%为一个刻度，即0-5%、5-10%"
-            validation_issue: "原表类型为数值，但说明使用区间；具体上报值编码待确认"
+            type: "varchar"
+            source_type: "字符串"
+            description: "TA 线上值按 5% 区间记录，如 0%-5%、5%-10%、85%-90%。"
       - tag: "激励视频"
         event_name: "video_play_start"
         display_name: "[视频]播放开始"
@@ -444,10 +442,9 @@ projects:
             source_type: "数值"
           - name: "chapter_speed"
             display_name: "当前进度"
-            type: "double"
-            source_type: "数值"
-        notes:
-          - "截图未填写播放开始事件的属性说明；不直接套用播放完成事件的说明，具体口径待确认。"
+            type: "varchar"
+            source_type: "字符串"
+            description: "TA 线上值按 5% 区间记录，如 0%-5%、5%-10%、85%-90%。"
 
     asset_change_events:
       event_name: "asset_change"
@@ -506,8 +503,26 @@ projects:
           type: "unspecified"
           description: "产出/消耗途径，如日常任务奖励获得、抽卡消耗；可直接使用中文或英文，方便客服、运营查询"
 
+    dashboards:
+      - name: "萝卜4小游戏-广告分析"
+        ta_dashboard_id: 2023
+        url: "https://ta-data.feiyu.com/#/panel/panel/37_2023_0"
+        default_filters:
+          data_date: "过去7天"
+          registration_date: "最近3651天"
+          channel: "排除 EDITOR_PAGE"
+          user_type: "全部用户；新用户=注册日等于数据日，老用户=注册日早于数据日"
+        reports:
+          - {name: "萝卜4小游戏-广告点汇总", ta_report_id: 5654}
+          - {name: "萝卜4小游戏-广告次数分布", ta_report_id: 5655}
+          - {name: "萝卜4小游戏-按关卡汇总", ta_report_id: 5657}
+          - {name: "萝卜4小游戏-按关卡明细", ta_report_id: 5658, extra_filter: "关卡名称"}
+        implementation_notes:
+          - "广告观看使用 video_play_start；广告完播及次数分布使用 video_play_end。"
+          - "广告点使用事件属性 positiontag。"
+          - "按关卡明细包含 0%-5% 至 95%-100% 共 20 个 chapter_speed 进度人数区间。"
+
     pending_confirmations:
-      - "确认激励视频 chapter_speed 的数值编码，以及播放开始事件各属性的具体上报口径。"
       - "确认项目实际采用单账号单角色还是单账号多角色。"
       - "确认 sever 是否改为 server，并确保历史与新数据字段名一致。"
       - "确认 asset_change 是否统一覆盖 8 类产出与消耗，并确认 item_type 的区分口径。"
