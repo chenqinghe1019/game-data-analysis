@@ -189,8 +189,8 @@ anti_cheat_rules:
     event: "battle_check"
     abnormal_type: "通关时间异常"
     customer_rule: "/"
-    logic: "按 battle_type + map_id 关卡维度，对筛选周期内 duration>0 的 battle_check 样本计算 P1 通关时间；实际 duration 低于 P1÷1.5 时标记异常"
-    sql_hint: "duration > 0 AND duration_p1 > 0 AND duration < duration_p1 / 1.5"
+    logic: "按 battle_type + map_id 关卡维度，对筛选周期内 duration>0 的 battle_check 样本计算 P1 通关时间；实际 duration 低于 P1÷2 时标记异常"
+    sql_hint: "duration > 0 AND duration_p1 > 0 AND duration < duration_p1 / 2.0"
 
   wall_hp_abnormal:
     report_name: "外挂治理new"
