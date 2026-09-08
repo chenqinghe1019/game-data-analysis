@@ -28,7 +28,7 @@ SELECT
                 CASE
                     WHEN x.duration > 0
                      AND x.duration_p1 > 0
-                     AND x.duration < x.duration_p1 / 1.5
+                     AND x.duration < x.duration_p1 / 2.0
                     THEN '通关时间异常'
                 END
             ],
@@ -51,7 +51,7 @@ SELECT
 
     round(x.duration, 2) AS "实际通关时间",
     round(x.duration_p1, 2) AS "关卡P1通关时间",
-    round(x.duration_p1 / 1.5, 2) AS "通关时间异常阈值（P1÷1.5）",
+    round(x.duration_p1 / 2.0, 2) AS "通关时间异常阈值（P1÷2）",
 
     x.battle_uid AS "异常battle_uid",
     x.battle_type AS "battle_type",
@@ -197,7 +197,7 @@ WHERE
         OR (
                 x.duration > 0
             AND x.duration_p1 > 0
-            AND x.duration < x.duration_p1 / 1.5
+            AND x.duration < x.duration_p1 / 2.0
            )
     )
 
