@@ -60,7 +60,6 @@ FROM
                     CASE
                         WHEN e."$part_event" = 'role_obtain_log'
                         THEN try_cast(e.init_star AS double)
-
                         WHEN e."$part_event" IN ('role_upstar_log', 'role_back_star_log')
                         THEN try_cast(e.nstar AS double)
                     END,
@@ -80,7 +79,7 @@ FROM
                     d.create_date,
                     d.days,
                     d.target_date,
-                    v.vip_level
+                    coalesce(v.vip_level, 0) vip_level
                 FROM
                 (
                     SELECT
@@ -108,15 +107,15 @@ FROM
                     ) c
                     CROSS JOIN UNNEST(sequence(0, 13)) AS n(days)
                 ) d
-                INNER JOIN
+                LEFT JOIN
                 (
                     SELECT
                         "#varchar_id",
                         "$tag_date",
                         max(
                             coalesce(
-                                tag_value_num,
-                                try_cast(tag_value AS double)
+                                try_cast(nullif(trim(tag_value), '') AS double),
+                                0
                             )
                         ) vip_level
                     FROM ta.history_tag_41
