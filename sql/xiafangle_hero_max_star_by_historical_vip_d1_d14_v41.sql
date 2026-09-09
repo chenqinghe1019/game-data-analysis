@@ -146,6 +146,7 @@ FROM
             FROM
             (
                 SELECT
+                    d.user_id,
                     d.account_id,
                     d.create_date,
                     d.days,
@@ -155,6 +156,7 @@ FROM
                 FROM
                 (
                     SELECT
+                        c.user_id,
                         c.account_id,
                         c.create_date,
                         n.days,
@@ -168,6 +170,8 @@ FROM
                     FROM
                     (
                         SELECT
+                            u."#user_id" user_id,
+
                             cast(
                                 u."#account_id" AS varchar
                             ) account_id,
@@ -179,6 +183,7 @@ FROM
                         FROM
                         (
                             SELECT
+                                "#user_id",
                                 "#account_id",
                                 create_role_time,
 
@@ -213,7 +218,7 @@ FROM
                 LEFT JOIN
                 (
                     SELECT
-                        "#varchar_id",
+                        "#long_id",
                         "$tag_date",
 
                         max(
@@ -228,11 +233,11 @@ FROM
                     WHERE cluster_name = 'vip_level_today'
 
                     GROUP BY
-                        "#varchar_id",
+                        "#long_id",
                         "$tag_date"
                 ) v
 
-                    ON d.account_id = v."#varchar_id"
+                    ON d.user_id = v."#long_id"
 
                    AND v."$tag_date" = cast(
                         date_format(
