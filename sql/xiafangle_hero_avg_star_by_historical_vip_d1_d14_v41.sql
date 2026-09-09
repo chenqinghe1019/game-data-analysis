@@ -51,26 +51,20 @@ FROM
                 ud.account_id,
                 ud.days,
                 ud.vip_level,
-                cast(e.ins_id AS varchar) ins_id,
-                max_by(
-                    cast(e.role_id AS varchar),
-                    e."#event_time"
+                ev.ins_id,
+                coalesce(
+                    max(ev.dim_hero_name),
+                    max(ev.raw_role_id)
                 ) hero_name,
                 max_by(
-                    CASE
-                        WHEN e."$part_event" = 'role_obtain_log'
-                        THEN try_cast(e.init_star AS double)
-                        WHEN e."$part_event" IN ('role_upstar_log', 'role_back_star_log')
-                        THEN try_cast(e.nstar AS double)
-                    END,
-                    e."#event_time"
+                    ev.star_value,
+                    ev.event_time
+                ) FILTER (
+                    WHERE ev.star_value IS NOT NULL
                 ) current_star,
                 max_by(
-                    CASE
-                        WHEN e."$part_event" = 'role_lost_log' THEN 0
-                        ELSE 1
-                    END,
-                    e."#event_time"
+                    ev.is_owned,
+                    ev.event_time
                 ) is_owned
             FROM
             (
@@ -124,23 +118,51 @@ FROM
                         date_format(d.target_date, '%Y%m%d') AS integer
                    )
             ) ud
-            INNER JOIN ta.v_event_41 e
-                ON cast(e."#account_id" AS varchar) = ud.account_id
-               AND e."$part_event" IN (
+            INNER JOIN
+            (
+                SELECT
+                    cast(e."#account_id" AS varchar) account_id,
+                    e."#event_time" event_time,
+                    cast(e."$part_date" AS date) event_date,
+                    e."$part_event" part_event,
+                    cast(e.ins_id AS varchar) ins_id,
+                    cast(e.role_id AS varchar) raw_role_id,
+                    h."heroname" dim_hero_name,
+                    CASE
+                        WHEN e."$part_event" = 'role_obtain_log'
+                        THEN coalesce(
+                            try_cast(e.init_star AS double),
+                            try_cast(h."star" AS double)
+                        )
+                        WHEN e."$part_event" IN (
+                            'role_upstar_log',
+                            'role_back_star_log'
+                        )
+                        THEN try_cast(e.nstar AS double)
+                    END star_value,
+                    CASE
+                        WHEN e."$part_event" = 'role_lost_log' THEN 0
+                        ELSE 1
+                    END is_owned
+                FROM ta.v_event_41 e
+                LEFT JOIN ta_ext.heroid_41 h
+                    ON cast(e.role_id AS varchar) = cast(h."heroname" AS varchar)
+                WHERE e."$part_event" IN (
                     'role_obtain_log',
                     'role_upstar_log',
                     'role_back_star_log',
                     'role_lost_log'
-               )
-               AND cast(e."$part_date" AS date)
-                   BETWEEN ud.create_date AND ud.target_date
-               AND date(e."#event_time")
-                   BETWEEN ud.create_date AND ud.target_date
+                )
+                  AND e."#account_id" IS NOT NULL
+            ) ev
+                ON ev.account_id = ud.account_id
+               AND ev.event_date BETWEEN ud.create_date AND ud.target_date
+               AND date(ev.event_time) BETWEEN ud.create_date AND ud.target_date
             GROUP BY
                 ud.account_id,
                 ud.days,
                 ud.vip_level,
-                cast(e.ins_id AS varchar)
+                ev.ins_id
         ) s
         WHERE s.is_owned = 1
           AND s.current_star IS NOT NULL
