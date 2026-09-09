@@ -1,5 +1,5 @@
 assistant_sql_response_rules:
-  updated_at: "2026-06-30"
+  updated_at: "2026-09-09"
   scope: "SQL adjustments and debugging in 倍特工作室 project"
   rules:
     - "When the user asks to modify, debug, optimize, or adapt SQL, always return the final full SQL version, not only diffs or fragments."
@@ -9,6 +9,38 @@ assistant_sql_response_rules:
     - "Avoid WITH / CTE unless the user explicitly requests it."
     - "For ThinkingData dynamic date parameters, keep event table partition filters such as e.${PartDate:date1} for scan pruning; do not remove partition filters just because day-N logic is present."
     - "When the user asks for first-day payment or first-day payment tiers, calculate payment only on the registration day / active_days = 0. Do not use cumulative_payment or query-range cumulative payment as a substitute unless the user explicitly asks for cumulative payment tiers."
+    - "Across all projects, ThinkingData current cluster/result tables use ta.user_result_cluster_xx, where xx is the project suffix. If joining a project's #account_id to this table, use ta.user_result_cluster_xx.#varchar_id, not #user_id."
+    - "Across all projects, ThinkingData historical tag tables use ta.history_tag_xx, where xx is the project suffix. If joining a project's #account_id to this table, use ta.history_tag_xx.#varchar_id. Historical tag versions are identified by $tag_date."
+  common_thinkingdata_tag_tables:
+    user_result_cluster_xx:
+      purpose: "current cluster / tag result table"
+      fields:
+        - "#user_id bigint"
+        - "#varchar_id varchar"
+        - "#double_id double"
+        - "tag_value varchar"
+        - "tag_value_num double"
+        - "tag_value_tm timestamp(3)"
+        - "tag_value_bool boolean"
+        - "tag_value_array_varchar array(varchar)"
+        - "cluster_name varchar"
+      account_id_join_rule: '"#account_id" = "#varchar_id"'
+    history_tag_xx:
+      purpose: "historical tag table"
+      fields:
+        - "#long_id bigint"
+        - "#varchar_id varchar"
+        - "#double_id double"
+        - "tag_value varchar"
+        - "tag_value_num double"
+        - "tag_value_tm timestamp(3)"
+        - "tag_value_bool boolean"
+        - "tag_value_array_varchar array(varchar)"
+        - "cluster_name varchar"
+        - "$tag_date integer"
+      account_id_join_rule: '"#account_id" = "#varchar_id"'
+      version_field: "$tag_date"
   notes:
     - "This rule was added after the user explicitly requested: 后续调整sql都发给我最终版本的完整版."
     - "First-day payment tier clarification added after the user corrected a query where cumulative_payment_R was mistaken for first-day payment."
+    - "Cross-project cluster/tag table structures and #account_id join rule were confirmed by the user on 2026-09-09."
