@@ -102,22 +102,17 @@ FROM
                             WHERE create_role_time IS NOT NULL
                         ) u
                         WHERE u.${PartDate:date}
-                          AND date_add('day', 13, date(u.create_role_time))
-                              <= date_add('day', -1, current_date)
                     ) c
                     CROSS JOIN UNNEST(sequence(0, 13)) AS n(days)
+                    WHERE date_add('day', n.days, c.create_date)
+                          <= date_add('day', -1, current_date)
                 ) d
                 LEFT JOIN
                 (
                     SELECT
                         "#varchar_id",
                         "$tag_date",
-                        max(
-                            coalesce(
-                                try_cast(nullif(trim(tag_value), '') AS double),
-                                0
-                            )
-                        ) vip_level
+                        max(coalesce(tag_value_num, 0)) vip_level
                     FROM ta.history_tag_41
                     WHERE cluster_name = 'vip_level_today'
                     GROUP BY
