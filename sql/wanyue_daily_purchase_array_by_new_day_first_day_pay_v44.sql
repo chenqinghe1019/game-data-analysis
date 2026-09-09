@@ -79,7 +79,6 @@ FROM
             SELECT
                 u."#account_id",
                 u."新增日期",
-
                 e."付费日期",
                 e."#event_time",
                 e."product_id",
@@ -87,7 +86,6 @@ FROM
 
                 coalesce(
                     d."name",
-                    e."product_name",
                     concat(
                         '未配置商品_',
                         e."product_id"
@@ -186,13 +184,6 @@ FROM
                         AS varchar
                     ) AS "product_id",
 
-                    trim(
-                        cast(
-                            e0."product_name"
-                            AS varchar
-                        )
-                    ) AS "product_name",
-
                     coalesce(
                         try_cast(
                             e0."payment"
@@ -237,7 +228,7 @@ FROM
                         )
                     ) AS "name"
 
-                FROM ta_ext_product_id_44
+                FROM ta_ext.product_id_44
 
                 GROUP BY
                     cast(
