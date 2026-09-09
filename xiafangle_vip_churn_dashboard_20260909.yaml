@@ -1,0 +1,106 @@
+dashboard_copy:
+  copied_at: "2026-09-09"
+  source:
+    project_id: 22
+    project_name: "一步两步微信小游戏"
+    dashboard_id: 1457
+    dashboard_name: "VIP已流失"
+    url: "https://ta-data.feiyu.com/#/panel/panel/22_1457_0"
+  target:
+    project_id: 41
+    project_name: "下方了"
+    project_space: "VIP-用户运营"
+    dashboard_id: 2027
+    dashboard_name: "VIP已流失"
+    url: "https://ta-data.feiyu.com/#/panel/panel/41_2027_0"
+
+reports:
+  - report_id: 5667
+    name: "【VIP】【分R】流失规模"
+    visualization:
+      type: "一维表"
+      row: "R"
+      metric: "#account_id 计数"
+      filter: "是否认证"
+  - report_id: 5669
+    name: "【VIP】流失名单（累充10w+）"
+    visualization:
+      type: "明细数据"
+  - report_id: 5670
+    name: "【VIP】【分赛季】流失规模"
+    visualization:
+      type: "一维表"
+      row: "season"
+      metric: "#account_id 计数"
+      filter: "是否认证"
+
+default_parameters:
+  lost_days:
+    display_name: "距今未登录天数"
+    expression: ">3"
+  total_payment:
+    display_name: "历史累充金额"
+    unit: "元"
+    expression: ">=2000"
+  last_online_time:
+    display_name: "最后登出时间"
+    type: "日期区间"
+    default: "最近14天"
+
+project_41_mapping:
+  event_table: "v_event_41"
+  user_table: "ta.v_user_41"
+  release_filter: "\"domain\" = 'release'"
+  login_event:
+    source_project_22: "log_in_out"
+    target_project_41: "in_out_log"
+  create_role_time:
+    source_project_22: "Unix 时间，源 SQL 使用 from_unixtime"
+    target_project_41: "timestamp，直接读取，禁止再次 from_unixtime"
+  total_payment:
+    source_project_22: "报表口径为元"
+    target_project_41: "原字段为分，SQL 使用 total_payment / 100.0 转为元"
+  last_online_time: "in_out_log 按 #account_id 取 max(#event_time)"
+  lost_days: "date_diff('day', date(last_online_time), date(now())) + 1"
+  r_bins:
+    - "a_free: 0 或空"
+    - "b_[1, 500)"
+    - "c_[500, 2k)"
+    - "d_[2k, 5k)"
+    - "e_[5k, 1w)"
+    - "f_[1w, 3w)"
+    - "g_[3w, 5w)"
+    - "h_[5w, 10w)"
+    - "i_[10w, 20w)"
+    - "j_[20w, 30w)"
+    - "k_[30w, 40w)"
+    - "l_[40w, 50w)"
+    - "m_[50w, 60w)"
+    - "n_[60w, 70w)"
+    - "o_[70w, 80w)"
+    - "p_[80w, 90w)"
+    - "q_[90w, 100w)"
+    - "r_[100w, +)"
+
+known_difference:
+  authentication_dimension:
+    source_table: "ta_dim.dim_22_1_vprop_sql_1243"
+    target_status: "项目 41 未发现对应维表；直接替换为 dim_41_1_vprop_sql_1243 会报表不存在"
+    current_behavior: "认证时间为 NULL，是否认证统一显示未认证"
+    dashboard_note: "已在看板便签中明确说明，后续接入目标项目认证名单维表后再恢复真实认证筛选"
+
+schedule:
+  precompute: true
+  cadence: "每天"
+  time: "06:00"
+  first_saved_state: "预计算-未开始"
+
+verification:
+  result_rows: 33
+  r_distribution:
+    "d_[2k_5k)": 22
+    "e_[5k_1w)": 9
+    "f_[1w_3w)": 2
+  season_distribution:
+    season_1: 33
+  cards: "三张报表均已加入目标看板并设为大图；源 VIP流失预警 看板中的临时卡片已移除"
