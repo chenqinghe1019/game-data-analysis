@@ -9,8 +9,8 @@ assistant_sql_response_rules:
     - "Avoid WITH / CTE unless the user explicitly requests it."
     - "For ThinkingData dynamic date parameters, keep event table partition filters such as e.${PartDate:date1} for scan pruning; do not remove partition filters just because day-N logic is present."
     - "When the user asks for first-day payment or first-day payment tiers, calculate payment only on the registration day / active_days = 0. Do not use cumulative_payment or query-range cumulative payment as a substitute unless the user explicitly asks for cumulative payment tiers."
-    - "Across all projects, ThinkingData current cluster/result tables use ta.user_result_cluster_xx, where xx is the project suffix. If joining a project's #account_id to this table, use ta.user_result_cluster_xx.#varchar_id, not #user_id."
-    - "Across all projects, ThinkingData historical tag tables use ta.history_tag_xx, where xx is the project suffix. If joining a project's #account_id to this table, use ta.history_tag_xx.#varchar_id. Historical tag versions are identified by $tag_date."
+    - "Across all projects, ThinkingData current cluster/result tables use ta.user_result_cluster_xx, where xx is the project suffix. If joining a project's #account_id to this table as a string analysis object, use ta.user_result_cluster_xx.#varchar_id."
+    - "Across all projects, ThinkingData historical user tags use ta.history_tag_xx. For user-level historical tags such as vip_level_today, join the source user table #user_id to history_tag_xx.#long_id; do not use #account_id to #varchar_id for these user tags. Historical tag versions are identified by $tag_date."
   common_thinkingdata_tag_tables:
     user_result_cluster_xx:
       purpose: "current cluster / tag result table"
@@ -24,7 +24,7 @@ assistant_sql_response_rules:
         - "tag_value_bool boolean"
         - "tag_value_array_varchar array(varchar)"
         - "cluster_name varchar"
-      account_id_join_rule: '"#account_id" = "#varchar_id"'
+      account_id_join_rule: 'cast("#account_id" as varchar) = "#varchar_id" when the cluster uses string analysis object'
     history_tag_xx:
       purpose: "historical tag table"
       fields:
@@ -38,9 +38,10 @@ assistant_sql_response_rules:
         - "tag_value_array_varchar array(varchar)"
         - "cluster_name varchar"
         - "$tag_date integer"
-      account_id_join_rule: '"#account_id" = "#varchar_id"'
+      user_tag_join_rule: 'source."#user_id" = history_tag."#long_id"'
       version_field: "$tag_date"
+      vip_level_today_value_field: "tag_value_num"
   notes:
     - "This rule was added after the user explicitly requested: 后续调整sql都发给我最终版本的完整版."
     - "First-day payment tier clarification added after the user corrected a query where cumulative_payment_R was mistaken for first-day payment."
-    - "Cross-project cluster/tag table structures and #account_id join rule were confirmed by the user on 2026-09-09."
+    - "Historical user-tag join rule was corrected by the user on 2026-09-09: use #user_id -> #long_id for vip_level_today."
