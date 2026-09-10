@@ -15,71 +15,15 @@ SELECT
         cast(x.days + 1 AS varchar)
     ) "新增第N天",
 
-    date_add(
-        'day',
-        x.days,
-        x."create_date"
-    ) "应观察日期",
-
     CASE
         WHEN date_add(
                  'day',
                  x.days,
                  x."create_date"
-             ) <= date_add(
-                 'day',
-                 -1,
-                 current_date
-             )
+             ) < current_date
             THEN '成熟'
         ELSE '未成熟'
     END "成熟状态",
-
-    CASE
-        WHEN x."create_date" <= date_add(
-                 'day',
-                 -1,
-                 current_date
-             )
-            THEN least(
-                date_add(
-                    'day',
-                    x.days,
-                    x."create_date"
-                ),
-                date_add(
-                    'day',
-                    -1,
-                    current_date
-                )
-            )
-        ELSE NULL
-    END "实际观察截止日期",
-
-    CASE
-        WHEN x."create_date" <= date_add(
-                 'day',
-                 -1,
-                 current_date
-             )
-            THEN date_diff(
-                'day',
-                x."create_date",
-                least(
-                    date_add(
-                        'day',
-                        x.days,
-                        x."create_date"
-                    ),
-                    date_add(
-                        'day',
-                        -1,
-                        current_date
-                    )
-                )
-            ) + 1
-        ELSE 0
-    END "实际观察天数",
 
     x."新增人数",
 
@@ -287,6 +231,12 @@ FROM
             CROSS JOIN UNNEST(
                 sequence(0, 29)
             ) AS n(days)
+
+            WHERE date_add(
+                      'day',
+                      n.days,
+                      c."create_date"
+                  ) <= current_date
         ) ud
 
         LEFT JOIN
@@ -367,11 +317,7 @@ FROM
                                 29,
                                 c."create_date"
                             ),
-                            date_add(
-                                'day',
-                                -1,
-                                current_date
-                            )
+                            current_date
                        )
 
                AND date(
@@ -384,11 +330,7 @@ FROM
                                 29,
                                 c."create_date"
                             ),
-                            date_add(
-                                'day',
-                                -1,
-                                current_date
-                            )
+                            current_date
                        )
 
             LEFT JOIN
@@ -484,14 +426,7 @@ FROM
 
            AND p."event_date"
                 BETWEEN ud."create_date"
-                    AND least(
-                        ud."target_date",
-                        date_add(
-                            'day',
-                            -1,
-                            current_date
-                        )
-                    )
+                    AND ud."target_date"
 
         GROUP BY GROUPING SETS
         (
