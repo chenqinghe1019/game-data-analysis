@@ -38,13 +38,13 @@ SELECT
     round(
         x."当日付费金额" * 1.0000
         / nullif(x."成熟新增人数", 0),
-        2
+        4
     ) "当日LTV贡献",
 
     round(
         x."当日总付费金额" * 1.0000
         / nullif(x."成熟新增人数", 0),
-        2
+        4
     ) "当日总LTV",
 
     coalesce(
@@ -62,13 +62,13 @@ SELECT
     round(
         x."累计付费金额" * 1.0000
         / nullif(x."成熟新增人数", 0),
-        2
+        4
     ) "累计LTV贡献",
 
     round(
         x."累计总付费金额" * 1.0000
         / nullif(x."成熟新增人数", 0),
-        2
+        4
     ) "累计总LTV",
 
     coalesce(
