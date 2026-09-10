@@ -1,12 +1,14 @@
 SELECT
     row_number() OVER (
         ORDER BY
+            x."create_date",
             x.days,
-            CASE WHEN x."是否汇总" = 1 THEN 0 ELSE 1 END,
             x."累计付费金额" DESC,
             x."product_id",
             x."product_name"
     ) "序号",
+
+    x."create_date" "新增日期",
 
     concat(
         'D',
@@ -15,17 +17,14 @@ SELECT
 
     x."成熟新增人数",
 
-    CASE
-        WHEN x."是否汇总" = 1 THEN '汇总'
-        ELSE coalesce(
-            x."product_id_name",
-            concat(
-                cast(x."product_id" AS varchar),
-                '_',
-                x."product_name"
-            )
+    coalesce(
+        x."product_id_name",
+        concat(
+            cast(x."product_id" AS varchar),
+            '_',
+            x."product_name"
         )
-    END "付费项",
+    ) "付费项",
 
     x."product_id",
     x."product_name",
@@ -92,7 +91,9 @@ FROM
                     THEN g."分组人数"
             END
         ) OVER (
-            PARTITION BY g.days
+            PARTITION BY
+                g."create_date",
+                g.days
         ) "成熟新增人数",
 
         max(
@@ -101,7 +102,9 @@ FROM
                     THEN g."当日付费金额"
             END
         ) OVER (
-            PARTITION BY g.days
+            PARTITION BY
+                g."create_date",
+                g.days
         ) "当日总付费金额",
 
         max(
@@ -110,12 +113,15 @@ FROM
                     THEN g."累计付费金额"
             END
         ) OVER (
-            PARTITION BY g.days
+            PARTITION BY
+                g."create_date",
+                g.days
         ) "累计总付费金额"
 
     FROM
     (
         SELECT
+            ud."create_date",
             ud.days,
 
             grouping(
@@ -232,6 +238,7 @@ FROM
         (
             SELECT
                 c."#account_id",
+                c."create_date",
 
                 date(
                     e."#event_time"
@@ -410,11 +417,15 @@ FROM
                 5,
                 6,
                 7,
-                8
+                8,
+                9
         ) p
 
             ON p."#account_id"
                 = ud."#account_id"
+
+           AND p."create_date"
+                = ud."create_date"
 
            AND p."event_date"
                 BETWEEN ud."create_date"
@@ -423,6 +434,7 @@ FROM
         GROUP BY GROUPING SETS
         (
             (
+                ud."create_date",
                 ud.days,
                 p."product_id_name",
                 p."product_id",
@@ -432,18 +444,19 @@ FROM
                 p."product_type_two"
             ),
             (
+                ud."create_date",
                 ud.days
             )
         )
     ) g
 ) x
 
-WHERE x."是否汇总" = 1
-   OR x."product_id" IS NOT NULL
+WHERE x."是否汇总" = 0
+  AND x."product_id" IS NOT NULL
 
 ORDER BY
+    x."create_date",
     x.days,
-    CASE WHEN x."是否汇总" = 1 THEN 0 ELSE 1 END,
     x."累计付费金额" DESC,
     x."product_id",
     x."product_name";
