@@ -2,12 +2,14 @@ updated_at: '2026-09-10'
 topic: 下方了付费项 D1-D30 LTV 贡献评估
 rules:
   - 新增 cohort 按 ta.v_user_41.create_role_time 的自然日筛选；先生成 cast(date(create_role_time) as varchar) "$part_date"，再使用 ${PartDate:date}。
+  - 输出必须按新增日期 create_date 分组，同一新增日期下再拆 D1-D30 和付费项，不再把筛选区间内不同新增日期合并。
   - D1-D30 按玩家创角日计算：D1=创角当天，D30=创角+29天；每个 Dn 单独按成熟日期判断，只统计 target_date <= 昨天的玩家，不要求统一成熟到 D30。
   - 付费事件使用 ta.v_event_41 的 pay_log，金额使用 payment/100 转为元。
   - 付费项必须通过 product_id + product_name 两个键关联 ta_ext.product_id_name_41；配置字段可带 product_id_name、price、product_type_one、product_type_two。
-  - 当日LTV贡献 = 该成熟 cohort 在对应 Dn 当天、该付费项产生的收入 / 该 Dn 成熟新增人数。
-  - 累计LTV贡献 = 该成熟 cohort 从 D1 累计到 Dn、该付费项产生的收入 / 该 Dn 成熟新增人数。
-  - 当日/累计LTV贡献占比以全部 pay_log 实际收入作为分母，因此未匹配配置表的付费仍会进入总LTV，但不会进入具体付费项行。
-  - 输出长表：每行=新增第N天 + 付费项，同时保留汇总行；金额与LTV保留两位，贡献占比保留四位且不自动转百分比。
+  - 当日LTV贡献 = 同一新增日期成熟 cohort 在对应 Dn 当天、该付费项产生的收入 / 该新增日期该 Dn 成熟新增人数。
+  - 累计LTV贡献 = 同一新增日期成熟 cohort 从 D1 累计到 Dn、该付费项产生的收入 / 该新增日期该 Dn 成熟新增人数。
+  - 当日/累计LTV贡献占比以该新增日期、该 Dn 的全部 pay_log 实际收入作为分母，因此未匹配配置表的付费仍会进入总LTV，但不会进入具体付费项行。
+  - 付费项目不输出汇总行；内部可保留汇总分组仅用于计算成熟新增人数、总LTV和贡献占比，最终结果只展示具体付费项。
+  - 输出长表：每行=新增日期 + 新增第N天 + 付费项；金额与LTV保留两位，贡献占比保留四位且不自动转百分比。
 related_sql:
   - sql/xiafangle_payment_item_ltv_contribution_d1_d30_v41.sql
