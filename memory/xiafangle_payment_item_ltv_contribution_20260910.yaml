@@ -16,6 +16,8 @@ rules:
   - 当日/累计LTV贡献占比以同口径过滤后的全部 pay_log 实际收入作为分母；未匹配配置表的付费仍会进入总LTV，但不会进入具体付费项行。
   - 付费项目不输出汇总行；内部可保留汇总分组仅用于计算新增人数、总LTV和贡献占比，最终结果只展示具体付费项。
   - 未成熟版为减少“各付费项LTV先四舍五入再加总”造成的差异，当日LTV贡献、当日总LTV、累计LTV贡献、累计总LTV统一保留4位小数；金额仍保留2位，贡献占比保留4位且不自动转百分比。
+  - 未匹配排查SQL需严格复用当前LTV的新增日期、D1-D30、payment/token_payment、直充排除规则，只输出无法按 product_id + product_name 命中 ta_ext.product_id_name_41 的有效付费；并标记“配置表无此product_id / product_id存在但product_name不一致 / 埋点字段为空”，用于定位总LTV与付费项加和差异。
 related_sql:
   - sql/xiafangle_payment_item_ltv_contribution_d1_d30_v41.sql
   - sql/xiafangle_payment_item_ltv_contribution_d1_d30_with_immature_v41.sql
+  - sql/xiafangle_payment_item_ltv_unmatched_check_v41.sql
