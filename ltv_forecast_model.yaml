@@ -1,134 +1,102 @@
 ltv_forecast_model:
-  version: "v1.7"
-  updated_at: "2026-08-19"
-  purpose: "LTV 两阶段模型：先按逐日同样本加权倍率补全 D1-D28 未成熟 cohort，再基于修正后的补全曲线做长期预测，并增加预测与补全加权曲线的重叠偏差校验。"
+  version: "v1.8"
+  updated_at: "2026-09-10"
+  purpose: "LTV 两阶段模型：先按逐日同样本加权倍率补全未成熟 cohort，再基于补全加权曲线做长期预测，并同时做重叠偏差校验与遮盖回测。"
 
-  source_structure:
-    source_max_day: 28
-    columns:
-      - "新增日期"
-      - "新增用户数"
-      - "指标"
-      - "D1...D28 累计LTV"
-    rules:
-      - "补值矩阵严格只生成 D1-D28，不生成 D29 以后 cohort 数据。"
-      - "真实成熟 LTV 永不覆盖；仅对未成熟单元格补值。"
-      - "D29+ 只允许存在于长期预测层。"
-
-  stage_value_definition:
-    formula: "StageLTV(Dn)=Σ[新增用户数_i×LTV_i(Dn)]/Σ新增用户数_i，仅统计真实成熟到 Dn 的 cohort。"
-    weighting: "新增用户数"
-    warning: "不同 Dn 的成熟 cohort 集合不同，不能直接用全体阶段值相除作为倍率。"
-
-  phase1_cohort_imputation:
-    model: "逐日同样本加权倍率递推"
-    daily_multiplier:
-      target_day: "Dt"
-      historical_reference: "只使用真实成熟到 Dt 的历史 cohort 集合 J(t)。"
-      formula: "R(t)=WeightedLTV_Dt(J(t))/WeightedLTV_D(t-1)(J(t))"
-      weighting: "新增用户数"
-      key_rule: "分子与分母必须使用同一批真实成熟到 Dt 的 cohort。"
-    imputation:
-      formula: "若 cohort i 的 Dt 未成熟，则 FilledLTV_i(Dt)=FilledLTV_i(D(t-1))×R(t)。"
-      recursive: true
-      max_day: 28
-      note: "若前一日是预测值，则继续以该预测值乘下一日历史同样本日倍率向后递推。"
-    verified_example:
-      cohort: "2026-08-18"
-      target: "D2"
-      historical_mature_range: "2026-07-22~2026-08-17"
-      mature_cohorts: 27
-      mature_users: 72885
-      same_cohort_weighted_D1: 2.814264937915895
-      same_cohort_weighted_D2: 4.744488715099128
-      D2_D1_multiplier: 1.6858713801880576
-      cohort_D1_actual: 4.35
-      cohort_D2_filled: 7.33354050381805
-      formula: "4.35×1.6858713801880576=7.33354050381805"
+  core_rules:
+    day_mapping: "当日=D1，第1日=D2，以此类推。"
+    stage_value: "StageLTV(Dn)=Σ[新增用户数_i×LTV_i(Dn)]/Σ新增用户数_i，仅统计真实成熟到 Dn 的 cohort。"
+    same_sample_rule: "任意 Dt/D(t-1) 倍率的分子和分母必须使用同一批真实成熟到 Dt 的 cohort。"
+    daily_multiplier: "R(t)=WeightedLTV_Dt(J(t))/WeightedLTV_D(t-1)(J(t))，J(t) 为真实成熟到 Dt 的 cohort。"
+    imputation: "若 cohort i 的 Dt 未成熟，则 FilledLTV_i(Dt)=FilledLTV_i(D(t-1))×R(t)。"
+    recursive: true
+    actual_never_overwrite: true
+    maturity_depth_rule: "补值矩阵的最大天数必须等于当前数据真实可观测的最大成熟天数；不能因为源表预留了更远列就生成无真实倍率依据的 cohort 补值。"
+    long_term_separation: "超过真实最大成熟天数的 Dn 只能存在于长期预测层，不能写回 cohort 补值矩阵。"
 
   filled_stage_curve:
     formula: "FilledStageLTV(Dt)=Σ[新增用户数_i×FilledLTV_i(Dt)]/Σ全部新增用户数_i"
-    actual_coverage: "真实成熟到 Dt 的新增人数 / 全部新增人数"
-    current_examples:
-      D1: 2.8635580728267507
-      D2: 4.827590600485089
-      D3: 6.214986382160555
-      D7: 9.693580795577041
-      D14: 12.092804380739501
-      D21: 13.61959818045689
-      D22: 13.756095880986694
-      D28: 14.538219269395164
+    actual_coverage: "真实成熟到 Dt 的新增人数/全部新增人数"
+    usage: "长期拟合时必须同时参考实测覆盖率，低覆盖率区间不能直接决定长期增长 slope。"
 
-  phase2_long_term_forecast:
-    separation_rule: "D29+ 仅属于长期预测结果，不写回 cohort 补值矩阵。"
-    preprocessing: "长期拟合使用补全阶段值并做累计 LTV 单调校正。"
-    current_fit_window: "D7-D22"
-    base_model:
-      name: "对数累计 LTV 长尾"
-      regression: "CorrectedLTV(d)=intercept+slope×ln(d)，D22 后从 D22 锚点连续外推。"
-      slope_current: 3.6331145439381847
-      anchor_day: 22
-      anchor_ltv: 13.756095880986694
-      D1_ltv: 2.8635580728267507
-      continuation: "LTV(d)=LTV(D22)+slope×ln(d/22), d>22"
+  long_term_model:
+    base_model: "对数累计 LTV 长尾"
+    formula: "LTV(d)=AnchorLTV + slope×ln(d/AnchorDay)"
+    slope_selection: "优先使用实测覆盖率仍相对可接受的补全阶段区间估计 slope；再用当前最大补全日重新锚定长期预测水平。"
     scenarios:
       conservative_slope_factor: 0.85
       base_slope_factor: 1.0
       aggressive_slope_factor: 1.15
-      note: "保守/进取是经营情景，不是统计置信区间。"
-    current_base_output:
-      D30: {ltv: 14.882924261881485, multiplier_vs_D1: 5.197353740827006}
-      D60: {ltv: 17.401207364663584, multiplier_vs_D1: 6.076778232573453}
-      D90: {ltv: 18.874308545990836, multiplier_vs_D1: 6.591208582460887}
-      D180: {ltv: 21.39259164877293, multiplier_vs_D1: 7.470633074207332}
-      D360: {ltv: 23.910874751555035, multiplier_vs_D1: 8.35005756595378}
-      D720: {ltv: 26.429157854337134, multiplier_vs_D1: 9.229482057700226}
+    validation:
+      overlap_consistency: "用训练区间估 slope，在后续仍有补全阶段值的重叠区间做 MAPE/WAPE/Bias 校验。"
+      true_accuracy: "用 leave-one-out 遮盖回测：人为截断成熟 cohort，仅用其它 cohort 的逐日同样本倍率递推，再与真实后续 LTV 比较。"
 
-  validation_framework:
-    overlap_consistency_check:
-      purpose: "检查长期预测曲线与 phase1 补全后的加权阶段曲线是否衔接一致。"
-      train_window: "D7-D22"
-      compare_window: "D23-D28"
-      rows:
-        D23: {filled_ltv: 13.874509081055795, forecast_ltv: 13.917594226086479, relative_error: 0.0031053455498120833}
-        D24: {filled_ltv: 14.208039869192362, forecast_ltv: 14.072218180215808, relative_error: -0.00955949520320952}
-        D25: {filled_ltv: 14.346703656889211, forecast_ltv: 14.220529162219913, relative_error: -0.008794667938144096}
-        D26: {filled_ltv: 14.515352337968373, forecast_ltv: 14.363022505600727, relative_error: -0.01049439440537669}
-        D27: {filled_ltv: 14.538219269395164, forecast_ltv: 14.500137440088206, relative_error: -0.0026194287347917878}
-        D28: {filled_ltv: 14.538219269395164, forecast_ltv: 14.632265257054181, relative_error: 0.006468879435392488}
-      summary:
-        MAPE: 0.006840368544454445
-        WAPE: 0.0068534274188446044
-        bias: -0.0036651114641474657
-        max_absolute_relative_error: 0.01049439440537669
-        conclusion: "D23-D28 相对偏差全部约在 ±1.1% 内，长期预测与补全加权曲线衔接良好。"
-      limitation: "D23-D28 的补全加权值本身包含插值，因此该偏差是模型一致性校验，不代表独立真实预测准确率。"
-    true_accuracy_backtest:
-      method: "遮盖回测 / leave-one-out。对已经真实成熟的 cohort 人为截断到 D7/D14 等成熟日，使用其余历史 cohort 的倍率补后续，再与被遮盖 cohort 的真实 D21/D28 比较。"
-      metrics:
-        - "MAPE"
-        - "WAPE"
-        - "Bias"
-      rule: "判断 D60/D180/D720 是否可信时，必须同时参考重叠一致性和独立遮盖回测；不能只看拟合曲线。"
-
-  workbook_v1_7:
-    filename: "LTV预估模型_修正插值_含偏差校验.xlsx"
-    added_sheet: "长期预测偏差校验"
-    sheets:
-      - "原始数据"
-      - "成熟标记"
-      - "逐日加权倍率"
-      - "补全矩阵"
-      - "补值标记"
-      - "补全阶段值"
-      - "插值校验"
-      - "长期拟合"
-      - "长期预测参数"
-      - "LTV预估结果"
-      - "长期预测偏差校验"
+  reference_dataset_2026_08_24_to_2026_09_09:
+    source_file: "08a3ff0f-36c7-4338-83c3-c3fa731c10ac.xlsx"
+    cohort_count: 17
+    total_new_users: 144965
+    actual_max_mature_day: 17
+    interpolation_max_day: 17
+    verified_latest_example:
+      cohort: "2026-09-09"
+      target: "D2"
+      historical_mature_range: "2026-08-24~2026-09-08"
+      mature_cohorts: 16
+      mature_users: 125182
+      same_cohort_weighted_D1: 3.1242832835391674
+      same_cohort_weighted_D2: 5.462670991037051
+      D2_D1_multiplier: 1.7484557241713925
+      cohort_D1_actual: 3.2
+      cohort_D2_filled: 5.595058317348457
+    filled_stage_examples:
+      D1: 3.1346161487255544
+      D3: 7.448801137315186
+      D7: 11.642651484398982
+      D11: 13.980199841942108
+      D14: 15.33455022435401
+      D17: 17.03919894624115
+    coverage_examples:
+      D7: 0.476949608526196
+      D10: 0.27321077501465874
+      D11: 0.20112440934018555
+      D14: 0.08615182975200911
+      D17: 0.020653261131997377
+    long_term_fit:
+      slope_fit_window: "D7-D11"
+      slope: 5.125577931786466
+      final_anchor_day: 17
+      final_anchor_ltv: 17.03919894624115
+      reason: "D12 以后实测覆盖率快速下降；因此 slope 只用 D7-D11，最终水平重新锚定到 D17 补全加权 LTV。"
+    overlap_check_D12_D17:
+      MAPE: 0.020229147556375834
+      WAPE: 0.021315925271717582
+      bias: -0.020639864934858893
+      max_absolute_relative_error: 0.04857871591050049
+      interpretation: "长期模型对补全曲线整体略偏低约 2.1%，最大偏差约 4.9%；考虑 D12-D17 实测覆盖率仅 13.9% 降至 2.1%，该偏差主要用于一致性校验。"
+    leave_one_out_backtest:
+      D1_to_D7: {samples: 11, WAPE: 0.08103156147555529, bias: 0.029653408890754858}
+      D3_to_D7: {samples: 11, WAPE: 0.04141136475297723, bias: 0.011949546512427137}
+      D7_to_D10: {samples: 8, WAPE: 0.042306404241455015, bias: -0.005698888103521724}
+      D7_to_D14: {samples: 4, WAPE: 0.08461793340195313, bias: 0.018122203662862546}
+      D10_to_D14: {samples: 4, WAPE: 0.03378486849911805, bias: 0.005794127016577108}
+      conclusion: "成熟度越高后再补值越稳定；当前 D3→D7、D7→D10、D10→D14 的 WAPE 约 3.4%~4.2%，D7→D14 约 8.5%。"
+    forecast_base:
+      D18: {ltv: 17.332168850835114, multiplier_vs_D1: 5.529279512543148}
+      D21: {ltv: 18.122280173527603, multiplier_vs_D1: 5.78133950496478}
+      D30: {ltv: 19.95044539500117, multiplier_vs_D1: 6.364557715659206}
+      D60: {ltv: 23.50322528715929, multiplier_vs_D1: 7.497959613560669}
+      D90: {ltv: 25.581468297387943, multiplier_vs_D1: 8.160957222079213}
+      D180: {ltv: 29.134248189546064, multiplier_vs_D1: 9.294359119980678}
+      D360: {ltv: 32.687028081704185, multiplier_vs_D1: 10.42776101788214}
+      D720: {ltv: 36.2398079738623, multiplier_vs_D1: 11.561162915783603}
+    D720_scenarios:
+      conservative: {ltv: 33.35971661971913, multiplier_vs_D1: 10.64236098996754}
+      base: {ltv: 36.2398079738623, multiplier_vs_D1: 11.561162915783603}
+      aggressive: {ltv: 39.119899328005474, multiplier_vs_D1: 12.479964841599667}
+    workbook: "LTV预估_新数据_20260824-0909.xlsx"
 
   usage_notes:
-    - "插值与长期预测必须分层：D1-D28 是 cohort 补值，D29+ 是预测结果。"
-    - "每个日倍率必须由同一批真实成熟到目标日的 cohort 计算。"
-    - "长期预测与补全曲线必须在重叠区间做偏差校验；当前 D23-D28 MAPE≈0.684%、WAPE≈0.685%、Bias≈-0.367%。"
-    - "低重叠偏差只能说明两阶段衔接顺，不等于真实预测准确；仍需遮盖回测。"
+    - "源表即使预留到第30日，只要当前真实最大成熟日只有 D17，cohort 补值就只能补到 D17。"
+    - "D18+ 属于长期预测，不是插值。"
+    - "阶段值直接下降通常是 cohort mix，不代表累计 LTV 真下降。"
+    - "补值模型可信度优先看 leave-one-out 遮盖回测；长期模型还要额外看重叠区间偏差。"
