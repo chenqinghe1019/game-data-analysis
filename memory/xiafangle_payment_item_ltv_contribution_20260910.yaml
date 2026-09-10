@@ -15,7 +15,7 @@ rules:
   - 累计LTV贡献 = 同一新增日期 cohort 从 D1 累计到当前实际 Dn、该付费项产生的收入 / 该新增日期新增人数；今天对应的未成熟 Dn 为截至查询时的实时部分累计。
   - 当日/累计LTV贡献占比以同口径过滤后的全部 pay_log 实际收入作为分母；未匹配配置表的付费仍会进入总LTV，但不会进入具体付费项行。
   - 付费项目不输出汇总行；内部可保留汇总分组仅用于计算新增人数、总LTV和贡献占比，最终结果只展示具体付费项。
-  - 输出长表：每行=新增日期 + 新增第N天 + 付费项；金额与LTV保留两位，贡献占比保留四位且不自动转百分比。
+  - 未成熟版为减少“各付费项LTV先四舍五入再加总”造成的差异，当日LTV贡献、当日总LTV、累计LTV贡献、累计总LTV统一保留4位小数；金额仍保留2位，贡献占比保留4位且不自动转百分比。
 related_sql:
   - sql/xiafangle_payment_item_ltv_contribution_d1_d30_v41.sql
   - sql/xiafangle_payment_item_ltv_contribution_d1_d30_with_immature_v41.sql
