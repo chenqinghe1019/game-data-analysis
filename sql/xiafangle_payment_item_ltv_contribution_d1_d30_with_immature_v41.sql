@@ -257,13 +257,29 @@ FROM
                 cfg."product_type_two",
 
                 sum(
-                    coalesce(
-                        try_cast(
-                            e."payment"
-                            AS double
-                        ),
-                        0
-                    )
+                    CASE
+                        WHEN coalesce(
+                                 try_cast(
+                                     e."payment"
+                                     AS double
+                                 ),
+                                 0
+                             ) = 0
+                            THEN coalesce(
+                                try_cast(
+                                    e."token_payment"
+                                    AS double
+                                ),
+                                0
+                            )
+                        ELSE coalesce(
+                            try_cast(
+                                e."payment"
+                                AS double
+                            ),
+                            0
+                        )
+                    END
                 ) / 100.0000 "pay_amount"
 
             FROM
@@ -398,13 +414,44 @@ FROM
               AND e."domain" = 'release'
               AND e."#account_id" IS NOT NULL
               AND e."$part_date" IS NOT NULL
-              AND coalesce(
-                    try_cast(
-                        e."payment"
-                        AS double
-                    ),
-                    0
-                  ) > 0
+
+              AND CASE
+                      WHEN coalesce(
+                               try_cast(
+                                   e."payment"
+                                   AS double
+                               ),
+                               0
+                           ) = 0
+                          THEN coalesce(
+                              try_cast(
+                                  e."token_payment"
+                                  AS double
+                              ),
+                              0
+                          )
+                      ELSE coalesce(
+                          try_cast(
+                              e."payment"
+                              AS double
+                          ),
+                          0
+                      )
+                  END > 0
+
+              AND (
+                    coalesce(
+                        cast(e."product_type" AS varchar),
+                        ''
+                    ) <> '直充'
+                    OR strpos(
+                        coalesce(
+                            cast(e."product_name" AS varchar),
+                            ''
+                        ),
+                        '钻石'
+                    ) > 0
+                  )
 
             GROUP BY
                 1,
