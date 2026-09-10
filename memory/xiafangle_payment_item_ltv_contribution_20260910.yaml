@@ -7,7 +7,8 @@ rules:
   - 包含未成熟版：最多只展开到当前自然日，不展示未来 Dn；例如当前日期为 2026-09-10，则任何新增日期的生命周期行最多只到实际对应 2026-09-10 的 Dn。
   - 包含未成熟版不需要“应观察日期”“实际观察截止日期”“实际观察天数”字段；保留“成熟状态”，target_date < current_date 为成熟，target_date = current_date 为未成熟。
   - 包含未成熟版纳入今天实时未完整流水，因此今天对应的 Dn 作为未成熟数据展示；事件日期上限使用 current_date。
-  - 付费事件使用 ta.v_event_41 的 pay_log，金额使用 payment/100 转为元。
+  - 付费事件使用 ta.v_event_41 的 pay_log；实际付费金额不是 payment + token_payment，而是优先取 payment：当 coalesce(payment,0) != 0 时取 payment；当 coalesce(payment,0) = 0 时改取 token_payment；最终 /100 转为元，避免两个字段同时有值时重复相加。
+  - 付费有效事件筛选也必须基于同一实际付费金额表达式 > 0，不能只写 payment > 0，否则会漏掉 payment=0、token_payment>0 的订单。
   - 付费项必须通过 product_id + product_name 两个键关联 ta_ext.product_id_name_41；配置字段可带 product_id_name、price、product_type_one、product_type_two。
   - 当日LTV贡献 = 同一新增日期 cohort 在对应 Dn 当天、该付费项产生的收入 / 该新增日期新增人数。
   - 累计LTV贡献 = 同一新增日期 cohort 从 D1 累计到当前实际 Dn、该付费项产生的收入 / 该新增日期新增人数；今天对应的未成熟 Dn 为截至查询时的实时部分累计。
