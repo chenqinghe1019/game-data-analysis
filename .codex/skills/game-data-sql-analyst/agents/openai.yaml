@@ -1,0 +1,6 @@
+interface:
+  display_name: "Game Data SQL Analyst"
+  short_description: "Build and maintain project-aware TrinoSQL from GitHub knowledge."
+  default_prompt: "Use $game-data-sql-analyst to read the current project knowledge first, then build, modify, debug, or validate the SQL and return the final complete query."
+policy:
+  allow_implicit_invocation: true
