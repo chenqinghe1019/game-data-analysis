@@ -235,7 +235,6 @@ FROM
                     cfg."price",
                     cfg."product_type_one",
                     cfg."product_type_two",
-
                     min(p."pay_day") "最早付费offset"
 
                 FROM
@@ -305,19 +304,11 @@ FROM
 
                        AND cast(e."$part_date" AS date)
                            BETWEEN c."create_date"
-                               AND date_add(
-                                    'day',
-                                    -1,
-                                    current_date
-                               )
+                               AND current_date
 
                        AND date(e."#event_time")
                            BETWEEN c."create_date"
-                               AND date_add(
-                                    'day',
-                                    -1,
-                                    current_date
-                               )
+                               AND current_date
 
                     WHERE e."$part_event" = 'pay_log'
                       AND e."domain" = 'release'
@@ -396,12 +387,7 @@ FROM
                     'day',
                     o."最早付费offset" + 29,
                     c."create_date"
-                   )
-                   <= date_add(
-                        'day',
-                        -1,
-                        current_date
-                      )
+                   ) <= current_date
 
             LEFT JOIN ta.v_event_41 e
 
