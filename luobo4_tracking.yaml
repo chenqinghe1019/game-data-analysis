@@ -514,7 +514,7 @@ projects:
         default_filters:
           data_date: "过去7天"
           registration_date: "最近3651天"
-          channel: "排除 EDITOR_PAGE"
+          media: "取用户表 ad_platform；coalesce(ad_platform,'自然量')；当前选项为全部、自然量、tencent"
           user_type: "全部用户；新用户=注册日等于数据日，老用户=注册日早于数据日"
         reports:
           - {name: "萝卜4小游戏-广告点汇总", ta_report_id: 5654}
@@ -530,6 +530,7 @@ projects:
           - "新老用户筛选必须在包含 day、reg_day 别名的明细 CTE 外层应用，避免 Column 'day' cannot be resolved。"
           - "关卡名称按点号拆分主段和次段转整数排序，避免 1.10 被排到 1.2 前。"
           - "所有百分比按百分数口径乘 100，并 cast(round(..., 2) as decimal(18,2))。"
+          - "2026-09-11 按用户要求将原‘渠道’筛选统一改为‘媒体’：用户维度使用 coalesce(ad_platform,'自然量')，SQL 别名统一为 media_name；7 张报表默认选‘全部’。"
 
       - name: "萝卜4小游戏-关卡分析"
         ta_dashboard_id: 2024
@@ -537,7 +538,7 @@ projects:
         default_filters:
           data_date: "过去7天"
           registration_date: "最近3651天"
-          channel: "排除 EDITOR_PAGE；选择‘微信小游戏’仅保留已识别为该渠道的用户，‘全部’还包含未知渠道"
+          media: "取用户表 ad_platform；coalesce(ad_platform,'自然量')；当前选项为全部、自然量、tencent"
           user_type: "全部用户；新用户=注册日等于数据日，老用户=注册日早于数据日"
         reports:
           - {name: "萝卜4小游戏-关卡汇总", ta_report_id: 5662}
