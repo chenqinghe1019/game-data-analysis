@@ -1,0 +1,48 @@
+project: 步步
+updated_at: 2026-09-11
+scope: 美团渠道3048813新增、服务器与周维度分R付费留存
+rules:
+  channel:
+    name: "美团"
+    channel_id: "3048813"
+    filter: "用户表 cast(channel_id as varchar)='3048813'"
+  payment:
+    event: "pay_log"
+    field: "payment"
+    unit: "分"
+    conversion: "/100 转元"
+    valid_filter: "payment>0"
+  active:
+    event: "log_in_out"
+  payment_retention:
+    denominator: "D1付费用户数"
+    numerator: "D1付费用户中第N日存在 log_in_out 活跃的用户数"
+    rule: "第N日不要求再次付费，只要再次活跃即算付费留存"
+    rate_format: "0~1小数，不乘100"
+  requirement_1_pure_new:
+    description: "纯新的后续N日付费及其付费留存"
+    pure_new: "同一 nb_open_id 下 create_role_time 最早的角色；先判定最早角色，再筛 channel_id=3048813"
+    day_definition: "D1=创角当天；后续按创角自然日顺延"
+  requirement_2_server:
+    description: "服务器维度的后续N日付费及其付费留存"
+    server_dimension: "按 server_open_time 日期 + region_id 分组"
+    cohort: "channel_id=3048813 且开服当天创建的角色"
+    rolling_server: "不剔除滚服"
+    day_definition: "D1=开服当天；后续按开服自然日顺延"
+  requirement_3_weekly_r:
+    description: "2026年5/6/7/8月新增，按周维度分R统计付费留存"
+    cohort_date_range: "2026-05-01~2026-08-31"
+    cohort: "新增角色；该项未指定纯新，因此不自动套用 nb_open_id 最早角色限制"
+    week_dimension: "按创角日期 date_trunc('week') 分周（周一为周起始）"
+    r_basis: "新增首日成功付费金额，不使用生命周期最终累充倒灌历史"
+    r_tiers:
+      a_free: "=0"
+      b_(0,6]: ">0且<=6"
+      c_(6,30]: ">6且<=30"
+      d_(30,100]: ">30且<=100"
+      e_(100,300]: ">100且<=300"
+      f_(300,500]: ">300且<=500"
+      g_(500,1000]: ">500且<=1000"
+      h_(1000,+): ">1000"
+  maturity:
+    rule: "后续第N日只统计已完整成熟到昨天的观察日；不使用今天未完整数据"
