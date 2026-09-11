@@ -1,7 +1,8 @@
 assistant_sql_response_rules:
-  updated_at: "2026-09-09"
+  updated_at: "2026-09-11"
   scope: "SQL adjustments and debugging in 倍特工作室 project"
   rules:
+    - "占比、率、百分比相关指标默认直接输出 0～1 的比例值，不乘 100；使用 cast(round(..., 4) as decimal(18,4)) 保留四位小数，除非用户明确指定其他格式。"
     - "When the user asks to modify, debug, optimize, or adapt SQL, always return the final full SQL version, not only diffs or fragments."
     - "If explaining the change, keep the explanation brief and place the complete runnable SQL in the same response."
     - "Preserve the user's existing SQL style and business logic unless the user explicitly asks to change the logic."
