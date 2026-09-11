@@ -17,12 +17,15 @@ rules:
   - 付费项目不输出汇总行；内部可保留汇总分组仅用于计算新增人数、总LTV和贡献占比，最终结果只展示具体付费项。
   - 成熟版与未成熟版均为减少“各付费项LTV先四舍五入再加总”造成的差异，将当日LTV贡献、当日总LTV、累计LTV贡献、累计总LTV统一保留4位小数；金额仍保留2位，贡献占比保留4位且不自动转百分比。
   - 未匹配排查SQL需严格复用当前LTV的新增日期、D1-D30、payment/token_payment、直充排除规则，只输出无法按 product_id + product_name 命中 ta_ext.product_id_name_41 的有效付费；并标记“配置表无此product_id / product_id存在但product_name不一致 / 埋点字段为空”，用于定位总LTV与付费项加和差异。
-  - 付费项低贡献评估新增 D1-D14 版本：必须以 ta_ext.product_id_name_41 商品表为左表，再 left join 付费结果，确保 0 购买、0 LTV 贡献商品也被展示。
-  - D1-D14 低贡献评估必须展示商品一级分类 product_type_one、二级分类 product_type_two，并按一级分类、二级分类、商品观察。
-  - D1-D14 低贡献评估中，累计付费人数占比 = 商品累计付费人数 / 同口径全部累计付费人数；另单独展示累计购买率 = 商品累计付费人数 / 成熟新增人数，避免两个指标混用。
-  - D1-D14 低贡献评估优先观察累计LTV贡献占比与累计付费人数占比，结果按低贡献占比、低付费人数占比升序，便于定位双低商品。
+  - 付费项低贡献评估最新口径：不再分 D1-D14 / D1-D30 每日行，直接看前30日汇总，每个商品一行。
+  - 前30日低贡献评估必须以 ta_ext.product_id_name_41 商品表为左表，再 left join 付费结果，确保 0 购买、0 LTV 贡献商品也被展示。
+  - 前30日低贡献评估必须展示商品一级分类 product_type_one、二级分类 product_type_two，并按一级分类、二级分类、商品观察。
+  - 前30日低贡献评估只统计完整成熟到 D30 的新增玩家，即 create_date + 29 天 <= 昨天，保证不同新增日期 cohort 观察窗口一致。
+  - 前30日付费人数占比 = 商品前30日付费人数 / 同口径全部前30日付费人数；另单独展示前30日购买率 = 商品前30日付费人数 / 成熟新增人数。
+  - 前30日LTV贡献占比 = 商品前30日付费金额 / 同口径全部前30日付费金额；优先按低LTV贡献占比、低付费人数占比升序定位双低商品。
 related_sql:
   - sql/xiafangle_payment_item_ltv_contribution_d1_d30_v41.sql
   - sql/xiafangle_payment_item_ltv_contribution_d1_d30_with_immature_v41.sql
   - sql/xiafangle_payment_item_ltv_unmatched_check_v41.sql
   - sql/xiafangle_payment_item_ltv_low_contribution_d1_d14_v41.sql
+  - sql/xiafangle_payment_item_ltv_low_contribution_d1_d30_summary_v41.sql
