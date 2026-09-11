@@ -23,6 +23,10 @@ projects:
         excluded_event_properties:
           video_play_end: ["channel", "new_player"]
           video_play_start: ["channel", "new_player"]
+      - file: "萝卜4小程序数数新增埋点看板反馈.xlsx"
+        imported_at: "2026-09-11"
+        scope: "广告分析与关卡分析看板验收反馈"
+        repository_policy: "原始 Excel 不提交；本文件记录反馈结论与已实施调整。"
 
     status: "初版埋点，存在技术命名、类型及用户 ID 模式待确认项"
     summary:
@@ -521,6 +525,31 @@ projects:
           - "广告观看使用 video_play_start；广告完播及次数分布使用 video_play_end。"
           - "广告点使用事件属性 positiontag。"
           - "按关卡明细包含 0%-5% 至 95%-100% 共 20 个 chapter_speed 进度人数区间。"
+          - "日活口径使用 ta_mg_show 按日去重，不使用 login；2026-09-09 复核新用户 ta_mg_show 为 6694，login 仅 1521。"
+          - "广告次数分布增加 Variable5‘广告点名称’，默认值‘全部’，可单独查看某个 positiontag 的次数分布。"
+          - "新老用户筛选必须在包含 day、reg_day 别名的明细 CTE 外层应用，避免 Column 'day' cannot be resolved。"
+          - "关卡名称按点号拆分主段和次段转整数排序，避免 1.10 被排到 1.2 前。"
+          - "所有百分比按百分数口径乘 100，并 cast(round(..., 2) as decimal(18,2))。"
+
+      - name: "萝卜4小游戏-关卡分析"
+        ta_dashboard_id: 2024
+        url: "https://ta-data.feiyu.com/#/panel/panel/37_2024_0"
+        default_filters:
+          data_date: "过去7天"
+          registration_date: "最近3651天"
+          channel: "排除 EDITOR_PAGE；选择‘微信小游戏’仅保留已识别为该渠道的用户，‘全部’还包含未知渠道"
+          user_type: "全部用户；新用户=注册日等于数据日，老用户=注册日早于数据日"
+        reports:
+          - {name: "萝卜4小游戏-关卡汇总", ta_report_id: 5662}
+          - {name: "萝卜4小游戏-关卡失败", ta_report_id: 5663, extra_filter: "关卡名称"}
+          - {name: "萝卜4小游戏-在线时长分布", ta_report_id: 5664}
+        implementation_notes:
+          - "活跃用户统一使用 ta_mg_show 去重；该修正同时解决关卡0进入人数和在线时长分布基数偏小。"
+          - "关卡汇总与关卡失败按 level_id 点号拆分后的整数主段、次段排序。"
+          - "关卡失败的死亡取 level_dead，失败取 level_result.is_win=false；死亡和失败均按 rounds 分为 0-5、6-10、11-15、16-20、21-25、26-30、31+。"
+          - "若失败指标持续为空，先检查客户端是否上报 level_result.is_win=false，不用 level_dead 伪造失败数据。"
+          - "在线时长按所选区间汇总每位 ta_mg_show 活跃用户的 ta_mg_hide.#duration，再换算分钟分桶。"
+          - "2026-09-11 看板复核：关卡0进入人数 6648、关卡1进入人数 6665；排序显示 1.1、1.2、1.3；死亡人数占比与在线时长人数占比均显示两位小数。"
 
     pending_confirmations:
       - "确认项目实际采用单账号单角色还是单账号多角色。"

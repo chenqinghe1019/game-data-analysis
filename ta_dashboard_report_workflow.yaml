@@ -180,7 +180,7 @@ ta_dashboard_report_workflow:
     cohort_and_dimension_rules:
       registration_day: "从 register 事件按 #user_id 取最早 $part_date；注册日期参数使用独立的 PartDate。"
       channel: "渠道优先取用户表的注册渠道；缺失值统一显示为‘未知’。"
-      active_users: "当日活跃按 login 事件对 #user_id 去重。"
+      active_users: "小游戏项目先核对实际前后台切换事件；萝卜4小游戏使用 ta_mg_show 对 #user_id 按日去重，login 只覆盖登录行为，不能直接作为日活。"
       new_users: "reg_day = 数据日期。"
       old_users: "reg_day < 数据日期。"
       editor_exclusion: "渠道选择‘全部’时也应默认过滤 channel_name <> 'EDITOR_PAGE'，避免编辑器测试数据进入业务看板。"
@@ -199,6 +199,10 @@ ta_dashboard_report_workflow:
     distribution_rule: "广告次数分布以 video_play_end 计数；从当日活跃用户集合 LEFT JOIN 每人完播次数，才能保留广告次数为 0 的用户。"
     level_rule: "名为‘关卡开始人数’的指标应使用 level_start 的去重用户数，不使用事件次数。"
     zero_division: "所有比率分母使用 nullif(..., 0)，最终保留两位小数。"
+    selector_alias_rule: "动态 Selector 引用 day、reg_day、channel_name 等别名时，必须在这些别名已经生成的外层 CTE 应用；不要在创建别名的同一层 WHERE 中引用，否则会出现 Column 'day' cannot be resolved。"
+    dotted_level_sort: "关卡名为 1.1、1.2、1.10 等点分文本时，分别 split_part 主段和次段并 try_cast 为 integer 排序；不要按字符串排序，也不要把整个关卡名 cast 为 double。"
+    percentage_display: "需要展示百分比数值时使用 cast(round(100.0*numerator/nullif(denominator,0),2) as decimal(18,2))，保证百分数口径和两位小数。"
+    failure_event_rule: "死亡和失败分开统计：死亡取 level_dead，失败取 level_result.is_win=false；失败数据为空时追查上报，不用死亡事件替代失败事件。"
 
   dynamic_variable_param:
     variable_syntax: "通过界面添加‘可变内容 Variable’时，系统生成的占位符格式为 ${Variable5}，不是 ${Variable:variable5}。"
