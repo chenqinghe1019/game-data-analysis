@@ -16,27 +16,29 @@ rules:
     event: "log_in_out"
   pure_new:
     rule: "同一 nb_open_id 下 create_role_time 最早的角色；先判定最早角色，再筛 channel_id=3048813"
+  day_output:
+    rule: "所有第N日维度直接输出整数1、2、3...N，不拼接D前缀，保证数值排序正常"
   payment_retention:
-    denominator: "D1付费用户数"
-    numerator: "D1付费用户中第N日存在 log_in_out 活跃的用户数"
+    denominator: "首日付费用户数"
+    numerator: "首日付费用户中第N日存在 log_in_out 活跃的用户数"
     rule: "第N日不要求再次付费，只要再次活跃即算付费留存"
     rate_format: "0~1小数，不乘100"
   requirement_1_pure_new_payment:
     description: "纯新的后续N日付费及其付费留存"
-    day_definition: "D1=创角当天；后续按创角自然日顺延"
+    day_definition: "1=创角当天；后续按创角自然日顺延"
     maturity: "按第N日分别成熟到昨天，今天未完整数据不统计"
   requirement_2_pure_new_registration_retention:
     description: "纯新的前七日注册留存"
-    day_definition: "D1=创角当天，D7=创角后第6个自然日"
+    day_definition: "1=创角当天，7=创角后第6个自然日"
     denominator: "纯新注册人数"
     numerator: "对应第N日存在 log_in_out 活跃的纯新人数"
-    maturity: "只纳入已完整成熟到D7的新增日期，即新增日+6<=昨天"
+    maturity: "只纳入已完整成熟到第7日的新增日期，即新增日+6<=昨天"
   requirement_3_server:
     description: "服务器维度的后续N日付费及其付费留存"
     server_dimension: "按 server_open_time 日期 + region_id 分组"
     cohort: "channel_id=3048813 且开服当天创建的角色"
     rolling_server: "不剔除滚服"
-    day_definition: "D1=开服当天；后续按开服自然日顺延"
+    day_definition: "1=开服当天；后续按开服自然日顺延"
     maturity: "按第N日分别成熟到昨天，今天未完整数据不统计"
   requirement_4_weekly_r:
     description: "2026年5/6/7/8月新增，按周维度分R统计付费留存"
@@ -53,4 +55,4 @@ rules:
       f_(300,500]: ">300且<=500"
       g_(500,1000]: ">500且<=1000"
       h_(1000,+): ">1000"
-    retention_window: "D1-D7，横向输出"
+    retention_window: "第1-7日横向输出，列名不使用D前缀"
