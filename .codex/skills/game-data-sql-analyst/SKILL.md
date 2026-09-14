@@ -14,34 +14,35 @@ Never start from memory alone when repository knowledge is available.
 For every SQL request in this repository:
 
 1. Identify the project and task type.
-2. Read the current GitHub knowledge for that project/topic before generating SQL.
+2. Read root `PROJECT_WORKING_RULES.md` first, then read the current GitHub knowledge for that project/topic before generating SQL.
 3. Reuse the latest verified SQL or template when one exists; do not independently rewrite equivalent logic without a reason.
 4. Apply the user's current change request with minimum necessary logic changes.
 5. Run SQL syntax/style and business-metric QA.
 6. Return the final complete runnable SQL by default.
-7. When the user confirms a reusable new rule or corrects an existing rule, update the corresponding GitHub knowledge source so later conversations inherit the correction.
+7. When the user confirms a reusable new rule or corrects an existing rule, update the corresponding GitHub knowledge source so later conversations inherit the correction; if the change affects common working conventions, also update `PROJECT_WORKING_RULES.md`.
 
 ## Knowledge Source Order
 
 Read only what is relevant, but use this priority:
 
-1. `project_memory.yaml` — project mapping, stable cross-project rules, mature-sample rules.
-2. `assistant_sql_response_rules.yaml` — SQL response and adjustment rules.
-3. Project tracking/config files, for example:
+1. `PROJECT_WORKING_RULES.md` — root entrypoint for common SQL habits, core metric concepts, project/config paths, channel cautions, and analysis workflow.
+2. `project_memory.yaml` — project mapping, stable cross-project rules, mature-sample rules.
+3. `assistant_sql_response_rules.yaml` — SQL response and adjustment rules.
+4. Project tracking/config files, for example:
    - `xiafangle_tracking.yaml`
    - `wanyue_tracking.yaml`
    - `bubu_tracking.yaml`
    - `baodanfeshe_tracking.yaml`
    - `luobo4_tracking.yaml`
    - related `*_operation_map.yaml` / `*_workflow.yaml`
-4. Topic knowledge under `memory/` and `memory/projects/`.
-5. Existing verified SQL under `sql/`; prefer the newest/current version for the same metric or dashboard.
-6. `sql_templates.yaml` for reusable structure.
-7. Inference only after the sources above are insufficient.
+5. Topic knowledge under `memory/` and `memory/projects/`.
+6. Existing verified SQL under `sql/`; prefer the newest/current version for the same metric or dashboard.
+7. `sql_templates.yaml` for reusable structure.
+8. Inference only after the sources above are insufficient.
 
 When multiple sources conflict, use this precedence:
 
-`current explicit user instruction > newest project/topic rule > latest verified SQL > stable global rule > generic template > inference`
+`current explicit user instruction > newest root/project/topic rule > latest verified SQL > stable global rule > generic template > inference`
 
 Do not silently choose an older rule because it appears in more files.
 
@@ -175,6 +176,7 @@ A statement becomes a reusable knowledge update when the user explicitly establi
 
 Classify the update:
 
+- root common workflow / common analysis convention → `PROJECT_WORKING_RULES.md`
 - global SQL rule → `project_memory.yaml`, `assistant_sql_response_rules.yaml`, or another global rules file
 - project stable rule → project tracking/config or `memory/projects/`
 - topic/dashboard rule → dedicated YAML/Markdown topic memory
