@@ -8,4 +8,4 @@ rules:
   - D1-D7 仍按每个玩家自己的 create_role_time 计算，创角当天为 D1。
   - 计算完整 LTV7 时，玩家需满足 date(create_role_time) <= date_add('day', -7, current_date)。
   - pay_log.payment 单位为分，除以100转元；payment>0，不额外限制 pay_result。
-  - 当前付费留存口径沿用：Dn当日付费人数 / D1付费人数；若后续改为严格首日付费 cohort 再次付费，需要单独调整分子口径。
+  - 付费留存统一口径：D1付费用户中，第N日仍有 in_out_log 登录/活跃的人数 / D1付费人数；第N日不要求再次付费。
