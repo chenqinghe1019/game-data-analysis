@@ -68,6 +68,15 @@ rules:
       - 诡橱体验礼包: 每购买1次补偿1个抽卡券
     product_match: pay_log按product_id + product_name关联ta_ext.product_id_name_41。
 
+  shop_compensation_20260918:
+    cutoff: '2026-09-18 20:00:00'
+    player_scope: 以2026-09-18相对开服天数判断当前活动周期，不要求当天登录；D18-D23=诡市寻宝，D24-D29=诡橱秘宝。
+    rules:
+      - 诡橱秘宝-光暗稀有传说自选卡: 每兑换1个补偿115代币
+      - 诡市寻宝-光暗稀有传说自选卡: 每兑换1个补偿250代币
+      - 诡市寻宝-煌炎护符: 每兑换1个补偿150代币
+    quantity_basis: 按shop_buy_log.num累计兑换数量计算补偿数量，不按事件次数计算。
+
   activity_payment_segment_shop:
     name: 活动付费分层-兑换商店购买分析
     sql_template: 游戏项目/下方了/sql模板/activity_payment_segment_shop_analysis.sql
