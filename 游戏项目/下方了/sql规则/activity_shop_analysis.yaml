@@ -1,6 +1,6 @@
 project: 下方了
 project_id: 41
-updated_at: '2026-08-19'
+updated_at: '2026-09-18'
 name: 活动商店分析模板
 status: active
 source: 2026-07-24 活动分析SQL（File Library: 粘贴的文本 (1).txt）
@@ -57,6 +57,16 @@ rules:
       - 人均购买数量
       - 消耗资源数量
       - 消耗资源占比
+
+
+  compensation_20260918:
+    cutoff: '2026-09-18 20:00:00'
+    player_scope: 以2026-09-18相对开服天数判断当前活动周期，不要求当天登录；D18-D23=诡市寻宝，D24-D29=诡橱秘宝。
+    payment_products:
+      - 诡市寻宝进阶奖励: 每购买1次补偿1张三系5+星随机卡
+      - 诡橱特惠礼包: 每购买1次补偿3个抽卡券
+      - 诡橱体验礼包: 每购买1次补偿1个抽卡券
+    product_match: pay_log按product_id + product_name关联ta_ext.product_id_name_41。
 
   activity_payment_segment_shop:
     name: 活动付费分层-兑换商店购买分析
