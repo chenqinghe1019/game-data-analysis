@@ -1,0 +1,75 @@
+project: 下方了
+date: 2026-09-18
+scope: account_id标签总表
+grain: "#account_id"
+source:
+  user: ta.v_user_41
+  event: ta.v_event_41
+  domain: release
+rules:
+  活跃情况:
+    event: in_out_log
+    window: 最近7个自然日（含当天）
+    mapping:
+      ">=5天": 高活
+      "2-4天": 中活
+      "<=1天": 低活
+  近10日活跃:
+    logic: 最后活跃日距今<=10天
+  0充用户:
+    event: pay_log
+    logic: 历史payment/100累计=0
+  VIP等级:
+    event: vip_change_log
+    field: after
+    logic: 按#event_time取最新after；0/1/2/3=>VIP0/VIP1/VIP2/VIP3，其余=>贵族，无记录=>VIP0
+  当天高付费:
+    event: pay_log
+    threshold_yuan: 10000
+  近七日高付费:
+    event: pay_log
+    window: 最近7个自然日（含当天）
+    threshold_yuan: 30000
+  充值中断预警:
+    event: pay_log
+    logic: D-12~D-3连续10天每天有充值，且D-2~D0连续3天无充值
+  消耗流失预警:
+    online_event: ta_mg_hide
+    duration_field: "#duration"
+    duration_filter: "0<=#duration<86400"
+    online_window: 最近7个完整自然日(D-7~D-1) vs 前7个完整自然日(D-14~D-8)
+    online_condition: 最近7日在线时长较前7日下降>=50%
+    task_event: mission_finish_log
+    task_type: 1
+    task_day_success: 当天完成去重task_id>=11
+    task_condition: 最近7个完整自然日任务成功天数<=2
+    final: 在线下降条件和任务条件同时满足
+    note: 此标签场景按用户2026-09-18最新口径使用ta_mg_hide，不沿用旧的in_out_log在线时长规则
+  流失沉睡:
+    event: in_out_log
+    thresholds_days: [4,7,14,21,31,61,91,121]
+  签到提醒:
+    event: daily_sign_log
+    field: sign_name
+    values: [七日签到,福利签到,豪华签到,超值签到]
+  创角天数:
+    source: v_user_41.create_role_time
+    milestones: [15,30,90,180,365,730]
+    condition: 当天有in_out_log时才命中
+  当前赛季:
+    event: in_out_log
+    field: season
+    logic: 按#event_time取最新非空season，展示S+season
+  活跃任务完成:
+    event: mission_finish_log
+    task_type: 1
+    logic: 当天去重task_id>=11即已完成
+  注册时间:
+    source: v_user_41.create_role_time
+excluded_missing_tracking:
+  - 企微新人
+  - 付费破冰
+  - 企微活动提醒
+  - 赛季成就
+  - 私域默认角色
+  - 已解绑角色
