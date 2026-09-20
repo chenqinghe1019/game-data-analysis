@@ -63,6 +63,7 @@ project_memory:
       notes:
         - "固定使用 v41；v44 是弯月勇者，不能混用。"
         - "代币支付可能 payment=0；统计商品名义金额时按 xiafangle_tracking.yaml 中维表关联口径处理。"
+        - "需要按实际消费金额统计现金+代币且排除代金券购买时：先排除 product_type='直充' 且 product_name 不含'钻石'；其余订单 payment>0 取 payment/100，payment=0 且 token_payment>0 取 token_payment/100，避免 payment 与 token_payment 同单重复相加。"
 
     baodanfeshe:
       project_name: "暴弹飞射"
