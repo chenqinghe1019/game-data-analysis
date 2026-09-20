@@ -1,0 +1,37 @@
+project: 下方了
+project_code: xiafangle
+project_id: 41
+created_at: '2026-09-20'
+topic: 按累计付费分层与新增天数查看最高战力分布
+cohort:
+  create_role_filter: ${Time:time}
+  active_days: date_diff('day', date(create_role_time), date(event_date)) + 1，创角当天=1
+  day_filter: ${Number:number6}
+payment:
+  window: 截至对应新增天数当天累计
+  amount_rule:
+    - product_type='直充' 且 product_name 不含'钻石'：0
+    - payment>0：payment/100
+    - 否则 token_payment>0：token_payment/100
+    - 否则0
+  segments:
+    - a_free: 0
+    - 'b_(0,6]': '(0,6]'
+    - 'c_(6,30]': '(6,30]'
+    - 'd_(30,100]': '(30,100]'
+    - 'e_(100,300]': '(100,300]'
+    - 'f_(300,500]': '(300,500]'
+    - 'g_(500,1000]': '(500,1000]'
+    - 'h_(1000,+)': '(1000,+)'
+power:
+  event: change_power_log
+  field: after
+  rule: 这里只看 change_power_log，当天最高战力=max(after)，不再混用 battle_star/battle_result.power
+metrics:
+  - 战力人数
+  - 均值最高战力
+  - P0
+  - P25
+  - P50
+  - P75
+  - P100
