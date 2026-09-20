@@ -1,0 +1,39 @@
+project: 下方了
+project_code: xiafangle
+project_id: 41
+created_at: '2026-09-20'
+topic: 按累计付费分层与新增天数监控战力异常
+population:
+  cohort_filter: 创角日期参数 ${Time:time}
+  active_event: in_out_log
+  rule: 仅统计对应新增天数当天存在 in_out_log 的活跃玩家
+  active_days: date_diff('day', date(create_role_time), date(event_date)) + 1，创角当天=1
+  day_filter: ${Number:number6}
+cumulative_payment:
+  window: 从创角日截至对应新增天数当天
+  actual_amount_rule:
+    - product_type='直充' 且 product_name 不含'钻石'：金额记0
+    - payment>0：取 payment/100
+    - 否则 token_payment>0：取 token_payment/100
+    - 否则0
+  segments:
+    - a_free: 0
+    - 'b_(0,6]': '(0,6]'
+    - 'c_(6,30]': '(6,30]'
+    - 'd_(30,100]': '(30,100]'
+    - 'e_(100,300]': '(100,300]'
+    - 'f_(300,500]': '(300,500]'
+    - 'g_(500,1000]': '(500,1000]'
+    - 'h_(1000,+)': '(1000,+)'
+power:
+  battle_events: [battle_star, battle_result]
+  battle_field: power
+  change_event: change_power_log
+  change_field: after
+  daily_max: max(当天战斗事件power最高值, 当天change_power_log.after最高值)
+  valid_population: 仅daily_max>0的玩家参与分位数
+abnormal_rule:
+  group_by: [累计付费分层, 新增天数]
+  percentile: P99
+  threshold: 玩家当天最高战力 > P99 * 2
+  output: 异常玩家明细，并带P99、异常阈值、超P99倍数、战力来源和样本人数
