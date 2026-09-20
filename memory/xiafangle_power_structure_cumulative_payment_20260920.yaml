@@ -1,0 +1,26 @@
+project: 下方了
+project_code: xiafangle
+project_id: 41
+created_at: '2026-09-20'
+topic: 新增天数×累计付费分层×战力变化原因
+source_sql_previous: sql/xiafangle/战力结构_新增天数_首日付费分层.sql
+adjustments:
+  - 原“首日付费分层”改为“截至对应新增天数当天累计付费分层”。
+  - 每个 change_power_log 所在自然日，累计从创角日到该日的有效消费，再重新判定付费分层。
+payment_amount_rule:
+  unit: 元
+  expression:
+    - product_type='直充' 且 product_name 不含'钻石' -> 0
+    - payment>0 -> payment/100
+    - 否则 token_payment>0 -> token_payment/100
+    - 否则 -> 0
+  note: 包含代币消费，排除购买代币/代金券本身；payment 与 token_payment 单笔不重复相加。
+segments:
+  - a_free: 0
+  - 'b_(0,6]': '(0,6]'
+  - 'c_(6,30]': '(6,30]'
+  - 'd_(30,100]': '(30,100]'
+  - 'e_(100,300]': '(100,300]'
+  - 'f_(300,500]': '(300,500]'
+  - 'g_(500,1000]': '(500,1000]'
+  - 'h_(1000,+)': '(1000,+)'
