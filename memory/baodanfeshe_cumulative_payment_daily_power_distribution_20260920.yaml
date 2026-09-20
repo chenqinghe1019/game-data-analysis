@@ -1,0 +1,41 @@
+project: 暴弹飞射
+project_code: baodanfeshe
+project_id: 42
+created_at: '2026-09-20'
+topic: 按截至当天累计付费分层与新增天数查看每日最高战力分布
+cohort:
+  create_role_date: 兼容 timestamp / Unix秒，生成新增日期后使用 ${PartDate:date1}
+  active_days: date_diff('day', 新增日期, 活跃日期) + 1，创角当天=1
+  day_filter: ${Number:number6}
+  active_event: in_out_log
+payment:
+  event: pay_log
+  unit: 元，禁止 /100
+  window: 截至对应新增天数当天累计
+  amount_rule:
+    - product_type='24_商城-金券充值': 0
+    - payment>0: payment
+    - token_payment>0: token_payment
+    - else: 0
+  segments:
+    - a_free: 0
+    - 'b_(0,6]': '(0,6]'
+    - 'c_(6,30]': '(6,30]'
+    - 'd_(30,100]': '(30,100]'
+    - 'e_(100,300]': '(100,300]'
+    - 'f_(300,500]': '(300,500]'
+    - 'g_(500,1000]': '(500,1000]'
+    - 'h_(1000,+)': '(1000,+)'
+power:
+  event: change_power_log
+  field: after
+  day_rule: 当天 max(after)
+  excluded_change_reason: 检测主力英雄
+metrics:
+  - 战力人数
+  - 均值最高战力
+  - P0
+  - P25
+  - P50
+  - P75
+  - P100
