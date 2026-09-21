@@ -93,6 +93,22 @@ FROM
                     current_date
                   )
 
+        INNER JOIN ta.v_event_41 b
+
+            ON cast(b."#account_id" AS varchar) = d.account_id
+
+           AND b."$part_event" IN (
+                'battle_star',
+                'battle_result'
+           )
+
+           AND try_cast(b.battle_type AS bigint) = 1
+
+           AND cast(b."$part_date" AS date) >= d.create_date
+
+           AND cast(b."$part_date" AS date)
+               <= cast(e."$part_date" AS date)
+
         LEFT JOIN
         (
             SELECT
@@ -150,6 +166,10 @@ FROM
             d.account_id,
             d.nick_name,
             d.region_id
+
+        HAVING max(
+            try_cast(b.map_id AS bigint)
+        ) > 3
     ) t
 
     WHERE t."新增N天最高战力" > 0
