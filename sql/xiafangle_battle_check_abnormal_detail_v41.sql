@@ -26,9 +26,8 @@ SELECT
                 END,
 
                 CASE
-                    WHEN x.duration > 0
-                     AND x.duration_p1 > 0
-                     AND x.duration < x.duration_p1 / 2.0
+                    WHEN x.battle_type = 1
+                     AND x.duration < 110
                     THEN '通关时间异常'
                 END
             ],
@@ -40,18 +39,23 @@ SELECT
     x.refresh_card AS "修改刷卡次数",
 
     round(
-        x.report_npc_hp_max / NULLIF(x.svr_npc_hp_max, 0),
+        x.report_npc_hp_max
+        / NULLIF(x.svr_npc_hp_max, 0),
         4
     ) AS "怪物异常生命比例（客户端/服务端）",
 
     round(
-        x.report_hp_max / NULLIF(x.svr_hp_max, 0),
+        x.report_hp_max
+        / NULLIF(x.svr_hp_max, 0),
         4
     ) AS "城墙异常生命比例（客户端/服务端）",
 
-    round(x.duration, 2) AS "实际通关时间",
-    round(x.duration_p1, 2) AS "关卡P1通关时间",
-    round(x.duration_p1 / 2.0, 2) AS "通关时间异常阈值（P1÷2）",
+    round(
+        x.duration,
+        2
+    ) AS "实际通关时间（秒）",
+
+    110.0 AS "通关时间异常阈值（秒）",
 
     x.battle_uid AS "异常battle_uid",
     x.battle_type AS "battle_type",
@@ -60,144 +64,196 @@ SELECT
 FROM
 (
     SELECT
-        b.*,
+        l.season_id,
 
-        approx_percentile(
-            IF(
-                b.duration > 0,
-                b.duration,
-                NULL
+        CAST(
+            e."#account_id" AS varchar
+        ) AS role_id,
+
+        TRY_CAST(
+            e."region_id" AS bigint
+        ) AS server_id,
+
+        COALESCE(
+            TRY_CAST(
+                e."total_payment" AS double
             ),
-            0.01
-        ) OVER (
-            PARTITION BY
-                b.battle_type,
-                b.map_id
-        ) AS duration_p1
+            0
+        ) / 100.0 AS payment_amount,
 
-    FROM
+        CAST(
+            e."#event_time" AS timestamp
+        ) AS abnormal_time,
+
+        NULLIF(
+            trim(
+                CAST(
+                    e."battle_uid" AS varchar
+                )
+            ),
+            ''
+        ) AS battle_uid,
+
+        TRY_CAST(
+            e."battle_type" AS integer
+        ) AS battle_type,
+
+        TRY_CAST(
+            e."map_id" AS integer
+        ) AS map_id,
+
+        TRY_CAST(
+            NULLIF(
+                trim(
+                    CAST(
+                        e."duration" AS varchar
+                    )
+                ),
+                ''
+            ) AS double
+        ) AS duration,
+
+        TRY_CAST(
+            NULLIF(
+                trim(
+                    CAST(
+                        e."refreshCard" AS varchar
+                    )
+                ),
+                ''
+            ) AS double
+        ) AS refresh_card,
+
+        TRY_CAST(
+            NULLIF(
+                trim(
+                    CAST(
+                        e."reportNpcHpMax" AS varchar
+                    )
+                ),
+                ''
+            ) AS double
+        ) AS report_npc_hp_max,
+
+        TRY_CAST(
+            NULLIF(
+                trim(
+                    CAST(
+                        e."svrNpcHpMax" AS varchar
+                    )
+                ),
+                ''
+            ) AS double
+        ) AS svr_npc_hp_max,
+
+        TRY_CAST(
+            NULLIF(
+                trim(
+                    CAST(
+                        e."reportHpMax" AS varchar
+                    )
+                ),
+                ''
+            ) AS double
+        ) AS report_hp_max,
+
+        TRY_CAST(
+            NULLIF(
+                trim(
+                    CAST(
+                        e."svrHpMax" AS varchar
+                    )
+                ),
+                ''
+            ) AS double
+        ) AS svr_hp_max
+
+    FROM ta.v_event_41 e
+
+    LEFT JOIN
     (
         SELECT
-            l.season_id,
+            CAST(
+                login_e."#account_id" AS varchar
+            ) AS role_id,
 
-            CAST(e."#account_id" AS varchar) AS role_id,
-            TRY_CAST(e."region_id" AS bigint) AS server_id,
+            CAST(
+                login_e."$part_date" AS date
+            ) AS login_date,
 
-            COALESCE(
-                TRY_CAST(e."total_payment" AS double),
-                0
-            ) / 100.0 AS payment_amount,
+            max_by(
+                TRY_CAST(
+                    login_e."season" AS bigint
+                ),
+                CAST(
+                    login_e."#event_time" AS timestamp
+                )
+            ) FILTER
+            (
+                WHERE TRY_CAST(
+                    login_e."season" AS bigint
+                ) IS NOT NULL
+            ) AS season_id
 
-            CAST(e."#event_time" AS timestamp) AS abnormal_time,
+        FROM ta.v_event_41 login_e
 
-            NULLIF(
-                trim(CAST(e."battle_uid" AS varchar)),
-                ''
-            ) AS battle_uid,
-
-            TRY_CAST(e."battle_type" AS integer) AS battle_type,
-            TRY_CAST(e."map_id" AS integer) AS map_id,
-
-            TRY_CAST(
-                NULLIF(
-                    trim(CAST(e."duration" AS varchar)),
-                    ''
-                ) AS double
-            ) AS duration,
-
-            TRY_CAST(
-                NULLIF(
-                    trim(CAST(e."refreshCard" AS varchar)),
-                    ''
-                ) AS double
-            ) AS refresh_card,
-
-            TRY_CAST(
-                NULLIF(
-                    trim(CAST(e."reportNpcHpMax" AS varchar)),
-                    ''
-                ) AS double
-            ) AS report_npc_hp_max,
-
-            TRY_CAST(
-                NULLIF(
-                    trim(CAST(e."svrNpcHpMax" AS varchar)),
-                    ''
-                ) AS double
-            ) AS svr_npc_hp_max,
-
-            TRY_CAST(
-                NULLIF(
-                    trim(CAST(e."reportHpMax" AS varchar)),
-                    ''
-                ) AS double
-            ) AS report_hp_max,
-
-            TRY_CAST(
-                NULLIF(
-                    trim(CAST(e."svrHpMax" AS varchar)),
-                    ''
-                ) AS double
-            ) AS svr_hp_max
-
-        FROM ta.v_event_41 e
-
-        LEFT JOIN
-        (
-            SELECT
-                CAST(login_e."#account_id" AS varchar) AS role_id,
-                CAST(login_e."$part_date" AS date) AS login_date,
-
-                max_by(
-                    TRY_CAST(login_e."season" AS bigint),
-                    CAST(login_e."#event_time" AS timestamp)
-                ) FILTER
-                (
-                    WHERE TRY_CAST(login_e."season" AS bigint) IS NOT NULL
-                ) AS season_id
-
-            FROM ta.v_event_41 login_e
-            WHERE login_e."$part_event" = 'in_out_log'
-              AND login_e.${PartDate:date}
-              AND COALESCE(
-                    CAST(login_e."domain" AS varchar),
-                    'release'
-                  ) = 'release'
-              AND login_e."#account_id" IS NOT NULL
-
-            GROUP BY
-                CAST(login_e."#account_id" AS varchar),
-                CAST(login_e."$part_date" AS date)
-        ) l
-        ON CAST(e."#account_id" AS varchar) = l.role_id
-       AND CAST(e."$part_date" AS date) = l.login_date
-
-        WHERE e."$part_event" = 'battle_check'
-          AND e.${PartDate:date}
+        WHERE login_e."$part_event" = 'in_out_log'
+          AND login_e.${PartDate:date}
           AND COALESCE(
-                CAST(e."domain" AS varchar),
+                CAST(
+                    login_e."domain" AS varchar
+                ),
                 'release'
               ) = 'release'
-    ) b
+          AND login_e."#account_id" IS NOT NULL
+
+        GROUP BY
+            CAST(
+                login_e."#account_id" AS varchar
+            ),
+            CAST(
+                login_e."$part_date" AS date
+            )
+    ) l
+
+    ON CAST(
+        e."#account_id" AS varchar
+    ) = l.role_id
+
+    AND CAST(
+        e."$part_date" AS date
+    ) = l.login_date
+
+    WHERE e."$part_event" = 'battle_check'
+      AND e.${PartDate:date}
+      AND COALESCE(
+            CAST(
+                e."domain" AS varchar
+            ),
+            'release'
+          ) = 'release'
 ) x
 
 WHERE
     x.battle_type <> 8
+
     AND
     (
            (
                 x.svr_hp_max > 0
             AND x.report_hp_max / x.svr_hp_max >= 2
            )
+
         OR (
                 x.svr_npc_hp_max > 0
             AND x.report_npc_hp_max / x.svr_npc_hp_max < 0.9
            )
+
         OR x.refresh_card > 2
+
         OR (
-                x.duration > 0
-            AND x.duration_p1 > 0
-            AND x.duration < x.duration_p1 / 2.0
+                x.battle_type = 1
+            AND x.duration < 110
            )
     )
 
