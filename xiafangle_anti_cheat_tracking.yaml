@@ -1,5 +1,5 @@
 # 下方了：外挂治理埋点整理
-# 来源：用户上传埋点文档；2026-07-29 按最新外挂规则图更新阈值；2026-09-08 增加并修正按关卡P1通关时长判断规则
+# 来源：用户上传埋点文档；2026-07-29 按最新外挂规则图更新阈值；2026-09-08 增加按关卡P1通关时长判断规则；2026-09-21 通关时间异常改为仅主线 battle_type=1 且 duration<110秒
 # 表后缀：41
 # 说明：
 # - battle_check / boss_battle_result 为外挂治理核心事件
@@ -189,8 +189,8 @@ anti_cheat_rules:
     event: "battle_check"
     abnormal_type: "通关时间异常"
     customer_rule: "/"
-    logic: "按 battle_type + map_id 关卡维度，对筛选周期内 duration>0 的 battle_check 样本计算 P1 通关时间；实际 duration 低于 P1÷2 时标记异常"
-    sql_hint: "duration > 0 AND duration_p1 > 0 AND duration < duration_p1 / 2.0"
+    logic: "仅检查主线战斗 battle_type=1；duration 低于110秒即标记通关时间异常，不再使用P1阈值"
+    sql_hint: "battle_type = 1 AND duration < 110"
 
   wall_hp_abnormal:
     report_name: "外挂治理new"
