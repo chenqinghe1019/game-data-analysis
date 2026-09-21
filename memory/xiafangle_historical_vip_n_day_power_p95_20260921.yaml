@@ -1,0 +1,30 @@
+project: 下方了
+project_code: xiafangle
+project_id: 41
+created_at: '2026-09-21'
+topic: 按历史每日累计VIP查看新增第N天战力明细并关联分位数
+cohort:
+  create_role_filter: ${PartDate:date}
+  day_filter: ${Number:number6}
+  day_definition: 新增当天=1，目标日期=create_role_date + N - 1
+  maturity: 仅统计目标日期已成熟到昨天的数据
+vip:
+  source: ta.history_tag_41
+  cluster_name: vip_level_today
+  join: ta.v_user_41.#user_id = ta.history_tag_41.#long_id
+  tag_date: 目标日期转YYYYMMDD匹配$tag_date
+  value: tag_value_num
+  null_default: 0
+power:
+  event: change_power_log
+  field: after
+  rule: 目标日期内每个玩家取max(after)作为新增第N天最高战力
+percentiles:
+  group_by: [历史VIP, 新增天数]
+  metrics: [P0, P25, P50, P75, P95]
+  exclude: P100
+  focus: P95
+detail:
+  attach_percentiles_to_each_player: true
+  extra_fields: [VIP样本人数, VIP平均最高战力, 是否高于P95, P95倍数]
+sql_file: sql/xiafangle_power_detail_by_historical_vip_n_day_v41.sql
