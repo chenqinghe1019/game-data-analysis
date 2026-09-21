@@ -34,3 +34,8 @@ detail:
   attach_percentiles_to_each_player: true
   extra_fields: [VIP样本人数, VIP平均最高战力, P95战力, 异常战力阈值, 战力状态, P95倍数]
 sql_file: sql/xiafangle_power_detail_by_historical_vip_n_day_v41.sql
+
+output_preference:
+  abnormal_detail: 仅保留核心排查字段
+  fields: [新增天数, 历史VIP, 账号ID, 角色名, 服务器ID, 最高战力, P95战力, 异常阈值, P95倍数]
+  removed: [新增日期, 新增第N天日期, 用户ID, 最高战力时间, VIP样本人数, VIP平均最高战力, P0, P25, P50, P75, 战力状态]
