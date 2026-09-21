@@ -39,3 +39,10 @@ output_preference:
   abnormal_detail: 仅保留核心排查字段
   fields: [新增天数, 历史VIP, 账号ID, 角色名, 服务器ID, 最高战力, P99战力, 异常阈值, P99倍数]
   removed: [新增日期, 新增第N天日期, 用户ID, 最高战力时间, VIP样本人数, VIP平均最高战力, P0, P25, P50, P75, 战力状态]
+
+mainline_sample_filter:
+  events: [battle_star, battle_result]
+  battle_type: 1
+  level_field: map_id
+  rule: 截至对应新增第N天，主线累计最大map_id必须>3
+  excluded: 主线停留在1-3及之前的玩家不进入P99样本，也不会进入异常玩家结果
