@@ -23,10 +23,8 @@ SELECT
     round(r."P50战力", 2) AS "P50战力",
     round(r."P75战力", 2) AS "P75战力",
     round(r."P95战力", 2) AS "P95战力",
-    CASE
-        WHEN r."新增N天最高战力" > r."P95战力" THEN '是'
-        ELSE '否'
-    END AS "是否高于P95",
+    round(r."P95战力" * 2, 2) AS "异常战力阈值",
+    '异常战力' AS "战力状态",
     round(
         r."新增N天最高战力" / nullif(r."P95战力", 0),
         2
@@ -218,6 +216,8 @@ FROM
 
     WHERE t."新增N天最高战力" > 0
 ) r
+
+WHERE r."新增N天最高战力" > r."P95战力" * 2
 
 ORDER BY
     r."历史VIP",
