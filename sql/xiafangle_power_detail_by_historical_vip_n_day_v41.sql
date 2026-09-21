@@ -12,7 +12,7 @@ SELECT
     r."服务器ID",
     round(r."新增N天最高战力", 2) AS "最高战力",
     round(r."P99战力", 2) AS "P99战力",
-    round(r."P99战力" * 2.5, 2) AS "异常阈值",
+    round(r."P99战力" * 3, 2) AS "异常阈值",
     round(
         r."新增N天最高战力" / nullif(r."P99战力", 0),
         2
@@ -175,7 +175,7 @@ FROM
     WHERE t."新增N天最高战力" > 0
 ) r
 
-WHERE r."新增N天最高战力" > r."P99战力" * 2.5
+WHERE r."新增N天最高战力" > r."P99战力" * 3
 
 ORDER BY
     r."历史VIP",
