@@ -1,6 +1,10 @@
 SELECT
     row_number() OVER (
-        ORDER BY r."历史VIP", r."新增日期", r."账号ID"
+        ORDER BY
+            r."历史VIP",
+            r."新增天数",
+            r."新增N天最高战力" DESC,
+            r."账号ID"
     ) AS "序号",
     r."新增日期",
     r."新增第N天日期",
@@ -34,57 +38,81 @@ FROM
         t.*,
 
         count(*) OVER (
-            PARTITION BY t."历史VIP", t."新增天数"
+            PARTITION BY
+                t."历史VIP",
+                t."新增天数"
         ) AS "VIP样本人数",
 
         avg(t."新增N天最高战力") OVER (
-            PARTITION BY t."历史VIP", t."新增天数"
+            PARTITION BY
+                t."历史VIP",
+                t."新增天数"
         ) AS "VIP平均最高战力",
 
         min(t."新增N天最高战力") OVER (
-            PARTITION BY t."历史VIP", t."新增天数"
+            PARTITION BY
+                t."历史VIP",
+                t."新增天数"
         ) AS "P0战力",
 
         approx_percentile(
             t."新增N天最高战力",
             0.25
         ) OVER (
-            PARTITION BY t."历史VIP", t."新增天数"
+            PARTITION BY
+                t."历史VIP",
+                t."新增天数"
         ) AS "P25战力",
 
         approx_percentile(
             t."新增N天最高战力",
             0.50
         ) OVER (
-            PARTITION BY t."历史VIP", t."新增天数"
+            PARTITION BY
+                t."历史VIP",
+                t."新增天数"
         ) AS "P50战力",
 
         approx_percentile(
             t."新增N天最高战力",
             0.75
         ) OVER (
-            PARTITION BY t."历史VIP", t."新增天数"
+            PARTITION BY
+                t."历史VIP",
+                t."新增天数"
         ) AS "P75战力",
 
         approx_percentile(
             t."新增N天最高战力",
             0.95
         ) OVER (
-            PARTITION BY t."历史VIP", t."新增天数"
+            PARTITION BY
+                t."历史VIP",
+                t."新增天数"
         ) AS "P95战力"
 
     FROM
     (
         SELECT
             d.create_date AS "新增日期",
-            d.target_date AS "新增第N天日期",
-            d.active_days AS "新增天数",
+            cast(e."$part_date" AS date) AS "新增第N天日期",
+
+            date_diff(
+                'day',
+                d.create_date,
+                cast(e."$part_date" AS date)
+            ) + 1 AS "新增天数",
+
             cast(coalesce(v.vip_level, 0) AS bigint) AS "历史VIP",
             d.user_id AS "用户ID",
             d.account_id AS "账号ID",
             d.nick_name AS "角色名",
             d.region_id AS "服务器ID",
-            max(try_cast(e.after AS double)) AS "新增N天最高战力",
+
+            max(
+                try_cast(e.after AS double)
+            ) AS "新增N天最高战力",
+
             max_by(
                 e."#event_time",
                 try_cast(e.after AS double)
@@ -97,13 +125,7 @@ FROM
                 cast(u."#account_id" AS varchar) AS account_id,
                 u.nick_name,
                 u.region_id,
-                date(u.create_role_time) AS create_date,
-                cast(${Number:number6} AS integer) AS active_days,
-                date_add(
-                    'day',
-                    cast(${Number:number6} AS integer) - 1,
-                    date(u.create_role_time)
-                ) AS target_date
+                date(u.create_role_time) AS create_date
 
             FROM
             (
@@ -121,20 +143,33 @@ FROM
             ) u
 
             WHERE u.${PartDate:date}
-              AND cast(${Number:number6} AS integer) >= 1
-              AND date_add(
-                      'day',
-                      cast(${Number:number6} AS integer) - 1,
-                      date(u.create_role_time)
-                  ) <= date_add('day', -1, current_date)
         ) d
+
+        INNER JOIN ta.v_event_41 e
+
+            ON cast(e."#account_id" AS varchar) = d.account_id
+
+           AND cast(e."$part_date" AS date) >= d.create_date
+
+           AND cast(e."$part_date" AS date)
+               <= date_add(
+                    'day',
+                    -1,
+                    current_date
+                  )
 
         LEFT JOIN
         (
             SELECT
                 "#long_id",
                 "$tag_date",
-                max(coalesce(tag_value_num, 0)) AS vip_level
+
+                max(
+                    coalesce(
+                        tag_value_num,
+                        0
+                    )
+                ) AS vip_level
 
             FROM ta.history_tag_41
 
@@ -146,26 +181,34 @@ FROM
         ) v
 
             ON d.user_id = v."#long_id"
+
            AND v."$tag_date" = cast(
                 date_format(
-                    d.target_date,
+                    cast(e."$part_date" AS date),
                     '%Y%m%d'
                 ) AS integer
            )
 
-        INNER JOIN ta.v_event_41 e
-
-            ON cast(e."#account_id" AS varchar) = d.account_id
-           AND cast(e."$part_date" AS date) = d.target_date
-
         WHERE e."$part_event" = 'change_power_log'
-          AND e."$part_date" IS NOT NULL
+
           AND e.after IS NOT NULL
+
+          AND (
+                date_diff(
+                    'day',
+                    d.create_date,
+                    cast(e."$part_date" AS date)
+                ) + 1
+              ) ${Number:number6}
 
         GROUP BY
             d.create_date,
-            d.target_date,
-            d.active_days,
+            cast(e."$part_date" AS date),
+            date_diff(
+                'day',
+                d.create_date,
+                cast(e."$part_date" AS date)
+            ) + 1,
             cast(coalesce(v.vip_level, 0) AS bigint),
             d.user_id,
             d.account_id,
@@ -178,6 +221,6 @@ FROM
 
 ORDER BY
     r."历史VIP",
+    r."新增天数",
     r."新增N天最高战力" DESC,
-    r."新增日期",
     r."账号ID"
