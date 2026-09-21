@@ -11,12 +11,12 @@ SELECT
     r."角色名",
     r."服务器ID",
     round(r."新增N天最高战力", 2) AS "最高战力",
-    round(r."P95战力", 2) AS "P95战力",
-    round(r."P95战力" * 2, 2) AS "异常阈值",
+    round(r."P99战力", 2) AS "P99战力",
+    round(r."P99战力" * 2, 2) AS "异常阈值",
     round(
-        r."新增N天最高战力" / nullif(r."P95战力", 0),
+        r."新增N天最高战力" / nullif(r."P99战力", 0),
         2
-    ) AS "P95倍数"
+    ) AS "P99倍数"
 
 FROM
 (
@@ -25,12 +25,12 @@ FROM
 
         approx_percentile(
             t."新增N天最高战力",
-            0.95
+            0.99
         ) OVER (
             PARTITION BY
                 t."历史VIP",
                 t."新增天数"
-        ) AS "P95战力"
+        ) AS "P99战力"
 
     FROM
     (
@@ -155,7 +155,7 @@ FROM
     WHERE t."新增N天最高战力" > 0
 ) r
 
-WHERE r."新增N天最高战力" > r."P95战力" * 2
+WHERE r."新增N天最高战力" > r."P99战力" * 2
 
 ORDER BY
     r."历史VIP",
