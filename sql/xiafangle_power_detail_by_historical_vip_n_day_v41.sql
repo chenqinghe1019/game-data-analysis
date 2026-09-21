@@ -3,28 +3,16 @@ SELECT
         ORDER BY
             r."历史VIP",
             r."新增天数",
-            r."新增N天最高战力" DESC,
-            r."账号ID"
+            r."新增N天最高战力" DESC
     ) AS "序号",
-    r."新增日期",
-    r."新增第N天日期",
     r."新增天数",
     r."历史VIP",
-    r."用户ID",
     r."账号ID",
     r."角色名",
     r."服务器ID",
-    round(r."新增N天最高战力", 2) AS "新增N天最高战力",
-    r."最高战力时间",
-    r."VIP样本人数",
-    round(r."VIP平均最高战力", 2) AS "VIP平均最高战力",
-    round(r."P0战力", 2) AS "P0战力",
-    round(r."P25战力", 2) AS "P25战力",
-    round(r."P50战力", 2) AS "P50战力",
-    round(r."P75战力", 2) AS "P75战力",
+    round(r."新增N天最高战力", 2) AS "最高战力",
     round(r."P95战力", 2) AS "P95战力",
-    round(r."P95战力" * 2, 2) AS "异常战力阈值",
-    '异常战力' AS "战力状态",
+    round(r."P95战力" * 2, 2) AS "异常阈值",
     round(
         r."新增N天最高战力" / nullif(r."P95战力", 0),
         2
@@ -34,51 +22,6 @@ FROM
 (
     SELECT
         t.*,
-
-        count(*) OVER (
-            PARTITION BY
-                t."历史VIP",
-                t."新增天数"
-        ) AS "VIP样本人数",
-
-        avg(t."新增N天最高战力") OVER (
-            PARTITION BY
-                t."历史VIP",
-                t."新增天数"
-        ) AS "VIP平均最高战力",
-
-        min(t."新增N天最高战力") OVER (
-            PARTITION BY
-                t."历史VIP",
-                t."新增天数"
-        ) AS "P0战力",
-
-        approx_percentile(
-            t."新增N天最高战力",
-            0.25
-        ) OVER (
-            PARTITION BY
-                t."历史VIP",
-                t."新增天数"
-        ) AS "P25战力",
-
-        approx_percentile(
-            t."新增N天最高战力",
-            0.50
-        ) OVER (
-            PARTITION BY
-                t."历史VIP",
-                t."新增天数"
-        ) AS "P50战力",
-
-        approx_percentile(
-            t."新增N天最高战力",
-            0.75
-        ) OVER (
-            PARTITION BY
-                t."历史VIP",
-                t."新增天数"
-        ) AS "P75战力",
 
         approx_percentile(
             t."新增N天最高战力",
@@ -102,19 +45,13 @@ FROM
             ) + 1 AS "新增天数",
 
             cast(coalesce(v.vip_level, 0) AS bigint) AS "历史VIP",
-            d.user_id AS "用户ID",
             d.account_id AS "账号ID",
             d.nick_name AS "角色名",
             d.region_id AS "服务器ID",
 
             max(
                 try_cast(e.after AS double)
-            ) AS "新增N天最高战力",
-
-            max_by(
-                e."#event_time",
-                try_cast(e.after AS double)
-            ) AS "最高战力时间"
+            ) AS "新增N天最高战力"
 
         FROM
         (
@@ -202,13 +139,14 @@ FROM
         GROUP BY
             d.create_date,
             cast(e."$part_date" AS date),
+
             date_diff(
                 'day',
                 d.create_date,
                 cast(e."$part_date" AS date)
             ) + 1,
+
             cast(coalesce(v.vip_level, 0) AS bigint),
-            d.user_id,
             d.account_id,
             d.nick_name,
             d.region_id
@@ -222,5 +160,4 @@ WHERE r."新增N天最高战力" > r."P95战力" * 2
 ORDER BY
     r."历史VIP",
     r."新增天数",
-    r."新增N天最高战力" DESC,
-    r."账号ID"
+    r."新增N天最高战力" DESC
