@@ -27,7 +27,10 @@ percentiles:
   metrics: [P0, P25, P50, P75, P95]
   exclude: P100
   focus: P95
+abnormal_rule:
+  definition: 玩家新增第N天最高战力 > 同历史VIP同新增天数P95 * 2
+  output: 仅保留异常战力玩家
 detail:
   attach_percentiles_to_each_player: true
-  extra_fields: [VIP样本人数, VIP平均最高战力, 是否高于P95, P95倍数]
+  extra_fields: [VIP样本人数, VIP平均最高战力, P95战力, 异常战力阈值, 战力状态, P95倍数]
 sql_file: sql/xiafangle_power_detail_by_historical_vip_n_day_v41.sql
