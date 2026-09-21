@@ -28,7 +28,7 @@ percentiles:
   exclude: P100
   focus: P99
 abnormal_rule:
-  definition: 玩家新增第N天最高战力 > 同历史VIP同新增天数P99 * 2.5
+  definition: 玩家新增第N天最高战力 > 同历史VIP同新增天数P99 * 3
   output: 仅保留异常战力玩家
 detail:
   attach_percentiles_to_each_player: true
