@@ -131,6 +131,43 @@ rules:
       - 活动付费、任务、礼包购买、shop_buy_log等行为继续使用${PartDate:date2}做事件分区裁剪，并限制在真实活动窗口内。
       - 商店分析先聚合到玩家×shop_id×goods_id×商品名称×res_id，再做最终汇总，减少count(distinct)开销。
 
+
+  activity_payment_segment_shop_immature_14822:
+    name: 夏日活动商店-活动付费分层-不成熟版
+    active_period_filter: '${PartDate:date2}'
+    activity_day_filter: '${Selector:selector2}'
+    supported_activity_day_filters:
+      - 'between X and Y'
+      - '>=N'
+    immature_rule: 不要求活动完整周期成熟；只要玩家在统计周期内实际处于活动开服天数范围并有in_out_log即可纳入。
+    open_ended_rule: 当selector2为>=N时，活动开始日=开服第N日，活动结束时间取本次统计结束日期+1天。
+    purchase_source:
+      events:
+        - item_log
+        - money_log
+      change_reason: 14822
+      change_type: 1
+      definition: 使用change_reason=14822且change_type=1的item_log/money_log识别商店购买获得内容；字段使用item_id、item_name、item_num。
+    removed_fields:
+      - shop_id
+      - goods_id
+      - res_id
+      - res_num
+      - 消耗资源数量
+      - 消耗资源占比
+      - selector4商店ID筛选
+    output_dimensions:
+      - 活动付费分层
+      - 资源类型
+      - 商品ID(item_id)
+      - 商品名称(item_name)
+    output_metrics:
+      - 获得数量(sum(item_num))
+      - 购买人数
+      - 购买人数占比（分层内）
+      - 人均获得数量
+    note: item_log/money_log无法还原shop_buy_log的消耗资源数量，因此不再输出消耗资源相关指标；change_reason字段线上名称为change_reason，不是change_reson。
+
 notes:
   - 数数动态日期参数必须作为完整 WHERE 条件使用，不写 e.${PartDate:date2} 这类拼接形式。
   - ${PartDate:date2}自2026-08-18起统一表示活动自然日统计/活跃周期，不再表示玩家创角日期。
