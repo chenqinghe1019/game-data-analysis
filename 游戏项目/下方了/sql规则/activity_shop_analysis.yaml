@@ -176,3 +176,18 @@ notes:
   - 新版活动付费分层只包含指定activity product_type_two下完整活动期间累计付费金额>0的成熟区服活动玩家。
   - shop_buy_log字段已确认：shop_id, goods_id, num, res_id, res_num, res_count, discount, items。
   - 商品名称统一从shop_buy_log.items[].name提取，去重后以“、”拼接；无名称时显示“未知商品”。
+
+  activity_payment_segment_shop_item_money_variant:
+    name: 活动付费分层-资源日志商店购买分析（不成熟版）
+    activity_day_filter: '${Selector:selector2}'
+    change_reason_selector: '${Selector:selector4}'
+    change_reason_examples:
+      - '= 14822'
+      - 'in (14822,14823)'
+    purchase_events:
+      - item_log
+      - money_log
+    purchase_reason_rule: 'try_cast(change_reason as bigint) ${Selector:selector4}'
+    purchase_gain_rule: 'change_type=1，用 item_id/item_name/item_num 识别买了什么及获得数量'
+    resource_cost_fields_removed: true
+    immature_rule: '支持 between X and Y 与 >=N；>=N 时活动结束时间取统计结束日+1，不要求完整活动周期成熟。'
