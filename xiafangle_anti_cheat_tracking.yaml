@@ -103,6 +103,14 @@ events:
       svrNpcHpMax:
         display_name: "怪物生命（服务端）"
         type: "double"
+      attackedTimes:
+        display_name: "城墙受击次数"
+        type: "double"
+        description: "为空时标记“城墙受击次数为空”异常"
+      HpLost:
+        display_name: "城墙扣血量"
+        type: "double"
+        description: "为空时标记“城墙扣血量为空”异常"
 
   boss_battle_result:
     data_type: "服务端+客户端"
@@ -224,6 +232,24 @@ anti_cheat_rules:
       total_payment_lt_30000: "直接封"
     logic: "修改刷卡次数大于2"
     sql_hint: "refreshCard > 2"
+
+  wall_attacked_times_empty:
+    report_name: "外挂治理new"
+    status: "使用中"
+    event: "battle_check"
+    abnormal_type: "城墙受击次数为空"
+    customer_rule: "/"
+    logic: "attackedTimes 为 NULL 或空字符串时标记异常"
+    sql_hint: "NULLIF(trim(cast(attackedTimes as varchar)), '') IS NULL"
+
+  wall_hp_lost_empty:
+    report_name: "外挂治理new"
+    status: "使用中"
+    event: "battle_check"
+    abnormal_type: "城墙扣血量为空"
+    customer_rule: "/"
+    logic: "HpLost 为 NULL 或空字符串时标记异常"
+    sql_hint: "NULLIF(trim(cast(HpLost as varchar)), '') IS NULL"
 
   boss_damage_abnormal:
     report_name: "boss外挂单3.0"
