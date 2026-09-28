@@ -184,8 +184,15 @@ FROM
 
                     max(
                         CASE
-                            WHEN e."$part_event"
-                                    = 'mission_reward_log'
+                            WHEN e."$part_event" = 'item_log'
+                             AND try_cast(
+                                 e."change_type"
+                                 AS bigint
+                             ) = 2
+                             AND cast(
+                                 e."item_name"
+                                 AS varchar
+                             ) = '能量电池'
                                 THEN 1
                             ELSE 0
                         END
@@ -381,7 +388,8 @@ FROM
 
                         e0."$part_event",
                         e0."#event_time",
-                        e0."task_type",
+                        e0."change_type",
+                        e0."item_name",
                         e0."product_id",
                         e0."product_name",
                         e0."payment",
@@ -398,14 +406,17 @@ FROM
                       AND
                       (
                           (
-                              e0."$part_event"
-                                    = 'mission_reward_log'
+                              e0."$part_event" = 'item_log'
 
                               AND try_cast(
-                                  e0."task_type"
+                                  e0."change_type"
                                   AS bigint
-                              )
-                              ${Selector:selector}
+                              ) = 2
+
+                              AND cast(
+                                  e0."item_name"
+                                  AS varchar
+                              ) = '能量电池'
                           )
 
                           OR
