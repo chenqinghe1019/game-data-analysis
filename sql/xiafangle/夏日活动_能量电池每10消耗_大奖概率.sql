@@ -2,7 +2,7 @@
 -- 口径：
 -- 1. 统计周期：${PartDate:date2}
 -- 2. 活动开服天数：${Selector:selector2}，夏日活动可填 >=8
--- 3. 抽取：item_log，item_name='能量电池'，change_type=2
+-- 3. 抽取：item_log，item_name='能量电池'，change_type=2；消耗事件item_num可能为负数，分桶时转为正向消耗量
 -- 4. 按玩家累计能量电池消耗量，每10个划分一个区间：1-10、11-20、21-30……
 -- 5. 本次抽取中奖：从本次能量电池消耗事件开始，到下一次能量电池消耗事件之前，
 --    存在 item_log 获取 item_name='夏日海滩' 且 change_reason=14817、change_type=1
@@ -125,13 +125,29 @@ FROM
                         AS timestamp
                     ) AS "抽取时间",
 
-                    coalesce(
-                        try_cast(
-                            e."item_num"
-                            AS double
-                        ),
-                        0
-                    ) AS "单次能量电池消耗"
+                    CASE
+                        WHEN coalesce(
+                            try_cast(
+                                e."item_num"
+                                AS double
+                            ),
+                            0
+                        ) < 0
+                            THEN 0 - coalesce(
+                                try_cast(
+                                    e."item_num"
+                                    AS double
+                                ),
+                                0
+                            )
+                        ELSE coalesce(
+                            try_cast(
+                                e."item_num"
+                                AS double
+                            ),
+                            0
+                        )
+                    END AS "单次能量电池消耗"
 
                 FROM ta.v_event_41 e
 
@@ -169,7 +185,7 @@ FROM
                             AS double
                         ),
                         0
-                      ) > 0
+                      ) <> 0
 
                   AND
                   (
