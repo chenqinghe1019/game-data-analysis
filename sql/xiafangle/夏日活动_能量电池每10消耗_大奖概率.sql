@@ -124,9 +124,13 @@ FROM
                         ELSE 0
                     END AS "是否获取大奖",
 
-                    count(
-                        reward."#account_id"
-                    ) AS "大奖获取次数"
+                    CASE
+                        WHEN count(
+                            reward."#account_id"
+                        ) > 0
+                            THEN 1
+                        ELSE 0
+                    END AS "大奖获取次数"
 
                 FROM
                 (
