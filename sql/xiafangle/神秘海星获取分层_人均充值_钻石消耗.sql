@@ -3,7 +3,7 @@
 -- 1. 玩家范围：${PartDate:date2}内存在in_out_log，且该活跃日相对server_open_time的开服天数>=8。
 -- 2. 神秘海星获取：item_log，item_name='神秘海星'，change_type=1；change_type为空时item_num>0兜底。
 -- 3. 神秘海星按玩家在统计期内、开服D8+阶段的累计获取数量分层：0单独一档，其余1-5、6-10、11-15……每5个一档。
--- 4. 人均充值金额：同统计期、开服D8+阶段pay_log的(payment+token_payment)/100，未付费玩家补0。
+-- 4. 人均充值金额：同统计期、开服D8+阶段，仅统计${Selector:selector1}命中的product_type_two商品小类；商品按product_id+product_name双键映射，金额为(payment+token_payment)/100，未付费玩家补0。
 -- 5. 人均消耗钻石数量：同统计期、开服D8+阶段money_log，钻石(item_id=1或item_name='钻石')，change_type=2，直接使用原始item_num，不做ABS；未消耗玩家补0。
 
 SELECT
@@ -246,6 +246,51 @@ FROM
                         u."#account_id"
                         AS varchar
                     )
+
+                INNER JOIN
+                (
+                    SELECT
+                        try_cast(
+                            "product_id"
+                            AS bigint
+                        ) AS "product_id",
+
+                        cast(
+                            "product_name"
+                            AS varchar
+                        ) AS "product_name"
+
+                    FROM ta_ext.product_id_name_41
+
+                    WHERE "product_id" IS NOT NULL
+                      AND "product_name" IS NOT NULL
+
+                    GROUP BY
+                        1,
+                        2
+
+                    HAVING regexp_like(
+                        coalesce(
+                            max(
+                                cast(
+                                    "product_type_two"
+                                    AS varchar
+                                )
+                            ),
+                            ''
+                        ),
+                        '${Selector:selector1}'
+                    )
+                ) product_cfg
+                    ON try_cast(
+                        e."product_id"
+                        AS bigint
+                    ) = product_cfg."product_id"
+
+                   AND cast(
+                        e."product_name"
+                        AS varchar
+                    ) = product_cfg."product_name"
 
                 WHERE ${PartDate:date2}
                   AND e."$part_event" = 'pay_log'
