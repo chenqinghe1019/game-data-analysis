@@ -202,7 +202,7 @@ anti_cheat_rules:
 
   wall_hp_abnormal:
     report_name: "外挂治理new"
-    status: "使用中"
+    status: "当前明细暂不启用"
     event: "battle_check"
     abnormal_type: "城墙最大生命值异常"
     customer_rule:
@@ -213,7 +213,7 @@ anti_cheat_rules:
 
   npc_hp_weaken:
     report_name: "外挂治理new"
-    status: "使用中"
+    status: "当前明细暂不启用"
     event: "battle_check"
     abnormal_type: "怪物生命削弱"
     customer_rule:
@@ -232,6 +232,15 @@ anti_cheat_rules:
       total_payment_lt_30000: "直接封"
     logic: "修改刷卡次数大于2"
     sql_hint: "refreshCard > 2"
+
+  wall_hp_lost_ratio_abnormal:
+    report_name: "外挂治理new"
+    status: "使用中"
+    event: "battle_check"
+    abnormal_type: "城墙扣血量异常"
+    customer_rule: "/"
+    logic: "城墙扣血量 HpLost / 客户端城墙血量 reportHpMax >= 5"
+    sql_hint: "reportHpMax > 0 AND HpLost / reportHpMax >= 5"
 
   wall_attacked_times_empty:
     report_name: "外挂治理new"
