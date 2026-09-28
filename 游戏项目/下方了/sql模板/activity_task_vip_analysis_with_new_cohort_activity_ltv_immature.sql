@@ -1,3 +1,6 @@
+-- 支持 selector2: between X and Y / >=N
+-- >=N 时活动结束按本次统计周期结束日+1处理；对应新增开始日期取实际纳入 cohort 的最早创角日期。
+
 -- 下方了：活动VIP分层 + 对应新增活动LTV（不成熟版）
 -- 活动参与：活动期内 item_log 消耗 item_name='能量电池'（change_type=2）
 -- 不成熟口径：
@@ -258,16 +261,27 @@ FROM
                             AS timestamp
                         ) AS "活动开始时间",
 
-                        cast(
-                            date_add(
-                                'day',
-                                activity_param."活动结束天数",
-                                date(
-                                    u."server_open_time"
+                        CASE
+                            WHEN activity_param."活动结束天数" IS NULL
+                                THEN cast(
+                                    date_add(
+                                        'day',
+                                        1,
+                                        stats_period."统计结束日期"
+                                    )
+                                    AS timestamp
                                 )
+                            ELSE cast(
+                                date_add(
+                                    'day',
+                                    activity_param."活动结束天数",
+                                    date(
+                                        u."server_open_time"
+                                    )
+                                )
+                                AS timestamp
                             )
-                            AS timestamp
-                        ) AS "活动结束时间"
+                        END AS "活动结束时间"
 
                     FROM
                     (
@@ -304,13 +318,23 @@ FROM
                     CROSS JOIN
                     (
                         SELECT
-                            try_cast(
-                                regexp_extract(
-                                    '${Selector:selector2}',
-                                    '(?i)between *([0-9]+) *and *([0-9]+)',
-                                    1
+                            coalesce(
+                                try_cast(
+                                    regexp_extract(
+                                        '${Selector:selector2}',
+                                        '(?i)between *([0-9]+) *and *([0-9]+)',
+                                        1
+                                    )
+                                    AS bigint
+                                ),
+                                try_cast(
+                                    regexp_extract(
+                                        '${Selector:selector2}',
+                                        '(?i)>= *([0-9]+)',
+                                        1
+                                    )
+                                    AS bigint
                                 )
-                                AS bigint
                             ) AS "活动开始天数",
 
                             try_cast(
@@ -713,7 +737,17 @@ LEFT JOIN
                         AS timestamp
                     ) AS "活动开始时间",
 
-                    cohort_period."对应新增开始日期",
+                    CASE
+                        WHEN cohort_period."对应新增开始日期" IS NULL
+                            THEN date(
+                                try_cast(
+                                    u."create_role_time"
+                                    AS timestamp
+                                )
+                            )
+                        ELSE cohort_period."对应新增开始日期"
+                    END AS "对应新增开始日期",
+
                     cohort_period."对应新增结束日期"
 
                 FROM ta.v_user_41 u
@@ -724,11 +758,15 @@ LEFT JOIN
                         activity_param."活动开始天数",
                         activity_param."活动结束天数",
 
-                        date_add(
-                            'day',
-                            1 - activity_param."活动结束天数",
-                            stats_period."统计开始日期"
-                        ) AS "对应新增开始日期",
+                        CASE
+                            WHEN activity_param."活动结束天数" IS NULL
+                                THEN NULL
+                            ELSE date_add(
+                                'day',
+                                1 - activity_param."活动结束天数",
+                                stats_period."统计开始日期"
+                            )
+                        END AS "对应新增开始日期",
 
                         date_add(
                             'day',
@@ -767,13 +805,23 @@ LEFT JOIN
                     CROSS JOIN
                     (
                         SELECT
-                            try_cast(
-                                regexp_extract(
-                                    '${Selector:selector2}',
-                                    '(?i)between *([0-9]+) *and *([0-9]+)',
-                                    1
+                            coalesce(
+                                try_cast(
+                                    regexp_extract(
+                                        '${Selector:selector2}',
+                                        '(?i)between *([0-9]+) *and *([0-9]+)',
+                                        1
+                                    )
+                                    AS bigint
+                                ),
+                                try_cast(
+                                    regexp_extract(
+                                        '${Selector:selector2}',
+                                        '(?i)>= *([0-9]+)',
+                                        1
+                                    )
+                                    AS bigint
                                 )
-                                AS bigint
                             ) AS "活动开始天数",
 
                             try_cast(
@@ -800,9 +848,18 @@ LEFT JOIN
                             u."create_role_time"
                             AS timestamp
                         )
+                      ) <= cohort_period."对应新增结束日期"
+
+                  AND (
+                        cohort_period."对应新增开始日期" IS NULL
+
+                        OR date(
+                            try_cast(
+                                u."create_role_time"
+                                AS timestamp
+                            )
+                        ) >= cohort_period."对应新增开始日期"
                       )
-                      BETWEEN cohort_period."对应新增开始日期"
-                          AND cohort_period."对应新增结束日期"
             ) new_user
 
             LEFT JOIN ta.v_event_41 vip_e
