@@ -1,13 +1,16 @@
--- 下方了｜夏日活动：每累计消耗10个能量电池的大奖概率
+-- 下方了｜夏日活动：每累计消耗10个能量电池的大奖概率（累计抽取版）
 -- 口径：
 -- 1. 统计周期：${PartDate:date2}
--- 2. 活动开服天数：${Selector:selector2}，夏日活动可填 >=8
--- 3. 抽取：item_log，item_name='能量电池'，change_type=2；消耗事件item_num可能为负数，分桶时转为正向消耗量
--- 4. 按玩家累计能量电池消耗量，每10个划分一个区间：1-10、11-20、21-30……
--- 5. 本次抽取中奖：从本次能量电池消耗事件开始，到下一次能量电池消耗事件之前，
---    存在 item_log 获取 item_name='夏日海滩' 且 change_reason=14817、change_type=1
--- 6. 人数大奖概率 = 大奖获取人数 / 抽取人数
--- 7. 次数大奖概率 = 大奖获取次数 / 抽取次数；同一抽取窗口内即使出现多条大奖获取事件，只记1次中奖抽取
+-- 2. 活动开服天数：${Selector:selector2}，夏日活动填 >=8
+-- 3. 抽取：item_log，item_name='能量电池'，change_type=2；item_num消耗可能为负数，统一转为正向消耗量
+-- 4. 玩家按累计能量电池消耗量，每10个划分区间：1-10、11-20、21-30……
+-- 5. 某次抽取中奖：从本次能量电池消耗时间开始，到下一次能量电池消耗时间之前，
+--    存在item_log获取item_name='夏日海滩'、change_reason=14817、change_type=1
+-- 6. 玩家一旦首次抽到夏日海滩，后续抽取全部停止计入
+-- 7. 抽取人数：达到该累计消耗区间、且此前尚未抽中大奖的去重玩家数
+-- 8. 累计抽取次数：对达到该区间的每个玩家，取截至该区间最后一次抽取的累计抽取次数，再跨玩家求和
+-- 9. 人数大奖概率 = 该区间首次中大奖人数 / 该区间抽取人数
+-- 10. 次数大奖概率 = 该区间大奖获取次数 / 该区间累计抽取次数
 
 SELECT
     row_number() OVER (
@@ -29,266 +32,324 @@ SELECT
         4
     ) AS "人数大奖概率",
 
-    q."抽取次数",
+    q."累计抽取次数",
     q."大奖获取次数",
 
     round(
         q."大奖获取次数" * 1.0000
-        / nullif(q."抽取次数", 0),
+        / nullif(q."累计抽取次数", 0),
         4
     ) AS "次数大奖概率"
 
 FROM
 (
     SELECT
-        d."区间起始",
+        p."区间起始",
 
-        count(
-            DISTINCT d."#account_id"
-        ) AS "抽取人数",
-
-        count(
-            DISTINCT CASE
-                WHEN d."是否获取大奖" = 1
-                    THEN d."#account_id"
-            END
-        ) AS "大奖获取人数",
-
-        count(*) AS "抽取次数",
+        count(*) AS "抽取人数",
 
         sum(
-            d."是否获取大奖"
+            p."该区间是否获取大奖"
+        ) AS "大奖获取人数",
+
+        sum(
+            p."截至该区间累计抽取次数"
+        ) AS "累计抽取次数",
+
+        sum(
+            p."该区间大奖获取次数"
         ) AS "大奖获取次数"
 
     FROM
     (
         SELECT
-            draw."#account_id",
-            draw."抽取时间",
-            draw."下一次抽取时间",
-            draw."累计能量电池消耗",
-
-            cast(
-                floor(
-                    (
-                        draw."累计能量电池消耗" - 1
-                    ) / 10.0
-                ) * 10 + 1
-                AS bigint
-            ) AS "区间起始",
+            y."#account_id",
+            y."区间起始",
 
             max(
-                CASE
-                    WHEN reward."#account_id" IS NOT NULL
-                        THEN 1
-                    ELSE 0
-                END
-            ) AS "是否获取大奖"
+                y."抽取序号"
+            ) AS "截至该区间累计抽取次数",
+
+            max(
+                y."是否获取大奖"
+            ) AS "该区间是否获取大奖",
+
+            sum(
+                y."大奖获取次数"
+            ) AS "该区间大奖获取次数"
 
         FROM
         (
             SELECT
-                x."#account_id",
-                x."抽取时间",
-                x."单次能量电池消耗",
+                z."#account_id",
+                z."抽取序号",
+                z."累计能量电池消耗",
 
-                sum(
-                    x."单次能量电池消耗"
+                cast(
+                    floor(
+                        (
+                            z."累计能量电池消耗" - 1
+                        ) / 10.0
+                    ) * 10 + 1
+                    AS bigint
+                ) AS "区间起始",
+
+                z."是否获取大奖",
+                z."大奖获取次数",
+
+                min(
+                    CASE
+                        WHEN z."是否获取大奖" = 1
+                            THEN z."抽取序号"
+                    END
                 ) OVER (
                     PARTITION BY
-                        x."#account_id"
-                    ORDER BY
-                        x."抽取时间"
-                    ROWS BETWEEN UNBOUNDED PRECEDING
-                         AND CURRENT ROW
-                ) AS "累计能量电池消耗",
-
-                lead(
-                    x."抽取时间"
-                ) OVER (
-                    PARTITION BY
-                        x."#account_id"
-                    ORDER BY
-                        x."抽取时间"
-                ) AS "下一次抽取时间"
+                        z."#account_id"
+                ) AS "首次中大奖抽取序号"
 
             FROM
             (
                 SELECT
-                    cast(
-                        e."#account_id"
-                        AS varchar
-                    ) AS "#account_id",
-
-                    cast(
-                        e."#event_time"
-                        AS timestamp
-                    ) AS "抽取时间",
+                    draw."#account_id",
+                    draw."抽取序号",
+                    draw."抽取时间",
+                    draw."下一次抽取时间",
+                    draw."累计能量电池消耗",
 
                     CASE
-                        WHEN coalesce(
-                            try_cast(
-                                e."item_num"
-                                AS double
-                            ),
-                            0
-                        ) < 0
-                            THEN 0 - coalesce(
+                        WHEN count(
+                            reward."#account_id"
+                        ) > 0
+                            THEN 1
+                        ELSE 0
+                    END AS "是否获取大奖",
+
+                    count(
+                        reward."#account_id"
+                    ) AS "大奖获取次数"
+
+                FROM
+                (
+                    SELECT
+                        x."#account_id",
+                        x."抽取时间",
+                        x."单次能量电池消耗",
+
+                        row_number() OVER (
+                            PARTITION BY
+                                x."#account_id"
+                            ORDER BY
+                                x."抽取时间"
+                        ) AS "抽取序号",
+
+                        sum(
+                            x."单次能量电池消耗"
+                        ) OVER (
+                            PARTITION BY
+                                x."#account_id"
+                            ORDER BY
+                                x."抽取时间"
+                            ROWS BETWEEN UNBOUNDED PRECEDING
+                                 AND CURRENT ROW
+                        ) AS "累计能量电池消耗",
+
+                        lead(
+                            x."抽取时间"
+                        ) OVER (
+                            PARTITION BY
+                                x."#account_id"
+                            ORDER BY
+                                x."抽取时间"
+                        ) AS "下一次抽取时间"
+
+                    FROM
+                    (
+                        SELECT
+                            cast(
+                                e."#account_id"
+                                AS varchar
+                            ) AS "#account_id",
+
+                            cast(
+                                e."#event_time"
+                                AS timestamp
+                            ) AS "抽取时间",
+
+                            CASE
+                                WHEN coalesce(
+                                    try_cast(
+                                        e."item_num"
+                                        AS double
+                                    ),
+                                    0
+                                ) < 0
+                                    THEN 0 - coalesce(
+                                        try_cast(
+                                            e."item_num"
+                                            AS double
+                                        ),
+                                        0
+                                    )
+                                ELSE coalesce(
+                                    try_cast(
+                                        e."item_num"
+                                        AS double
+                                    ),
+                                    0
+                                )
+                            END AS "单次能量电池消耗"
+
+                        FROM ta.v_event_41 e
+
+                        INNER JOIN ta.v_user_41 u
+                            ON cast(
+                                e."#account_id"
+                                AS varchar
+                            )
+                            =
+                            cast(
+                                u."#account_id"
+                                AS varchar
+                            )
+
+                        WHERE ${PartDate:date2}
+                          AND e."domain" = 'release'
+                          AND u."domain" = 'release'
+                          AND e."$part_event" = 'item_log'
+                          AND e."#account_id" IS NOT NULL
+                          AND u."server_open_time" IS NOT NULL
+
+                          AND cast(
+                                e."item_name"
+                                AS varchar
+                              ) = '能量电池'
+
+                          AND try_cast(
+                                e."change_type"
+                                AS bigint
+                              ) = 2
+
+                          AND coalesce(
                                 try_cast(
                                     e."item_num"
                                     AS double
                                 ),
                                 0
-                            )
-                        ELSE coalesce(
-                            try_cast(
-                                e."item_num"
-                                AS double
-                            ),
-                            0
+                              ) <> 0
+
+                          AND
+                          (
+                              date_diff(
+                                  'day',
+                                  date(
+                                      u."server_open_time"
+                                  ),
+                                  date(
+                                      e."#event_time"
+                                  )
+                              ) + 1
+                          ) ${Selector:selector2}
+                    ) x
+                ) draw
+
+                LEFT JOIN
+                (
+                    SELECT
+                        cast(
+                            e."#account_id"
+                            AS varchar
+                        ) AS "#account_id",
+
+                        cast(
+                            e."#event_time"
+                            AS timestamp
+                        ) AS "获取时间"
+
+                    FROM ta.v_event_41 e
+
+                    INNER JOIN ta.v_user_41 u
+                        ON cast(
+                            e."#account_id"
+                            AS varchar
                         )
-                    END AS "单次能量电池消耗"
+                        =
+                        cast(
+                            u."#account_id"
+                            AS varchar
+                        )
 
-                FROM ta.v_event_41 e
+                    WHERE ${PartDate:date2}
+                      AND e."domain" = 'release'
+                      AND u."domain" = 'release'
+                      AND e."$part_event" = 'item_log'
+                      AND e."#account_id" IS NOT NULL
+                      AND u."server_open_time" IS NOT NULL
 
-                INNER JOIN ta.v_user_41 u
-                    ON cast(
-                        e."#account_id"
-                        AS varchar
-                    )
-                    =
-                    cast(
-                        u."#account_id"
-                        AS varchar
-                    )
+                      AND cast(
+                            e."item_name"
+                            AS varchar
+                          ) = '夏日海滩'
 
-                WHERE ${PartDate:date2}
-                  AND e."domain" = 'release'
-                  AND u."domain" = 'release'
-                  AND e."$part_event" = 'item_log'
-                  AND e."#account_id" IS NOT NULL
-                  AND u."server_open_time" IS NOT NULL
+                      AND try_cast(
+                            e."change_type"
+                            AS bigint
+                          ) = 1
 
-                  AND cast(
-                        e."item_name"
-                        AS varchar
-                      ) = '能量电池'
+                      AND try_cast(
+                            e."change_reason"
+                            AS bigint
+                          ) = 14817
 
-                  AND try_cast(
-                        e."change_type"
-                        AS bigint
-                      ) = 2
+                      AND
+                      (
+                          date_diff(
+                              'day',
+                              date(
+                                  u."server_open_time"
+                              ),
+                              date(
+                                  e."#event_time"
+                              )
+                          ) + 1
+                      ) ${Selector:selector2}
+                ) reward
 
-                  AND coalesce(
-                        try_cast(
-                            e."item_num"
-                            AS double
-                        ),
-                        0
-                      ) <> 0
+                    ON draw."#account_id"
+                     = reward."#account_id"
 
-                  AND
-                  (
-                      date_diff(
-                          'day',
-                          date(
-                              u."server_open_time"
-                          ),
-                          date(
-                              e."#event_time"
-                          )
-                      ) + 1
-                  ) ${Selector:selector2}
-            ) x
-        ) draw
+                   AND reward."获取时间"
+                        >= draw."抽取时间"
 
-        LEFT JOIN
-        (
-            SELECT
-                cast(
-                    e."#account_id"
-                    AS varchar
-                ) AS "#account_id",
+                   AND
+                   (
+                       draw."下一次抽取时间" IS NULL
 
-                cast(
-                    e."#event_time"
-                    AS timestamp
-                ) AS "获取时间"
+                       OR reward."获取时间"
+                            < draw."下一次抽取时间"
+                   )
 
-            FROM ta.v_event_41 e
+                GROUP BY
+                    draw."#account_id",
+                    draw."抽取序号",
+                    draw."抽取时间",
+                    draw."下一次抽取时间",
+                    draw."累计能量电池消耗"
+            ) z
+        ) y
 
-            INNER JOIN ta.v_user_41 u
-                ON cast(
-                    e."#account_id"
-                    AS varchar
-                )
-                =
-                cast(
-                    u."#account_id"
-                    AS varchar
-                )
+        WHERE
+            y."首次中大奖抽取序号" IS NULL
 
-            WHERE ${PartDate:date2}
-              AND e."domain" = 'release'
-              AND u."domain" = 'release'
-              AND e."$part_event" = 'item_log'
-              AND e."#account_id" IS NOT NULL
-              AND u."server_open_time" IS NOT NULL
-
-              AND cast(
-                    e."item_name"
-                    AS varchar
-                  ) = '夏日海滩'
-
-              AND try_cast(
-                    e."change_type"
-                    AS bigint
-                  ) = 1
-
-              AND try_cast(
-                    e."change_reason"
-                    AS bigint
-                  ) = 14817
-
-              AND
-              (
-                  date_diff(
-                      'day',
-                      date(
-                          u."server_open_time"
-                      ),
-                      date(
-                          e."#event_time"
-                      )
-                  ) + 1
-              ) ${Selector:selector2}
-        ) reward
-
-            ON draw."#account_id"
-             = reward."#account_id"
-
-           AND reward."获取时间"
-                >= draw."抽取时间"
-
-           AND
-           (
-               draw."下一次抽取时间" IS NULL
-
-               OR reward."获取时间"
-                    < draw."下一次抽取时间"
-           )
-
-        WHERE draw."累计能量电池消耗" > 0
+            OR y."抽取序号"
+                <= y."首次中大奖抽取序号"
 
         GROUP BY
-            draw."#account_id",
-            draw."抽取时间",
-            draw."下一次抽取时间",
-            draw."累计能量电池消耗"
-    ) d
+            y."#account_id",
+            y."区间起始"
+    ) p
 
     GROUP BY
-        d."区间起始"
+        p."区间起始"
 ) q
 
 ORDER BY
