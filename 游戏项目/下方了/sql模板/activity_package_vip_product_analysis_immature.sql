@@ -1,0 +1,442 @@
+-- 下方了：活动礼包VIP分层 + 礼包LTV贡献（不成熟版，支持 between X and Y / >=N）
+-- >=N：活动开始天数=N；活动结束时间按统计结束日+1；对应新增理论下限开放，展示实际纳入 cohort 的最早创角日期。
+-- between X and Y：保留原有区间逻辑。
+-- 不要求完整活动周期成熟，只统计当前已发生数据。
+
+SELECT
+    row_number() OVER (
+        ORDER BY
+            q."分层排序",
+            q."礼包类型",
+            q."商品价格",
+            q."礼包名"
+    ) AS "序号",
+
+    q."VIP层级（活动开始前）",
+    q."礼包类型",
+    q."礼包名",
+    q."商品价格",
+    q."活动活跃人数",
+    q."付费人数",
+
+    round(
+        q."付费人数" * 1.0000
+        / nullif(q."活动活跃人数", 0),
+        4
+    ) AS "活跃购买率",
+
+    q."购买次数",
+
+    round(
+        q."购买次数" * 1.0000
+        / nullif(q."付费人数", 0),
+        2
+    ) AS "人均购买次数",
+
+    round(q."付费金额", 2) AS "付费金额",
+
+    round(
+        q."付费金额" * 1.0000
+        / nullif(
+            sum(q."付费金额") OVER (
+                PARTITION BY
+                    q."VIP层级（活动开始前）",
+                    q."礼包类型"
+            ),
+            0
+        ),
+        4
+    ) AS "付费金额占比（层内）",
+
+    round(
+        q."付费金额" * 1.0000
+        / nullif(q."付费人数", 0),
+        2
+    ) AS "人均付费金额"
+
+FROM
+(
+    SELECT
+        CASE
+            WHEN grouping(r."VIP层级（活动开始前）") = 1
+                THEN '汇总'
+            ELSE r."VIP层级（活动开始前）"
+        END AS "VIP层级（活动开始前）",
+
+        CASE
+            WHEN grouping(r."VIP层级（活动开始前）") = 1
+                THEN 0
+            ELSE max(r."分层排序")
+        END AS "分层排序",
+
+        r."礼包类型",
+        r."礼包名",
+        r."商品价格",
+
+        CASE
+            WHEN grouping(r."VIP层级（活动开始前）") = 1
+                THEN max(r."总活动活跃人数")
+            ELSE max(r."层内活动活跃人数")
+        END AS "活动活跃人数",
+
+        count(
+            DISTINCT r."#account_id"
+        ) AS "付费人数",
+
+        sum(r."购买次数") AS "购买次数",
+        sum(r."付费金额") AS "付费金额"
+
+    FROM
+    (
+        SELECT
+            s."#account_id",
+            s."VIP层级（活动开始前）",
+            s."分层排序",
+            s."层内活动活跃人数",
+            s."总活动活跃人数",
+            p."礼包类型",
+            p."礼包名",
+            p."商品价格",
+
+            count(p."#event_time") AS "购买次数",
+
+            sum(
+                coalesce(
+                    p."单笔付费金额",
+                    0
+                )
+            ) AS "付费金额"
+
+        FROM
+        (
+            SELECT
+                z.*,
+
+                count(*) OVER (
+                    PARTITION BY
+                        z."VIP层级（活动开始前）"
+                ) AS "层内活动活跃人数",
+
+                count(*) OVER () AS "总活动活跃人数"
+
+            FROM
+            (
+                SELECT
+                    y."#account_id",
+                    y."活动开始时间",
+                    y."活动结束时间",
+
+                    CASE
+                        WHEN coalesce(
+                            y."活动开始前VIP等级",
+                            0
+                        ) BETWEEN 0 AND 3
+                            THEN 'a.V0-V3'
+
+                        WHEN coalesce(
+                            y."活动开始前VIP等级",
+                            0
+                        ) BETWEEN 4 AND 6
+                            THEN 'b.V4-V6'
+
+                        WHEN coalesce(
+                            y."活动开始前VIP等级",
+                            0
+                        ) BETWEEN 7 AND 9
+                            THEN 'c.V7-V9'
+
+                        ELSE 'd.V10+'
+                    END AS "VIP层级（活动开始前）",
+
+                    CASE
+                        WHEN coalesce(
+                            y."活动开始前VIP等级",
+                            0
+                        ) BETWEEN 0 AND 3 THEN 1
+
+                        WHEN coalesce(
+                            y."活动开始前VIP等级",
+                            0
+                        ) BETWEEN 4 AND 6 THEN 2
+
+                        WHEN coalesce(
+                            y."活动开始前VIP等级",
+                            0
+                        ) BETWEEN 7 AND 9 THEN 3
+
+                        ELSE 4
+                    END AS "分层排序"
+
+                FROM
+                (
+                    SELECT
+                        active_user."#account_id",
+                        active_user."活动开始时间",
+                        active_user."活动结束时间",
+
+                        max(
+                            try_cast(vip_e."after" AS bigint)
+                        ) AS "活动开始前VIP等级"
+
+                    FROM
+                    (
+                        SELECT DISTINCT
+                            cast(a."#account_id" AS varchar) AS "#account_id",
+                            date(u."server_open_time") AS "开服日期",
+
+                            cast(
+                                date_add(
+                                    'day',
+                                    activity_param."活动开始天数" - 1,
+                                    date(u."server_open_time")
+                                ) AS timestamp
+                            ) AS "活动开始时间",
+
+                            CASE
+                                WHEN activity_param."活动结束天数" IS NULL
+                                    THEN cast(
+                                        date_add(
+                                            'day',
+                                            1,
+                                            stats_period."统计结束日期"
+                                        ) AS timestamp
+                                    )
+                                ELSE cast(
+                                    date_add(
+                                        'day',
+                                        activity_param."活动结束天数",
+                                        date(u."server_open_time")
+                                    ) AS timestamp
+                                )
+                            END AS "活动结束时间"
+
+                        FROM
+                        (
+                            SELECT
+                                "#account_id",
+                                "#event_time"
+
+                            FROM ta.v_event_41
+
+                            WHERE ${PartDate:date2}
+                              AND "domain" = 'release'
+                              AND "$part_event" = 'in_out_log'
+                              AND "#account_id" IS NOT NULL
+                        ) a
+
+                        INNER JOIN ta.v_user_41 u
+                            ON cast(a."#account_id" AS varchar)
+                                = cast(u."#account_id" AS varchar)
+
+                        CROSS JOIN
+                        (
+                            SELECT
+                                coalesce(
+                                    try_cast(
+                                        regexp_extract(
+                                            '${Selector:selector2}',
+                                            '(?i)between *([0-9]+) *and *([0-9]+)',
+                                            1
+                                        ) AS bigint
+                                    ),
+                                    try_cast(
+                                        regexp_extract(
+                                            '${Selector:selector2}',
+                                            '(?i)>= *([0-9]+)',
+                                            1
+                                        ) AS bigint
+                                    )
+                                ) AS "活动开始天数",
+
+                                try_cast(
+                                    regexp_extract(
+                                        '${Selector:selector2}',
+                                        '(?i)between *([0-9]+) *and *([0-9]+)',
+                                        2
+                                    ) AS bigint
+                                ) AS "活动结束天数"
+                        ) activity_param
+
+                        CROSS JOIN
+                        (
+                            SELECT
+                                min(cast(d."$part_date" AS date)) AS "统计开始日期",
+                                max(cast(d."$part_date" AS date)) AS "统计结束日期"
+                            FROM
+                            (
+                                SELECT "$part_date"
+                                FROM ta.v_event_41
+                                WHERE ${PartDate:date2}
+                            ) d
+                        ) stats_period
+
+                        WHERE u."domain" = 'release'
+                          AND u."server_open_time" IS NOT NULL
+
+                          /* 仅保留活动完整周期全部落在统计周期内的成熟区服 */
+                          /* 玩家必须在真实活动周期内有活跃 */
+                          AND (
+                                date_diff(
+                                    'day',
+                                    date(u."server_open_time"),
+                                    date(a."#event_time")
+                                ) + 1
+                              ) ${Selector:selector2}
+                    ) active_user
+
+                    LEFT JOIN ta.v_event_41 vip_e
+                        ON cast(vip_e."#account_id" AS varchar)
+                            = active_user."#account_id"
+                       AND vip_e."$part_event" = 'vip_change_log'
+                       AND vip_e."domain" = 'release'
+                       AND vip_e."#event_time"
+                            < active_user."活动开始时间"
+                       AND vip_e."$part_date"
+                           BETWEEN cast(
+                                active_user."开服日期"
+                                AS varchar
+                           )
+                           AND cast(
+                                date_add(
+                                    'day',
+                                    -1,
+                                    date(active_user."活动开始时间")
+                                ) AS varchar
+                           )
+
+                    GROUP BY
+                        1,
+                        2,
+                        3
+                ) y
+            ) z
+        ) s
+
+        LEFT JOIN
+        (
+            SELECT
+                cast(e."#account_id" AS varchar) AS "#account_id",
+                e."#event_time",
+                product_cfg."product_type_two" AS "礼包类型",
+                product_cfg."product_name" AS "礼包名",
+                product_cfg."price" AS "商品价格",
+
+                (
+                    coalesce(
+                        try_cast(e."payment" AS double),
+                        0
+                    )
+                    +
+                    coalesce(
+                        try_cast(e."token_payment" AS double),
+                        0
+                    )
+                ) / 100.0000 AS "单笔付费金额"
+
+            FROM
+            (
+                SELECT
+                    "#account_id",
+                    "#event_time",
+                    "product_id",
+                    "payment",
+                    "token_payment"
+
+                FROM ta.v_event_41
+
+                WHERE ${PartDate:date2}
+                  AND "domain" = 'release'
+                  AND "$part_event" = 'pay_log'
+                  AND "#account_id" IS NOT NULL
+
+                  AND
+                  (
+                      coalesce(
+                          try_cast("payment" AS double),
+                          0
+                      ) > 0
+
+                      OR
+
+                      coalesce(
+                          try_cast("token_payment" AS double),
+                          0
+                      ) > 0
+                  )
+            ) e
+
+            INNER JOIN
+            (
+                SELECT
+                    try_cast("product_id" AS bigint) AS "product_id",
+
+                    max(
+                        cast("product_name" AS varchar)
+                    ) AS "product_name",
+
+                    max(
+                        cast("product_type_two" AS varchar)
+                    ) AS "product_type_two",
+
+                    max(
+                        try_cast("price" AS double)
+                    ) AS "price"
+
+                FROM ta_ext.product_id_41
+
+                WHERE "product_id" IS NOT NULL
+
+                GROUP BY 1
+
+                HAVING regexp_like(
+                    coalesce(
+                        max(
+                            cast("product_type_two" AS varchar)
+                        ),
+                        ''
+                    ),
+                    '${Selector:selector1}'
+                )
+            ) product_cfg
+                ON try_cast(e."product_id" AS bigint)
+                    = product_cfg."product_id"
+        ) p
+            ON p."#account_id" = s."#account_id"
+           AND p."#event_time" >= s."活动开始时间"
+           AND p."#event_time" < s."活动结束时间"
+
+        GROUP BY
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+
+        HAVING count(p."#event_time") > 0
+    ) r
+
+    GROUP BY GROUPING SETS
+    (
+        (
+            r."VIP层级（活动开始前）",
+            r."分层排序",
+            r."礼包类型",
+            r."礼包名",
+            r."商品价格"
+        ),
+        (
+            r."礼包类型",
+            r."礼包名",
+            r."商品价格"
+        )
+    )
+) q
+
+ORDER BY
+    q."分层排序",
+    q."礼包类型",
+    q."商品价格",
+    q."礼包名"
