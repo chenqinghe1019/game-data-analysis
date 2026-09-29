@@ -4,8 +4,8 @@ SELECT
             x."合服日期",
             x."zone_id",
             x."付费金额" DESC,
-            x."product_id",
-            x."product_name"
+            x."一级分类",
+            x."二级分类"
     ) AS "序号",
 
     x."合服日期",
@@ -16,10 +16,6 @@ SELECT
 
     x."一级分类",
     x."二级分类",
-    x."付费类型",
-    x."product_id",
-    x."product_name",
-    round(x."配置单价", 2) AS "配置单价",
 
     x."购买人数",
     x."购买次数",
@@ -98,21 +94,6 @@ FROM
             '未分类'
         ) AS "二级分类",
 
-        coalesce(
-            p.product_type,
-            '未获取'
-        ) AS "付费类型",
-
-        p.product_id AS "product_id",
-        p.product_name AS "product_name",
-
-        max(
-            coalesce(
-                p.price,
-                0
-            )
-        ) AS "配置单价",
-
         count(
             DISTINCT p."#user_id"
         ) AS "购买人数",
@@ -173,6 +154,7 @@ FROM
 
                     ELSE greatest(
                         z2.zone_id,
+
                         coalesce(
                             max(
                                 try_cast(
@@ -193,7 +175,8 @@ FROM
                     lead(
                         z1.zone_id
                     ) OVER (
-                        ORDER BY z1.zone_id
+                        ORDER BY
+                            z1.zone_id
                     ) AS next_zone_id
 
                 FROM
@@ -370,27 +353,8 @@ FROM
 
             e."#user_id",
 
-            coalesce(
-                cast(
-                    e.product_type AS varchar
-                ),
-                '未获取'
-            ) AS product_type,
-
-            try_cast(
-                e.product_id AS bigint
-            ) AS product_id,
-
-            coalesce(
-                cast(
-                    e.product_name AS varchar
-                ),
-                '未获取'
-            ) AS product_name,
-
             cfg.product_type_one,
             cfg.product_type_two,
-            cfg.price,
 
             CASE
                 WHEN coalesce(
@@ -437,13 +401,7 @@ FROM
                     cast(
                         product_type_two AS varchar
                     )
-                ) AS product_type_two,
-
-                max(
-                    try_cast(
-                        price AS double
-                    )
-                ) AS price
+                ) AS product_type_two
 
             FROM ta_ext.product_id_name_41
 
@@ -482,6 +440,11 @@ FROM
             AND try_cast(
                 e.region_id AS bigint
             ) IS NOT NULL
+
+            AND coalesce(
+                cfg.product_type_two,
+                '未分类'
+            ) <> '代金券'
 
             AND (
                 coalesce(
@@ -552,20 +515,12 @@ FROM
         coalesce(
             p.product_type_two,
             '未分类'
-        ),
-
-        coalesce(
-            p.product_type,
-            '未获取'
-        ),
-
-        p.product_id,
-        p.product_name
+        )
 ) x
 
 ORDER BY
     x."合服日期",
     x."zone_id",
     x."付费金额" DESC,
-    x."product_id",
-    x."product_name";
+    x."一级分类",
+    x."二级分类";
