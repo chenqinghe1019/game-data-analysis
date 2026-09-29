@@ -392,12 +392,27 @@ FROM
             cfg.product_type_two,
             cfg.price,
 
-            coalesce(
-                try_cast(
-                    e.payment AS double
-                ),
-                0
-            ) / 100.0 AS pay_amount
+            CASE
+                WHEN coalesce(
+                    try_cast(
+                        e.payment AS double
+                    ),
+                    0
+                ) = 0
+                THEN coalesce(
+                    try_cast(
+                        e.token_payment AS double
+                    ),
+                    0
+                )
+
+                ELSE coalesce(
+                    try_cast(
+                        e.payment AS double
+                    ),
+                    0
+                )
+            END / 100.0 AS pay_amount
 
         FROM ta.v_event_41 e
 
@@ -468,12 +483,46 @@ FROM
                 e.region_id AS bigint
             ) IS NOT NULL
 
-            AND coalesce(
-                try_cast(
-                    e.payment AS double
-                ),
-                0
-            ) > 0
+            AND (
+                coalesce(
+                    cast(
+                        e.product_type AS varchar
+                    ),
+                    ''
+                ) <> '直充'
+
+                OR strpos(
+                    coalesce(
+                        cast(
+                            e.product_name AS varchar
+                        ),
+                        ''
+                    ),
+                    '钻石'
+                ) > 0
+            )
+
+            AND CASE
+                WHEN coalesce(
+                    try_cast(
+                        e.payment AS double
+                    ),
+                    0
+                ) = 0
+                THEN coalesce(
+                    try_cast(
+                        e.token_payment AS double
+                    ),
+                    0
+                )
+
+                ELSE coalesce(
+                    try_cast(
+                        e.payment AS double
+                    ),
+                    0
+                )
+            END > 0
     ) p
         ON p.region_id BETWEEN
             b.region_start
