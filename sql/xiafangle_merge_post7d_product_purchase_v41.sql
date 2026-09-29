@@ -12,6 +12,7 @@ SELECT
     x."zone_id",
     x."合服区服范围",
     x."实际统计天数",
+    x."对应新增人数",
 
     x."一级分类",
     x."二级分类",
@@ -48,7 +49,29 @@ SELECT
             0
         ),
         2
-    ) AS "人均付费金额"
+    ) AS "人均付费金额",
+
+    round(
+        coalesce(
+            x."付费金额" * 1.0000
+            / nullif(x."对应新增人数", 0),
+            0
+        ),
+        4
+    ) AS "付费项LTV贡献",
+
+    round(
+        coalesce(
+            sum(x."付费金额") OVER (
+                PARTITION BY
+                    x."合服日期",
+                    x."zone_id"
+            ) * 1.0000
+            / nullif(x."对应新增人数", 0),
+            0
+        ),
+        4
+    ) AS "合服后7日总LTV"
 
 FROM
 (
@@ -63,6 +86,7 @@ FROM
         ) AS "合服区服范围",
 
         b.actual_days AS "实际统计天数",
+        b.first_day_new_num AS "对应新增人数",
 
         coalesce(
             p.product_type_one,
@@ -106,6 +130,11 @@ FROM
             z.merge_date,
             z.region_start,
             z.region_end,
+
+            coalesce(
+                sum(r.first_day_new_num),
+                0
+            ) AS first_day_new_num,
 
             least(
                 6,
@@ -252,6 +281,80 @@ FROM
                 z2.merge_date,
                 z2.next_zone_id
         ) z
+
+        LEFT JOIN
+        (
+            SELECT
+                x.region_id,
+
+                sum(
+                    x.new_user_num
+                ) AS first_day_new_num
+
+            FROM
+            (
+                SELECT
+                    y.region_id,
+                    y.create_date,
+                    y.new_user_num,
+
+                    min(
+                        y.create_date
+                    ) OVER (
+                        PARTITION BY
+                            y.region_id
+                    ) AS first_create_date
+
+                FROM
+                (
+                    SELECT
+                        try_cast(
+                            u.region_id AS bigint
+                        ) AS region_id,
+
+                        cast(
+                            u.create_role_time AS date
+                        ) AS create_date,
+
+                        count(
+                            DISTINCT u."#user_id"
+                        ) AS new_user_num
+
+                    FROM ta.v_user_41 u
+
+                    WHERE
+                        u.create_role_time IS NOT NULL
+
+                        AND try_cast(
+                            u.region_id AS bigint
+                        ) IS NOT NULL
+
+                    GROUP BY
+                        try_cast(
+                            u.region_id AS bigint
+                        ),
+
+                        cast(
+                            u.create_role_time AS date
+                        )
+                ) y
+            ) x
+
+            WHERE
+                x.create_date = x.first_create_date
+
+            GROUP BY
+                x.region_id
+        ) r
+            ON r.region_id BETWEEN
+                z.region_start
+                AND z.region_end
+
+        GROUP BY
+            z.zone_id,
+            z.merge_date,
+            z.region_start,
+            z.region_end
     ) b
 
     INNER JOIN
@@ -390,18 +493,23 @@ FROM
         b.region_start,
         b.region_end,
         b.actual_days,
+        b.first_day_new_num,
+
         coalesce(
             p.product_type_one,
             '未分类'
         ),
+
         coalesce(
             p.product_type_two,
             '未分类'
         ),
+
         coalesce(
             p.product_type,
             '未获取'
         ),
+
         p.product_id,
         p.product_name
 ) x
