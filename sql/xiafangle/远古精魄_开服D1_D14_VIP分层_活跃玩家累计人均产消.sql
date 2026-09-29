@@ -137,7 +137,12 @@ FROM
                     )
 
                 WHERE
-                    e."$part_event" = 'in_out_log'
+                    e."$part_date" >= '2023-10-01'
+
+                    AND e."$part_date"
+                        <= cast(current_date AS varchar)
+
+                    AND e."$part_event" = 'in_out_log'
 
                     AND e."domain" = 'release'
 
@@ -164,6 +169,11 @@ FROM
                AND try_cast(
                     v."region_id" AS bigint
                 ) = d."region_id"
+
+               AND v."$part_date" >= '2023-10-01'
+
+               AND v."$part_date"
+                    <= cast(d."活跃日期" AS varchar)
 
                AND v."$part_event" = 'vip_change_log'
 
@@ -237,7 +247,12 @@ FROM
             FROM ta.v_event_41 e
 
             WHERE
-                e."$part_event" = 'item_log'
+                e."$part_date" >= '2023-10-01'
+
+                AND e."$part_date"
+                    <= cast(current_date AS varchar)
+
+                AND e."$part_event" = 'item_log'
 
                 AND e."domain" = 'release'
 
