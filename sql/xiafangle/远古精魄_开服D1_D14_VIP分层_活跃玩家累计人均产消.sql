@@ -123,7 +123,36 @@ FROM
 
                 FROM ta.v_event_41 e
 
-                INNER JOIN ta.v_user_41 u
+                INNER JOIN
+                (
+                    SELECT
+                        u0."#account_id",
+                        u0."region_id",
+                        u0."server_open_time"
+
+                    FROM
+                    (
+                        SELECT
+                            "#account_id",
+                            "region_id",
+                            "server_open_time",
+
+                            cast(
+                                date("server_open_time")
+                                AS varchar
+                            ) AS "$part_date"
+
+                        FROM ta.v_user_41
+
+                        WHERE
+                            "domain" = 'release'
+
+                            AND "server_open_time" IS NOT NULL
+                    ) u0
+
+                    WHERE
+                        u0.${PartDate:date}
+                ) u
                     ON cast(
                         e."#account_id" AS varchar
                     ) = cast(
@@ -146,13 +175,9 @@ FROM
 
                     AND e."domain" = 'release'
 
-                    AND u."domain" = 'release'
-
                     AND e."#account_id" IS NOT NULL
 
                     AND e."region_id" IS NOT NULL
-
-                    AND u."server_open_time" IS NOT NULL
 
                     AND date_diff(
                         'day',
