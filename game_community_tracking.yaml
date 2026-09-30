@@ -1,0 +1,444 @@
+projects:
+- project: 游戏社区
+  project_code: game_community
+  project_type: 跨游戏社区 / H5活动 / 企微私域
+  source_document:
+    title: 游戏社区埋点方案
+    uploaded_file: a002066d-a0bc-4008-beba-c832d62803dd.xlsx
+    imported_at: '2026-09-30'
+    sheets:
+    - 接入必知
+    - 事件属性
+    - 用户属性
+    - 公共事件属性
+    - 多用户id体系的埋点建议
+    - 公共事件属性设置方式
+    - 数据类型设计原则
+    - 多端接入注意点
+    - '#用户ID体系'
+    - 添加企微需求
+    repository_policy: 原始 Excel 不提交；本 YAML 保存结构化埋点口径。
+  summary:
+    unique_event_count: 22
+    user_property_count: 21
+    common_event_property_count: 5
+    wecom_related_event_count: 10
+  community_ids:
+    yblbsns: 一步两步营地
+    jsccsns: 极速冲刺社区
+    xflsns: 下方了社区
+  environment_values:
+    dev: 开发环境
+    sit: 测试环境
+    prd: 正式环境
+  core_rules:
+  - TA 属性类型由字段首次入库时的类型决定，埋点上线前必须确认字段类型。
+  - 公共事件属性作用于全部或大部分事件；客户端 SDK 在用户退出登录后需要手动清除已设置的公共事件属性。
+  - 多端接入避免客户端/服务端重复采集同含义事件；通用属性需在各端保持一致。
+  - '多端用户关联需统一 #account_id / #distinct_id；访客阶段 #distinct_id 必须有值。'
+  - 客户端与服务端需统一时间基准，避免跨端事件前后顺序错乱。
+  user_id_system:
+    community_account_id: 社区UID；格式为 社区标识_环境_uid，例如 jsccsns_prd_10001；一步两步保持两段，不增加社区标识。
+    distinct_id: 小游戏同 open_id；APP 同设备ID；H5活动页使用虚拟设备ID。
+    generic_templates:
+    - 单账号单角色：#account_id=玩家账号ID；#distinct_id=设备相关ID/访客ID。
+    - 单账号多角色：#account_id=角色ID；角色所属账户ID作为自定义属性；#distinct_id=设备相关ID/访客ID。
+    conflicts:
+    - '用户属性页把 #account_id 定义为“社区UID”，公共事件属性页把 #account_id 显示为“角色ID”；两处冲突，使用前需按线上实际实现确认。'
+    - 通用多用户ID建议页偏游戏角色模型；社区项目实际实现优先按线上验证结果。
+  common_event_properties_format: 属性名 | 显示名 | 类型 | 说明 | 开发状态
+  common_event_properties:
+  - '#user_id | 用户在系统中的唯一用户标识 | bigint |  | 3、已完成'
+  - '#distinct_id | 访客ID | varchar | 小游戏：同open_id / app：同设备id | 3、已完成'
+  - '#account_id | 角色ID | varchar |  | 3、已完成'
+  - user_source | 用户来源 | double | 1，游戏内；2，短信；3，公众号；4，微博；5，B站；6，社群 | 3、已完成
+  - sns_id | 社区标识 | varchar | yblbsns，一步两步营地；jsccsns，极速冲刺社区； | 1、开发中
+  user_properties_format: 采集端/源单元格 | 属性名 | 显示名 | 类型 | 更新方式 | 标签 | 说明 | 上报时间
+  user_properties:
+  - '436 | #user_id | 用户在系统中的唯一用户标识 | bigint | user_setOnce | 基本信息类 |  | 注册'
+  - '436 | #distinct_id | 访客ID | varchar | user_setOnce | 基本信息类 | 小游戏：同open_id / app：同设备id / H5活动页：虚拟设备id | 注册'
+  - '436 | #account_id | 社区UID | varchar | user_setOnce | 基本信息类 | 注册账号时记录 / 社区标识+_+环境+_+uid    例如正式环境  用户10001  就是jsccsns_prd_10001 / 注：一步两步保持为两段 不增加社区标识 | 注册'
+  - ' | #active_time | 激活时间 | timestamp | user_setOnce | 时间类 | 首次进入（调起）客户端时间 | 注册'
+  - '436 | #reg_time | 注册时间 | timestamp | user_setOnce | 时间类 | 注册账号时记录 | 注册'
+  - '客户端 | open_id | 渠道账号id | varchar | user_setOnce | 基本信息类 | 微信登录验证成功时记录 | '
+  - '客户端 | sex | 性别 | varchar | user_setOnce | 基本信息类 | 实名认证后上报 | '
+  - '客户端 | bd_year | 出生年份 | varchar | user_setOnce | 基本信息类 | 实名认证后上报 | '
+  - '客户端 | bd_month | 出生月份 | varchar | user_setOnce | 基本信息类 | 实名认证后上报 | '
+  - '客户端 | bd_day | 出生日期 | varchar | user_setOnce | 基本信息类 | 实名认证后上报 | '
+  - 服务端 | env | 环境 | varchar | user_setOnce | 基本信息类 | 区分测试/正式服： /  dev-开发环境   sit-测试环境 prd-正式环境 | 登出时
+  - 服务端 | latest_login_time | 最后登录时间 | timestamp | user_set | 时间类 | 每次登出时 | 登出时
+  - 服务端 | latest_online_time | 最后登出时间 | timestamp | user_set | 时间类 | 每次登出时 | 登出时
+  - 服务端 | nick_name | 社区名称 | varchar | user_set | 基本信息类 | 每次登出时 | 登出时
+  - 服务端 | follow_count | 关注人数 | double | user_set | 进度类 | 每次登出时 | 登出时
+  - 服务端 | fans_count | 粉丝数 | double | user_set | 进度类 | 每次登出时 | 登出时
+  - 服务端 | like_count | 获赞数 | double | user_set | 进度类 | 每次登出时 | 登出时
+  - 服务端 | user_level | 用户等级 | double | user_set | 进度类 | 每次登出时 | 登出时
+  - 服务端 | user_source | 用户来源 | double | user_setOnce | 基本信息类 | 1.社区；2.H5活动 | 注册
+  - 服务端 | activity_id | H5活动id | varchar | user_setOnce | 基本信息类 | 通过H5活动注册用户上报 | 注册
+  - 服务端 | sns_id | 社区标识 | varchar | user_setOnce | 基本信息类 | yblbsns，一步两步营地；jsccsns，极速冲刺社区 | 注册
+  events_property_format: 属性名 | 显示名 | 类型 | 说明 | 开发状态
+  events:
+  - event_name: click_log
+    display_name: 点击事件
+    source: 客户端
+    trigger: 触发点击时上报
+    tag: 点击事件
+    status: 3、已完成
+    verification: 验证通过
+    properties:
+    - env | 环境id | varchar | 区分测试/正式服： /  dev-开发环境   sit-测试环境 prd-正式环境 | 3、已完成
+    - button_from | 按钮归属页面 | double | 1-首页；2-关注；3-消息；4-我的 | 3、已完成
+    - button_id | 按钮id | double |  | 3、已完成
+    - button_name | 按钮名称 | varchar | ----我的部分（即 按钮归属页面=4-我的 时）---- / 个人主页（4100001） / 等级成长（4200001）---- 未实现 / 我的角色；去绑定（4300001） / 我的帖子（4100002） / 我的评论（4100003） / 收藏夹（4100004） / 浏览记录（4100005） | 3、已完成
+    - sns_id | 社区标识 | varchar | yblbsns，一步两步营地；jsccsns，极速冲刺社区 | 1、开发中
+  - event_name: click_log_index
+    display_name: 首页点击事件
+    source: 客户端
+    trigger: 触发点击时上报
+    tag: 点击事件
+    status: 3、已完成
+    verification: 验证通过
+    note: '1：菜单与菜单标识对照表[一步两步营地]菜单&版块需求
+
+
+      2. banner与工具栏ID见后台轮播图管理与工具栏管理'
+    properties:
+    - env | 环境id | varchar | 区分测试/正式服： / dev-开发环境   sit-测试环境 prd-正式环境 | 3、已完成
+    - index_from_game_id | 归属游戏专区ID | double | 1：一步营地（一步两步营地上报） / 1：极速营地（极速营地上报） | 3、已完成
+    - button_form_menu | 归属菜单 | varchar | 一级菜单标识 | 3、已完成
+    - button_type | 按钮类型 | double | 1-一级菜单；2-二级菜单；3-banner；4-工具栏 | 3、已完成
+    - button_id | 按钮id | varchar | ID或标识（菜单传标识，其他类型传ID） | 3、已完成
+    - button_name | 按钮名称 | varchar | 菜单名称_按钮名称 /  / 推荐✔ / 推荐_banner / 推荐_每日签到 / 推荐_社区活动 / 推荐_活动日历 / 推荐_启动游戏 / 官方✔ / 官方_活动 / 官方_公告 / 官方_咨询 / 攻略 / 攻略_综合 / 攻略_副本 / 攻略_阵容 / 攻略_英雄 / 攻略_远古世界 / 视频 | 3、已完成
+    - sns_id | 社区标识 | varchar | yblbsns，一步两步营地；jsccsns，极速冲刺社区 | 1、开发中
+  - event_name: log_in_out
+    display_name: 登录登出日志
+    source: 服务端
+    trigger: 启动服务器/登出服务器/心跳监测消失
+    tag: 玩家登录/登出时
+    status: 3、已完成
+    properties:
+    - env | 环境id | varchar | 区分测试/正式服： /  dev-开发环境   sit-测试环境 prd-正式环境 | 3、已完成
+    - change_reason | 变化原因 | double | 1：登录； / 2：登出 | 3、已完成
+  - event_name: uid_in_out
+    display_name: 账号登录登出
+    source: 服务端,客户端
+    trigger: 账号登录登出
+    tag: 账号登录登出时
+    status: 3、已完成
+    properties:
+    - env | 环境id | varchar | 区分测试/正式服： /  dev-开发环境   sit-测试环境 prd-正式环境 | 3、已完成
+    - change_reason | 变化原因 | double | 1：登录（由服务端上报）； / 2：登出（由客户端上报）； | 3、已完成
+    - 'source | 来源 | double | 1.社区；2.H5活动 | '
+    - 'activity_id | H5活动ID | varchar | 通过社区登录/登出传空 | '
+  - event_name: game_role_bind
+    display_name: 账号绑定角色
+    source: 服务端
+    trigger: 玩家成功绑定时
+    tag: 账号绑定
+    status: 3、已完成
+    verification: 暂无数据，触发后验证
+    properties:
+    - env | 环境id | varchar | 区分测试/正式服： /  dev-开发环境   sit-测试环境 prd-正式环境 | 3、已完成
+    - game_role_id | 游戏内角色ID | varchar |  | 3、已完成
+    - sns_id | 社区标识 | varchar | yblbsns，一步两步营地；jsccsns，极速冲刺社区；xflsns，下方了社区 | 1、开发中
+    - source | 来源 | double | 1.社区；2.H5活动；3.企微 | 0、需求待确认
+    - 'activity_id | 活动ID | varchar | 通过社区绑定传空，看邀请是否有活动ID | '
+    - 'activity_type | 活动类型 | varchar | 企微活动、H5活动 | '
+    - 'activity_name | 活动名称 | varchar | 上报活动名称如：见面礼活动、企微特权活动 | '
+    - 'wx_union_id | 微信unionID | varchar |  | '
+    - 'netease_cid | 网易cid | varchar |  | '
+    - 'invite_account_id | 邀请者社区ID | varchar |  | '
+  - event_name: add_post_success
+    display_name: 成功发帖事件
+    source: 服务端
+    trigger: 成功发帖时（过审）
+    tag: 发帖
+    status: 3、已完成
+    verification: 暂无数据，触发后验证
+    properties:
+    - env | 环境id | varchar | 区分测试/正式服： /  dev-开发环境   sit-测试环境 prd-正式环境 | 3、已完成
+    - post_id | 帖子ID | varchar |  | 3、已完成
+    - post_title | 标题 | varchar |  | 3、已完成
+    - post_source | 帖子来源 | double | 1-小程序； 2-后台 | 3、已完成
+    - post_type | 发布类型 | double | 1-帖子；2-图片；3-视频 | 3、已完成
+    - post_section | 发布板块名称 | varchar | 比如：攻略、交流 | 3、已完成
+    - post_game_id | 发布游戏专区ID | double |  | 3、已完成
+    - post_tag | 发贴标签 | Array(Object) | 比如：[{"tag_name":"秋妃传","tag_id":"1","tag_sort":"1"},{"tag_name":"第一集","tag_id":"4","tag_sort":"2"}] | 3、已完成
+    - is_original | 是否我的原创 | double | 1-否；2-是 | 3、已完成
+    - sns_id | 社区标识 | varchar | yblbsns，一步两步营地；jsccsns，极速冲刺社区 | 1、开发中
+  - event_name: user_access
+    display_name: 浏览事件
+    source: 服务端
+    trigger: 点击进入帖子浏览时
+    tag: 浏览
+    status: 3、已完成
+    verification: 验证通过
+    properties:
+    - env | 环境id | varchar | 区分测试/正式服： /  dev-开发环境   sit-测试环境 prd-正式环境 | 3、已完成
+    - post_id | 帖子ID | varchar |  | 3、已完成
+    - post_title | 标题 | varchar |  | 3、已完成
+    - post_user_id | 楼主ID | varchar | 指的是发帖人（谁发的帖） | 3、已完成
+    - is_follow | 是否关注 | double | 1-否；2-是 | 3、已完成
+    - is_comment | 是否留下评论 | double | 1-否；2-是 | 3、已完成
+    - is_like | 是否点赞 | double | 1-否；2-是 | 3、已完成
+    - is_favorite | 是否收藏 | double | 1-否；2-是 | 3、已完成
+    - is_report | 是否举报 | double | 1-否；2-是 | 3、已完成
+    - sns_id | 社区标识 | varchar | yblbsns，一步两步营地；jsccsns，极速冲刺社区 | 1、开发中
+  - event_name: online_time
+    display_name: 在线时长
+    source: 客户端
+    trigger: 登出时
+    tag: 在线时长
+    status: 3、已完成
+    verification: 验证通过
+    properties:
+    - env | 环境id | varchar | 区分测试/正式服： /  dev-开发环境   sit-测试环境 prd-正式环境 | 3、已完成
+    - type | 类型 | double | 1-按天（累计值）；2-按次 | 3、已完成
+    - value | 次数唯一ID | double |  | 3、已完成
+    - online_time | 在线时长（s） | double |  | 3、已完成
+    - sns_id | 社区标识 | varchar | yblbsns，一步两步营地；jsccsns，极速冲刺社区 | 1、开发中
+  - event_name: delete_post_success
+    display_name: 小程序（C端）删帖子事件
+    source: 服务端
+    trigger: 小程序（C端）删除帖子时
+    tag: 删帖
+    status: 3、已完成
+    properties:
+    - env | 环境id | varchar | 区分测试/正式服： /  dev-开发环境   sit-测试环境 prd-正式环境 | 3、已完成
+    - post_id | 帖子ID | varchar |  | 3、已完成
+    - post_title | 标题 | varchar |  | 3、已完成
+    - post_type | 发布类型 | double | 1-帖子；2-图片；3-视频 | 3、已完成
+    - post_section | 发布板块名称 | varchar | 比如：精华、推荐 | 3、已完成
+    - is_original | 是否我的原创 | double | 1-否；2-是 | 3、已完成
+  - event_name: delete_post_success_B
+    display_name: 后台（B端）删帖子事件
+    source: 服务端
+    trigger: 后台（B端）删除帖子时
+    tag: 删帖
+    status: 3、已完成
+    note: '谁删帖就记录谁的account_id/distinct_id（open_id）
+
+      【B端操作默认为管理员账号执行，使用account_id =   环境_admin_后台用户id 】
+
+
+      eg:   prd_admin_12'
+    properties:
+    - env | 环境id | varchar | 区分测试/正式服： /  dev-开发环境   sit-测试环境 prd-正式环境 | 3、已完成
+    - post_id | 帖子ID | varchar |  | 3、已完成
+    - post_title | 标题 | varchar |  | 3、已完成
+    - post_type | 发布类型 | double | 1-帖子；2-图片；3-视频 | 3、已完成
+    - post_section | 发布板块名称 | varchar | 比如：精华、推荐 | 3、已完成
+    - is_original | 是否我的原创 | double | 1-否；2-是 | 3、已完成
+  - event_name: del_post_success
+    display_name: 删帖子事件
+    source: 服务端
+    trigger: 删除帖子时
+    tag: 删帖
+    status: 3、已完成
+    verification: 暂无数据，触发后验证
+    properties:
+    - env | 环境id | varchar | 区分测试/正式服： /  dev-开发环境   sit-测试环境 prd-正式环境 | 3、已完成
+    - post_id | 被删帖子ID | varchar |  | 3、已完成
+    - post_title | 标题 | varchar |  | 3、已完成
+    - post_type | 发布类型 | double | 1-帖子；2-图片；3-视频 | 3、已完成
+    - post_section | 发布板块名称 | varchar | 比如：攻略、交流 | 3、已完成
+    - post_game_id | 发布游戏专区ID | double |  | 3、已完成
+    - post_tag | 发贴标签 | Array(Object) | 比如：[{"tag_name":"秋妃传","tag_id":"1","tag_sort":"1"},{"tag_name":"第一集","tag_id":"4","tag_sort":"2"}] | 3、已完成
+    - is_original | 是否我的原创 | double | 1-否；2-是 | 3、已完成
+    - operator_role | 操作人身份 | double | 1-官方；2-版主；3-普通用户；4-后台管理 | 3、已完成
+    - entry_id | 操作入口id，在哪里操作 | double | 1-C端小程序；2-B端后台 | 3、已完成
+    - post_account_id | 被删帖子作者的accountid | varchar | 帖子作者account_id   eg:prd_50 | 3、已完成
+    - delete_reason | 删除原因 | double | 0-删除自己的帖子 / 1-有垃圾或广告信息 / 2-有政治敏感信息 / 3-有暴力色情信息 / 4-骚扰、辱骂、歧视等不友善信息 / 5-传播封建迷信 / 6-内容涉嫌侵权 | 3、已完成
+    - sns_id | 社区标识 | varchar | yblbsns，一步两步营地；jsccsns，极速冲刺社区 | 1、开发中
+  - event_name: user_check_in
+    display_name: 每日签到
+    source: 服务端
+    trigger: 每日签到成功
+    tag: 签到
+    status: 3、已完成
+    verification: 暂无数据，触发后验证
+    properties:
+    - env | 环境id | varchar | 区分测试/正式服： / dev-开发环境   sit-测试环境 prd-正式环境 | 3、已完成
+    - sns_id | 社区标识 | varchar | yblbsns，一步两步营地；jsccsns，极速冲刺社区 | 1、开发中
+  - event_name: game_role_transfer
+    display_name: 转端事件
+    source: 服务端
+    trigger: 转端执行完成时
+    tag: 转端
+    status: 1、开发中
+    verification: 暂无数据，触发后验证
+    properties:
+    - env | 环境id | varchar | 区分测试/正式服： / dev-开发环境   sit-测试环境 prd-正式环境 | 1、开发中
+    - 'is_transfer | 是否转端成功 | double | 1- 否；2是 | '
+    - 'transfer_result | 转端执行结果 | double | 1- 未执行转端；操作角色已转端 / 2- 未执行转端；操作角色已转端、通行证增加手机号绑定  / 3- 未执行转端；通行证绑定手机号失败——社区手机号与操作角色已分别绑定不同通行证 / 4- 未执行转端；社区手机号已绑通行证并已创建微端账号 / 5- 转端成功；通行证绑定微信失败——操作角色所属微信和社区手机号已分别绑定不同通行证
+      / 6-转端成功；通行证绑定微信失败——社区手机号所属通行证已绑定其他微信  / 7- 转端成功；通行证绑定微信失败——操作角色所属微信通行证已存在微端账号 / 8- 转端成功；通行证绑定微信失败——操作角色所属微信通行证已绑定其他手机号 / 9- 系统错误转端失败 / 10- 正常绑定 /  / 如果用户来自抖小，描述中微信号对应表示抖音号 | '
+    - 'game_role_id | 游戏内角色ID | varchar |  | '
+    - 'game_openid | 聚合OpenID | varchar |  | '
+    - 'source_channel_id | 来源渠道号 | double |  | '
+    - sns_id | 社区标识 | varchar | yblbsns，一步两步营地；jsccsns，极速冲刺社区 | 1、开发中
+  - event_name: share_click
+    display_name: 分享
+    source: 客户端
+    trigger: 点击复制分享链接/保存分享图/复制暗号
+    status: 0、需求待确认
+    properties:
+    - env | 环境id | varchar | 区分测试/正式服： / dev-开发环境   sit-测试环境 prd-正式环境 | 0、需求待确认
+    - 'module | 所属模块 | varchar | 全局模块-global；签到-checkin；组队-team； | '
+    - 'activity_id | H5活动id | varchar |  | '
+    - 'sns_id | 社区标识 | varchar | yblbsns，一步两步营地；jsccsns，极速冲刺社区 | '
+    - 'game_role_id | 游戏内角色ID | varchar |  | '
+    - 'activity_type | 活动类型 | varchar | 企微活动、H5活动 | '
+    - 'activity_name | 活动名称 | varchar | 上报活动名称如：见面礼活动、企微特权活动 | '
+    - 'wx_union_id | 微信unionID | varchar |  | '
+  - event_name: h5_lottery
+    display_name: 抽奖
+    source: 服务端
+    properties:
+    - 'env | 环境id | varchar | 区分测试/正式服： / dev-开发环境   sit-测试环境 prd-正式环境 | '
+    - 'activity_id | H5活动id | varchar |  | '
+    - 'sns_id | 社区标识 | varchar | yblbsns，一步两步营地；jsccsns，极速冲刺社区 | '
+    - 'prop_id_list | 获得奖励道具 | Array(Object) | 道具ID、道具数量 | '
+    - 'game_role_id | 游戏内角色ID | varchar |  | '
+    - 'guaranteed | 是否触发保底 | double | 本次抽奖是否触发保底，是1，否0 | '
+    - 'activity_type | 活动类型 | varchar | 企微活动、H5活动 | '
+    - 'activity_name | 活动名称 | varchar | 上报活动名称如：见面礼活动、企微特权活动 | '
+    - 'wx_union_id | 微信unionID | varchar |  | '
+  - event_name: wechat_qr_show
+    display_name: 二维码页面访问
+    source: 客户端
+    properties:
+    - 'env | 环境id | varchar | 区分测试/正式服： / dev-开发环境   sit-测试环境 prd-正式环境 | '
+    - 'page_name | 页面名 | varchar |  | '
+    - 'wx_union_id | 微信unionID | varchar |  | '
+    - 'sns_id | 社区标识 | varchar | yblbsns，一步两步营地；jsccsns，极速冲刺社区；xflsns，下方了社区 | '
+    - 'entrance_source | 来源 | double | 视情况确认 | '
+    - 'ar_wx_union_id | 二维码所属微信unionid | varchar |  | '
+  - event_name: wechat_qr_scan
+    display_name: 二维码识别
+    source: 客户端
+    trigger: 长按拉起时触发
+    properties:
+    - 'env | 环境id | varchar | 区分测试/正式服： / dev-开发环境   sit-测试环境 prd-正式环境 | '
+    - 'page_name | 页面名 | varchar | 企微小助手二维码，还有群二维码和公众号二维码 | '
+    - 'wx_union_id | 微信unionID | varchar |  | '
+    - 'sns_id | 社区标识 | varchar | yblbsns，一步两步营地；jsccsns，极速冲刺社区；xflsns，下方了社区 | '
+    - 'entrance_source | 来源 | double | 视情况确认 | '
+    - 'ar_wx_union_id | 二维码所属微信unionid | varchar |  | '
+  - event_name: page_view
+    display_name: 访问页面
+    source: 客户端
+    trigger: 服务端下发活动配置
+    properties:
+    - 'env | 环境id | varchar | 区分测试/正式服： / dev-开发环境   sit-测试环境 prd-正式环境 | '
+    - 'activity_id | 活动id | varchar |  | '
+    - 'module | 所属模块 | varchar | global | '
+    - 'sns_id | 社区标识 | varchar | yblbsns，一步两步营地；jsccsns，极速冲刺社区；xflsns，下方了社区 | '
+    - 'page_name | 页面名称 | varchar | 企微特权这种 | '
+    - 'activity_type | 活动类型 | varchar | 企微活动、H5活动 | '
+    - 'activity_name | 活动名称 | varchar | 上报活动名称如：见面礼活动、企微特权活动 | '
+    - 'wx_union_id | 微信unionID | varchar |  | '
+    - 'entrance_source | 来源 | double | 1-组队分享，2-其他，3-页面分享 | '
+    - 'invite_account_id | 邀请者社区ID | varchar |  | '
+    - 'game_role_id | 游戏内角色ID | varchar |  | '
+  - event_name: account_bind
+    display_name: 社区账号绑定
+    source: 客户端
+    trigger: 社区账号绑定
+    properties:
+    - 'env | 环境id | varchar | 区分测试/正式服： / dev-开发环境   sit-测试环境 prd-正式环境 | '
+    - 'activity_id | 活动id | varchar |  | '
+    - 'module | 所属模块 | varchar | global | '
+    - 'sns_id | 社区标识 | varchar | yblbsns，一步两步营地；jsccsns，极速冲刺社区；xflsns，下方了社区 | '
+    - 'page_name | 页面名称 | varchar | 企微特权这种 | '
+    - 'activity_type | 活动类型 | varchar | 企微活动、H5活动 | '
+    - 'activity_name | 活动名称 | varchar | 上报活动名称如：见面礼活动、企微特权活动 | '
+    - 'wx_union_id | 微信unionID | varchar |  | '
+    - 'entrance_source | 来源 | double | 1-组队分享，2-其他，3-页面分享 | '
+    - 'netease_cid | 网易cid | varchar |  | '
+    - 'invite_account_id | 邀请者社区ID | varchar |  | '
+    - 'game_role_id | 游戏内角色ID | varchar |  | '
+  - event_name: h5_team_join
+    display_name: 加入h5活动队伍
+    source: 服务端
+    trigger: 创建/加入队伍成功
+    properties:
+    - 'env | 环境id | varchar | 区分测试/正式服： / dev-开发环境   sit-测试环境 prd-正式环境 | '
+    - 'activity_id | H5活动id | varchar |  | '
+    - 'module | 所属模块 | varchar | 全局模块-global；签到-checkin；组队-team； | '
+    - 'join_source | 来源 | double | 1-分享，2-其他 | '
+    - 'team_id | 队伍id | varchar |  | '
+    - 'sns_id | 社区标识 | varchar | yblbsns，一步两步营地；jsccsns，极速冲刺社区；xflsns，下方了社区 | '
+    - 'activity_type | 活动类型 | varchar | 企微活动、H5活动 | '
+    - 'activity_name | 活动名称 | varchar | 上报活动名称如：见面礼活动、企微特权活动 | '
+    - 'wx_union_id | 微信unionID | varchar |  | '
+    - 'game_role_id | 游戏内角色ID | varchar |  | '
+  - event_name: h5_team_create_success
+    display_name: 组建h5活动队伍成功
+    source: 服务端
+    trigger: 成功组成5人小队（5个人都会有这个事件）
+    properties:
+    - 'env | 环境id | varchar | 区分测试/正式服： / dev-开发环境   sit-测试环境 prd-正式环境 | '
+    - 'activity_id | H5活动id | varchar |  | '
+    - 'module | 所属模块 | varchar | 全局模块-global；签到-checkin；组队-team； | '
+    - 'team_id | 队伍id | varchar |  | '
+    - 'sns_id | 社区标识 | varchar | yblbsns，一步两步营地；jsccsns，极速冲刺社区；xflsns，下方了社区 | '
+    - 'activity_type | 活动类型 | varchar | 企微活动、H5活动 | '
+    - 'activity_name | 活动名称 | varchar | 上报活动名称如：见面礼活动、企微特权活动 | '
+    - 'wx_union_id | 微信unionID | varchar |  | '
+    - 'game_role_id | 游戏内角色ID | varchar |  | '
+  - event_name: h5_activity_claim_reward
+    display_name: 领取h5活动奖励
+    source: 服务端
+    trigger: 通知游戏下发邮件
+    properties:
+    - 'env | 环境id | varchar | 区分测试/正式服： / dev-开发环境   sit-测试环境 prd-正式环境 | '
+    - 'activity_id | H5活动id | varchar |  | '
+    - 'module | 所属模块 | varchar | 全局模块-global；签到-checkin；组队-team； | '
+    - 'team_id | 队伍id | varchar | 签到活动传空 | '
+    - 'day_index | 签到第几天 | varchar | 1 / 7，组队活动传空 | '
+    - 'activity_type | 活动类型 | varchar | 企微活动、H5活动 | '
+    - 'activity_name | 活动名称 | varchar | 上报活动名称如：见面礼活动、企微特权活动 | '
+    - 'wx_union_id | 微信unionID | varchar |  | '
+    - 'product_id | 礼包ID | double |  | '
+    - 'sns_id | 社区标识 | varchar | yblbsns，一步两步营地；jsccsns，极速冲刺社区；xflsns，下方了社区 | '
+    - 'prop_id_list | 获得奖励道具 | Array(Object) | 道具ID、道具数量 | '
+    - 'game_role_id | 游戏内角色ID | varchar |  | '
+  wecom_extension:
+    notes:
+    - 页面访问/点击/奖励发放复用原有埋点，包含微信授权、二维码展示、绑定页面。
+    - 组队活动复用 h5_team_join / h5_team_create_success。
+    - game_role_bind 的 source 扩展到 3=企微，并补充 wx_union_id、netease_cid、invite_account_id。
+    - 二维码与企微活动补充 entrance_source、ar_wx_union_id、activity_type、activity_name、wx_union_id、game_role_id 等上下文字段。
+    events:
+    - game_role_bind
+    - wechat_qr_show
+    - wechat_qr_scan
+    - page_view
+    - account_bind
+    - h5_team_join
+    - h5_team_create_success
+    - h5_activity_claim_reward
+    - share_click
+    - h5_lottery
+  data_type_principles_format: TA类型 | JSON类型 | 规则 | 建议场景
+  data_type_principles:
+  - 数值 | Number | 数据范围是-9E15至9E15，小数点最多保留3位 | 1.属性具备数值型运算场景（总和、中位数、均值等），如充值金额、消耗钻石量、过关时间（秒）、等级..... / 2.id相关属性，且id的先后关系和数值大小成正相关，如关卡id、服务器id等，如这类id非纯数值，则作为字符串处理 / 3.接上，对于用户相关id，如角色id等，虽然可能由全数字组成，但本身无数值含义，且位数可能很大，建议作为字符串处理
+  - 字符串 | String | 字符的默认上限是2KB | 不适用其它类型的属性，都可以考虑使用字符串类型，包括一些目前TA不支持的复杂类型，如map类型等
+  - 时间 | String | "yyyy-MM-dd HH:mm:ss.SSS"或"yyyy-MM-dd HH:mm:ss"，如需表示日期，可使用"yyyy-MM-dd 00:00:00" | 如注册时间、首次充值时间、月卡到期时间等
+  - 布尔 | Boolean | - | 如是否首次过关、是否付费用户等
+  - 列表 | Array(String) | 列表中的元素都会转变为字符串类型 | 如参战卡牌id["关羽"、"张飞"、"赵云“]，用户标签["高付费用户"、"潜在流失用户"]
+  - 对象 | Object | 须符合子属性的取值规则，如子属性为字符串，子属性的取值需符合字符的默认上限是2KB | /
+  - 对象组 | Array(Object) | 须符合子属性的取值规则，如子属性为字符串，子属性的取值需符合字符的默认上限是2KB | 例如一次战斗中多个角色出征，对象类型的属性可以包含不同类型的多个子属性，用于描述某个英雄的名称、星级、战力等；对象组类型可以将多个对象类型以数组的形式用一个字段表达，用以描述整个出征阵容。
+  multi_terminal_rules:
+  - '用户ID匹配：登录后客户端和服务端 #account_id 使用同一业务ID；未登录行为使用设备型 #distinct_id，并保证各端可回传/复用。'
+  - 时间先后：无多时区时客户端初始化获取服务端时间；多时区敏感场景由服务端按客户端时区设置事件时间。
+  - 事件与通用属性：无特殊需求时不多端重复采集同含义事件；等级、渠道、服务器等通用属性应在各端都包含。
+  source_issues:
+  - 用户属性前几行“数据类型”列出现 436，无法解释为客户端/服务端，按源值保留，不自行推断。
+  - 事件属性 game_role_bind 区块存在列错位：源表第22行同时出现两列“服务端”，已按 event=game_role_bind 向右校正一列。
+  - account_bind 在事件属性页出现两组相同基础定义，已合并；未判定任一组废弃。
+  - share_click、h5_lottery 的基础版与企微/H5扩展版已按字段并集合并。
+  - h5_activity_claim_reward 的 team_id 在源表重复两行；合并后保留“签到活动传空”的说明。
+  - 公共事件属性 user_source 枚举为 1游戏内/2短信/3公众号/4微博/5B站/6社群；用户属性 user_source 枚举为 1社区/2H5活动。两处冲突，分析或开发前必须确认线上口径。
+  - 部分 sns_id 说明仅列 yblbsns/jsccsns，企微扩展与部分事件已增加 xflsns；新增社区时需同步更新所有相关定义。
+  - delete_post_success、delete_post_success_B 与 del_post_success 含义重叠；源表未明确旧事件是否废弃，因此全部保留。
