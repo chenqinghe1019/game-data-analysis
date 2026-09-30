@@ -48,6 +48,7 @@ SQL 规则优先级：
 - `bubu_tracking.yaml`：步步项目 埋点结构与项目口径（表后缀 22）
 - `baodanfeshe_tracking.yaml`：暴弹飞射 项目表、时间字段、付费与动态日期口径（表后缀 42）
 - `luobo4_tracking.yaml`：萝卜4小游戏 初版埋点结构、待确认字段与接入注意项
+- `game_community_tracking.yaml`：跨游戏社区埋点（一步两步营地、极速冲刺社区、下方了社区），含事件/用户/公共属性及企微和 H5 活动扩展。
 
 ### SQL 口径
 
