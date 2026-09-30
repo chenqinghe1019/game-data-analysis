@@ -53,3 +53,10 @@ tracking_projects:
     status: "proposal"
     battle_tracking_yaml: "游戏项目/喵喵岛/埋点规则/battle_tracking_proposal_20260825.yaml"
     tracking_dictionary_yaml: "游戏项目/喵喵岛/埋点规则/tracking_dictionary_20260825.yaml"
+  - project: "游戏社区"
+    project_type: "跨游戏社区 / H5活动 / 企微私域"
+    yaml: "game_community_tracking.yaml"
+    community_ids:
+      yblbsns: "一步两步营地"
+      jsccsns: "极速冲刺社区"
+      xflsns: "下方了社区"
