@@ -1,0 +1,28 @@
+project: 暴弹飞射
+project_code: baodanfeshe
+project_id: 42
+created_at: '2026-10-06'
+topic: 关卡D1-D7按累计付费分层
+scope:
+  source_table: ta.v_event_42
+  cohort_table: ta.v_user_42
+  output: 关卡挑战/通关/跳关/通关战力看板
+cumulative_payment:
+  rule: 从创角日累计到对应新增第N天当天
+  example: D1取首日累计，D2取创角日至D2累计，依次到D7
+  payment_event: pay_log
+  amount_field: payment
+  unit: 元，直接使用原值，不除以100
+  valid_payment: payment > 0
+  segments:
+    - a_free: 0
+    - 'b_(0,6]': '(0,6]'
+    - 'c_(6,30]': '(6,30]'
+    - 'd_(30,100]': '(30,100]'
+    - 'e_(100,300]': '(100,300]'
+    - 'f_(300,500]': '(300,500]'
+    - 'g_(500,1000]': '(500,1000]'
+    - 'h_(1000,+)': '(1000,+)'
+notes:
+  - 同一玩家的付费分层可随新增天数变化，不再固定使用首日付费档位。
+  - 关卡、首次挑战通关、总通关、跳关及通关战力逻辑保持原SQL不变。
