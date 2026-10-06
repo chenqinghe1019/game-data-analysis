@@ -16,6 +16,18 @@ SELECT
         4
     ) AS "矿脉参与率",
 
+    round(
+        q."占领参与人数" * 1.0000
+        / nullif(q."活动活跃人数", 0),
+        4
+    ) AS "占领参与率",
+
+    round(
+        q."掠夺参与人数" * 1.0000
+        / nullif(q."活动活跃人数", 0),
+        4
+    ) AS "掠夺参与率",
+
     q."活动付费人数",
 
     round(
@@ -82,6 +94,22 @@ FROM
                 ELSE 0
             END
         ) AS "矿脉参与人数",
+
+        sum(
+            CASE
+                WHEN p."是否占领参与" = 1
+                    THEN 1
+                ELSE 0
+            END
+        ) AS "占领参与人数",
+
+        sum(
+            CASE
+                WHEN p."是否掠夺参与" = 1
+                    THEN 1
+                ELSE 0
+            END
+        ) AS "掠夺参与人数",
 
         sum(
             CASE
@@ -152,6 +180,8 @@ FROM
             END AS "分层排序",
 
             y."是否参与矿脉",
+            y."是否占领参与",
+            y."是否掠夺参与",
             y."周期活动付费金额"
 
         FROM
@@ -162,6 +192,8 @@ FROM
                 x."周期排序",
                 x."周期开始日期",
                 x."是否参与矿脉",
+                x."是否占领参与",
+                x."是否掠夺参与",
                 x."周期活动付费金额",
 
                 max(
@@ -188,6 +220,24 @@ FROM
                             ELSE 0
                         END
                     ) AS "是否参与矿脉",
+
+                    max(
+                        CASE
+                            WHEN e."$part_event" = 'mining_log'
+                             AND try_cast(e."change_reason" AS bigint) = 1
+                                THEN 1
+                            ELSE 0
+                        END
+                    ) AS "是否占领参与",
+
+                    max(
+                        CASE
+                            WHEN e."$part_event" = 'mining_log'
+                             AND try_cast(e."change_reason" AS bigint) = 3
+                                THEN 1
+                            ELSE 0
+                        END
+                    ) AS "是否掠夺参与",
 
                     sum(
                         CASE
@@ -476,6 +526,7 @@ FROM
 
                         e0."$part_event",
                         e0."#event_time",
+                        e0."change_reason",
                         e0."product_id",
                         e0."payment",
                         e0."token_payment"
@@ -631,7 +682,9 @@ FROM
                 3,
                 4,
                 5,
-                6
+                6,
+                7,
+                8
         ) y
     ) p
 
