@@ -4,6 +4,21 @@
 
 > 本文件是仓库根目录的统一工作入口。处理“倍特工作室”相关 SQL、数据分析、埋点、看板、项目配置、口径核查、报错修复、跨项目迁移等需求时，除当前用户明确指令外，优先读取本文件，再按本文索引读取对应项目和专题知识。
 
+## 0. Canonical 知识库入口（2026-10-08 起）
+
+后续所有倍特工作室需求，先读取 `knowledge/CANONICAL_INDEX.md`。
+Canonical 层用于保存当前有效、跨会话复用的稳定事实和规则；旧的 `memory/`、`knowledge/` 专题文件和 `sql/` 仍保留，但优先级低于 Canonical。
+
+Canonical 读取顺序：
+1. `knowledge/CANONICAL_INDEX.md`
+2. `knowledge/global/` 对应全局规则
+3. `knowledge/projects/<项目>/FACTS.md`
+4. 项目 tracking YAML
+5. `memory/projects/` 最新专题
+6. `sql/` 最新已验证实现
+
+若旧文件与 Canonical 冲突，以“当前用户明确要求 > Canonical 当前规则 > 最新专题 > 最新验证 SQL > 历史文件”为准。
+
 ## 1. 读取优先级
 
 处理任何需求，默认按以下顺序取知识：
