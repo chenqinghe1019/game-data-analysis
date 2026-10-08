@@ -137,3 +137,14 @@ git push
 - 浏览器抓取的前端大包，例如 `ta_umi.js`、`ta_micro_umi.js`。
 - 临时接口脚本、截图、查询结果、导出的业务数据。
 - Excel 原始导出文件，除非你明确需要归档。
+
+## Canonical Knowledge（2026-10-08）
+
+知识库已新增 Canonical 层，推荐从 [knowledge/CANONICAL_INDEX.md](knowledge/CANONICAL_INDEX.md) 进入。
+
+- `knowledge/global/`：统一指标、SQL、成熟、身份、支付、异常排查、字段易错、分析方法。
+- `knowledge/projects/*/FACTS.md`：项目当前稳定事实卡。
+- `memory/projects/`：专题规则和历史修正。
+- `sql/`：已验证 SQL 实现。
+
+旧文件保留，不做破坏性迁移；后续新增稳定规则优先写入 Canonical。
