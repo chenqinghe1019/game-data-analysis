@@ -34,7 +34,7 @@ last_verified: 2026-10-08
 - projects/luobo4/FACTS.md
 
 ## 企微运营专题（2026-10-12）
-- [projects/game-community/WECOM_DASHBOARD.md](projects/game-community/WECOM_DASHBOARD.md)：项目35社区账号人数主体、分游戏数据源、好友指标忽略、比例四位小数及局部维护约束；下方了已实施账号主体变更，一步两步本轮不改。
+- [projects/game-community/WECOM_DASHBOARD.md](projects/game-community/WECOM_DASHBOARD.md)：项目35社区账号人数主体、分游戏数据源、好友指标忽略、比例四位小数及局部维护约束；下方了与一步两步均已实施账号主体变更；各看板布局和日期设置保持其各自范围。
 
 ## 版本规则
 - Canonical 文件只保存“当前有效且可复用”的事实/规则。
