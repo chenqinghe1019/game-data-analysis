@@ -2,7 +2,7 @@
 
 status: current
 effective_date: 2026-10-08
-last_verified: 2026-10-08
+last_verified: 2026-10-13
 
 ## 基础
 - 项目：下方了
@@ -35,6 +35,19 @@ last_verified: 2026-10-08
 - h = >1000
 
 ## 渠道
+渠道配置表：ta_ext.channel_id_41。
+
+字段定义：
+- channel_id：varchar，渠道ID。
+- channel_type：varchar，渠道类型。
+- channel_name：varchar，渠道名称。
+- gravity_app_id：double，Gravity APPID / 应用ID映射字段。
+
+渠道名称、渠道类型等展示字段应优先关联 ta_ext.channel_id_41 获取，不要仅依赖硬编码。
+- active_channel / event_channel 等渠道ID字段：统一 cast 为 varchar 后与 channel_id 关联。
+- ge_app_id / APPID 映射：标准化数值类型后与 gravity_app_id 关联；建议 try_cast(trim(cast(app_id as varchar)) as double)。
+- gravity_app_id 可能一对多对应多个 channel_id；用于流水、ROI等汇总前必须先确认映射粒度，避免 JOIN 放大。
+
 当前后台渠道：
 - 3056210 TapTap
 - 3056211 微信小游戏
