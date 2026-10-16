@@ -1,6 +1,6 @@
 # 极速冲刺埋点知识（2026-10-16）
 状态：用户上传《极速冲刺-埋点说明文档.xlsx》文档确认，非线上执行验证。
-原SQL对应 ta.v_event_39 / ta.v_user_39（按用户最初SQL识别，项目归属尚待线上确认）。
+极速冲刺正式映射：ta.v_event_39 / ta.v_user_39（2026-10-16 用户明确确认项目映射）。
 文档表「事件数据」包含83个正式事件，另有「用户属性」「公共事件属性」「引导节点」「增补埋点」。
 主体：#account_id为角色ID，nb_open_id为星云聚合ID，region_id为区服，domain=release为正式服。文档的create_role_time标注及历史SQL时间戳转换存在类型歧义，必须实际typeof确认。
 
@@ -25,3 +25,8 @@
 - 极速冲刺装备 equip_id/equip_name/level_before/level_after/star_before/star_after 与暴弹的 eid/eid_name、olv/nlv、ostar/nstar 可按具体事件映射；任务 task_id/task_name 可由暴弹 mission_* 映射。
 - 暴弹数组类型实测 battle_array=array(varchar)，skill_options与skill_chosen=array(row(...))，展示使用 json_format(cast(x as json))，不可 cast(array as varchar)；battle_uid 为 double；battle_result 实际包含 True/False。
 注意：「埋点文档没有」不等于线上绝对不存在；此比较只说明当前文档映射状况。
+
+## 暴弹移植 SQL 无埋点列标注规范（用户确认 2026-10-16）
+- 最终输出保留原 SQL 列顺序；**确无相同业务含义埋点的字段**以 SQL 别名 `"字段名（无埋点）"` 明确标注，值为类型匹配的 NULL。
+- 当前确认待标注：hp_percent、rougue_battle_time、slot_id、ui_name、entrance。原项目 artifact_id/artifact_name 是神器标识，不可直接用暴弹圣物 relic_id/relic_name 替代；如果不能找到真正的神器标识来源也标注无埋点。
+- 对事件确实发生频率少、在每日最后业务事件上缺少属性、未在筛选日期发生等原因产生的空值，不能标无埋点；已有同义映射 task_id、task_name、equip_id、equip_name、level_before/after、star_before/after 不标无埋点。
