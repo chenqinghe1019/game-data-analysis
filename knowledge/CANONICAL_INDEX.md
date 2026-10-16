@@ -31,7 +31,7 @@ last_verified: 2026-10-08
 - projects/wanyue/FACTS.md
 - projects/bubu/FACTS.md
 - projects/baodanfeshe/FACTS.md
-- projects/jisuchongci/FACTS.md（极速冲刺：上传埋点文档整理，原SQL v39 项目归属待线上确认）
+- projects/jisuchongci/FACTS.md（极速冲刺：用户已确认 v39，埋点文档已整理）
 - projects/luobo4/FACTS.md
 
 ## 企微运营专题（2026-10-12）
