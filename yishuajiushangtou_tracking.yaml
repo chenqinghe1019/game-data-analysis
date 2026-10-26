@@ -1,0 +1,1294 @@
+projects:
+  -
+    project: "一耍就上头"
+    ta_project: "IAA_Game"
+    project_id: 54
+    source_files:
+      - "【一耍就上头】埋点说明文档.xlsx"
+    verified_at: "2026-10-26"
+    events:
+      -
+        event_name: "ta_app_install"
+        source_name: "app安装"
+        trigger: "开启客户端自动采集后自动上报"
+        params: []
+      -
+        event_name: "ta_app_start"
+        source_name: "app启动"
+        trigger: "开启客户端自动采集后自动上报"
+        params: []
+      -
+        event_name: "ta_app_crash"
+        source_name: "app崩溃"
+        trigger: "开启客户端自动采集后自动上报"
+        params: []
+      -
+        event_name: "ta_app_end"
+        source_name: "app关闭"
+        trigger: "开启客户端自动采集后自动上报"
+        params:
+          -
+            name: "#duration"
+            source_name: "在线时长"
+            type: "number"
+            source_type: "double"
+            required: null
+            description: ""
+            notes: ""
+      -
+        event_name: "active_log"
+        source_name: "激活"
+        trigger: "玩家每进入一个登录节点时"
+        params:
+          -
+            name: "#device_id"
+            source_name: "设备ID"
+            type: "string"
+            source_type: "varchar"
+            required: null
+            description: ""
+            notes: ""
+          -
+            name: "#country"
+            source_name: "国家地区"
+            type: "string"
+            source_type: "varchar"
+            required: null
+            description: "用户所在国家或地区，根据 IP 地址生成"
+            notes: ""
+          -
+            name: "#province"
+            source_name: "省份"
+            type: "string"
+            source_type: "varchar"
+            required: null
+            description: "用户所在省份，根据 IP 地址生成"
+            notes: ""
+          -
+            name: "#city"
+            source_name: "城市"
+            type: "string"
+            source_type: "varchar"
+            required: null
+            description: "用户所在城市，根据 IP 地址生成"
+            notes: ""
+          -
+            name: "#fps"
+            source_name: "FPS"
+            type: "number"
+            source_type: "double"
+            required: null
+            description: "用户设备的当前图像每秒传输帧率，如 60"
+            notes: ""
+          -
+            name: "#device_model"
+            source_name: "设备型号"
+            type: "string"
+            source_type: "varchar"
+            required: null
+            description: "用户设备的型号，如 iPhone 8 等"
+            notes: ""
+          -
+            name: "#device_type"
+            source_name: "设备类型"
+            type: "string"
+            source_type: "varchar"
+            required: null
+            description: "用户设备的类型，如iPad,iPhone等"
+            notes: ""
+          -
+            name: "#os"
+            source_name: "操作系统"
+            type: "string"
+            source_type: "varchar"
+            required: null
+            description: "iOS 11.2.2、Android 8.0.0 等"
+            notes: ""
+          -
+            name: "#network_type"
+            source_name: "网络类型"
+            type: "string"
+            source_type: "varchar"
+            required: null
+            description: "事件发生时的网络状态，如 WIFI、3G、4G 等"
+            notes: ""
+          -
+            name: "#app_version"
+            source_name: "app版本"
+            type: "string"
+            source_type: "varchar"
+            required: null
+            description: "您的 APP 的版本"
+            notes: ""
+          -
+            name: "#ip"
+            source_name: "客户端ip"
+            type: "number"
+            source_type: "double"
+            required: null
+            description: ""
+            notes: ""
+          -
+            name: "node_id"
+            source_name: "节点序号"
+            type: "number"
+            source_type: "double"
+            required: null
+            description: "10.程序启动\n20开始加载\n30.结束加载\n40.注册创角\n50.登录\n60. 进入引导战斗\n99. 完成引导战斗（首次）\n101 首次进入大厅（首次）"
+            notes: ""
+          -
+            name: "node_name"
+            source_name: "节点页面名称"
+            type: "string"
+            source_type: "varchar"
+            required: null
+            description: "Launch.程序启动\nBeginLoading 开始加载\nEndLoading .结束加载\nRegister. 进入引导战斗\nLogin.登录\nBeginGuideMap.注册创角\nEndGuideMap. 完成引导战斗（首次）\nEnterHome 首次进入大厅（首次）"
+            notes: ""
+      -
+        event_name: "ad_log"
+        source_name: "激励广告"
+        trigger: "广告播放结束时上报"
+        params:
+          -
+            name: "ad_location_id"
+            source_name: "广告位id"
+            type: "string"
+            source_type: "varchar"
+            required: null
+            description: "广告id"
+            notes: ""
+          -
+            name: "ad_location_name"
+            source_name: "广告位名称"
+            type: "string"
+            source_type: "varchar"
+            required: null
+            description: "对应微信后台广告位名称"
+            notes: ""
+          -
+            name: "ad_location_scene"
+            source_name: "广告按钮出现场景"
+            type: "string"
+            source_type: "varchar"
+            required: null
+            description: "复活/磁铁等等"
+            notes: ""
+          -
+            name: "duration"
+            source_name: "广告播放时长（秒）"
+            type: "string"
+            source_type: "varchar"
+            required: null
+            description: ""
+            notes: ""
+          -
+            name: "result"
+            source_name: "结果"
+            type: "string"
+            source_type: "varchar"
+            required: null
+            description: "1 成功/2失败/3中途退出"
+            notes: ""
+          -
+            name: "error_code"
+            source_name: "错误码"
+            type: "number"
+            source_type: "double"
+            required: null
+            description: "成功，中途退出时上报0"
+            notes: ""
+          -
+            name: "battle_uid"
+            source_name: "战斗唯一id"
+            type: "string"
+            source_type: "varchar"
+            required: null
+            description: "为了区分是哪一场战斗"
+            notes: ""
+          -
+            name: "battle_type"
+            source_name: "战斗类型"
+            type: "string"
+            source_type: "varchar"
+            required: null
+            description: "0经典/1...,后续研发侧添加"
+            notes: ""
+          -
+            name: "battle_type_name"
+            source_name: "战斗类型名称"
+            type: "string"
+            source_type: "varchar"
+            required: null
+            description: ""
+            notes: ""
+          -
+            name: "map_id"
+            source_name: "关卡id"
+            type: "number"
+            source_type: "double"
+            required: null
+            description: "1001，类推"
+            notes: ""
+      -
+        event_name: "ad_button"
+        source_name: "广告按钮"
+        trigger: "广告弹出/点击时上报"
+        params:
+          -
+            name: "battle_uid"
+            source_name: "战斗唯一id"
+            type: "string"
+            source_type: "varchar"
+            required: null
+            description: "为了区分是哪一场战斗"
+            notes: ""
+          -
+            name: "battle_type"
+            source_name: "战斗类型"
+            type: "string"
+            source_type: "varchar"
+            required: null
+            description: "0经典/1...,后续研发侧添加"
+            notes: ""
+          -
+            name: "battle_type_name"
+            source_name: "战斗类型名称"
+            type: "string"
+            source_type: "varchar"
+            required: null
+            description: ""
+            notes: ""
+          -
+            name: "map_id"
+            source_name: "关卡id"
+            type: "number"
+            source_type: "double"
+            required: null
+            description: "1001，类推"
+            notes: ""
+          -
+            name: "ad_location_scene"
+            source_name: "广告触发场景"
+            type: "string"
+            source_type: "varchar"
+            required: null
+            description: "失败/复活等等"
+            notes: "新增类型研发自行增加"
+          -
+            name: "ad_location_name"
+            source_name: "广告位名称"
+            type: "string"
+            source_type: "varchar"
+            required: null
+            description: "对应微信后台广告位名称"
+            notes: ""
+          -
+            name: "ad_location_id"
+            source_name: "广告位id"
+            type: "string"
+            source_type: "varchar"
+            required: null
+            description: "可以都使用同一个广告展示id"
+            notes: ""
+          -
+            name: "action_id"
+            source_name: "行为id"
+            type: "number"
+            source_type: "double"
+            required: null
+            description: "1.弹出，2.点击"
+            notes: ""
+      -
+        event_name: "battle_start"
+        source_name: "战斗开始"
+        trigger: "战斗开始"
+        params:
+          -
+            name: "battle_uid"
+            source_name: "战斗唯一id"
+            type: "string"
+            source_type: "varchar"
+            required: null
+            description: "为了区分是哪一场战斗"
+            notes: ""
+          -
+            name: "battle_type"
+            source_name: "战斗类型"
+            type: "string"
+            source_type: "varchar"
+            required: null
+            description: "0经典/1...,后续研发侧添加"
+            notes: "直接用中文或者英文，方便客服、运营查询"
+          -
+            name: "battle_type_name"
+            source_name: "战斗类型名称"
+            type: "string"
+            source_type: "varchar"
+            required: null
+            description: ""
+            notes: "中文"
+          -
+            name: "map_id"
+            source_name: "关卡id"
+            type: "number"
+            source_type: "double"
+            required: null
+            description: "1001，类推"
+            notes: ""
+      -
+        event_name: "battle_result"
+        source_name: "战斗结算"
+        trigger: "战斗结束"
+        params:
+          -
+            name: "battle_uid"
+            source_name: "战斗唯一id"
+            type: "string"
+            source_type: "varchar"
+            required: null
+            description: "为了区分是哪一场战斗"
+            notes: ""
+          -
+            name: "battle_type"
+            source_name: "战斗类型"
+            type: "string"
+            source_type: "varchar"
+            required: null
+            description: ""
+            notes: "直接用中文或者英文，方便客服、运营查询"
+          -
+            name: "battle_type_name"
+            source_name: "战斗类型名称"
+            type: "string"
+            source_type: "varchar"
+            required: null
+            description: ""
+            notes: "中文"
+          -
+            name: "map_id"
+            source_name: "关卡id"
+            type: "number"
+            source_type: "double"
+            required: null
+            description: ""
+            notes: ""
+          -
+            name: "battle_result"
+            source_name: "战斗结果"
+            type: "number"
+            source_type: "double"
+            required: null
+            description: "1:成功/2:失败/3:退出/4:重玩"
+            notes: ""
+          -
+            name: "total_score"
+            source_name: "总得分"
+            type: "number"
+            source_type: "double"
+            required: null
+            description: "战斗结算总得分"
+            notes: ""
+          -
+            name: "battle_time"
+            source_name: "战斗时间(秒)"
+            type: "number"
+            source_type: "double"
+            required: null
+            description: ""
+            notes: ""
+          -
+            name: "revive_count"
+            source_name: "复活次数"
+            type: "number"
+            source_type: "double"
+            required: null
+            description: ""
+            notes: ""
+          -
+            name: "ad_count"
+            source_name: "广告次数"
+            type: "number"
+            source_type: "double"
+            required: null
+            description: ""
+            notes: ""
+          -
+            name: "item_use"
+            source_name: "道具使用情况"
+            type: "string"
+            source_type: "varchar"
+            required: null
+            description: "[{\"磁铁\":1},{\"刷新\":2},...]"
+            notes: ""
+          -
+            name: "remain_screw_num"
+            source_name: "剩余螺丝数量"
+            type: "number"
+            source_type: "double"
+            required: null
+            description: ""
+            notes: ""
+      -
+        event_name: "res_change"
+        source_name: "物品变化"
+        trigger: "金币变动上报"
+        params:
+          -
+            name: "change_reason_name"
+            source_name: "变化原因名称"
+            type: "string"
+            source_type: "varchar"
+            required: null
+            description: "为了区别什么事件导致的资源变动（举例：战斗消耗，广告获得，建造小岛）"
+            notes: ""
+          -
+            name: "res_get_info"
+            source_name: "获得资源信息"
+            type: "array"
+            source_type: "Array(Object)"
+            required: null
+            description: ""
+            notes: ""
+          -
+            name: "res_get_info.res_id"
+            source_name: "获得资源id"
+            type: "number"
+            source_type: "double"
+            required: null
+            description: ""
+            notes: "炸弹等添加进物品id"
+          -
+            name: "res_get_info.res_name"
+            source_name: "获得资源名称"
+            type: "string"
+            source_type: "varchar"
+            required: null
+            description: ""
+            notes: ""
+          -
+            name: "res_get_info.res_type"
+            source_name: "获得资源类型"
+            type: "number"
+            source_type: "double"
+            required: null
+            description: ""
+            notes: ""
+          -
+            name: "res_get_info.change_num"
+            source_name: "获得资源数量"
+            type: "number"
+            source_type: "double"
+            required: null
+            description: ""
+            notes: ""
+          -
+            name: "res_get_info.after_num"
+            source_name: "获得后资源数量"
+            type: "number"
+            source_type: "double"
+            required: null
+            description: ""
+            notes: ""
+          -
+            name: "res_cost_info"
+            source_name: "消耗资源信息"
+            type: "array"
+            source_type: "Array(Object)"
+            required: null
+            description: ""
+            notes: ""
+          -
+            name: "res_cost_info.res_id"
+            source_name: "消耗资源id"
+            type: "number"
+            source_type: "double"
+            required: null
+            description: ""
+            notes: ""
+          -
+            name: "res_cost_info.res_name"
+            source_name: "消耗资源名称"
+            type: "string"
+            source_type: "varchar"
+            required: null
+            description: ""
+            notes: ""
+          -
+            name: "res_cost_info.res_type"
+            source_name: "消耗资源类型"
+            type: "number"
+            source_type: "double"
+            required: null
+            description: ""
+            notes: ""
+          -
+            name: "res_cost_info.change_num"
+            source_name: "消耗资源数量"
+            type: "number"
+            source_type: "double"
+            required: null
+            description: ""
+            notes: ""
+          -
+            name: "res_cost_info.after_num"
+            source_name: "消耗后资源数量"
+            type: "number"
+            source_type: "double"
+            required: null
+            description: ""
+            notes: ""
+      -
+        event_name: "game_share"
+        source_name: "分享游戏"
+        trigger: "分享游戏后上报"
+        params: []
+      -
+        event_name: "click"
+        source_name: "界面点击"
+        trigger: "界面弹出/点击时"
+        params:
+          -
+            name: "change_reason"
+            source_name: "变化原因"
+            type: "number"
+            source_type: "double"
+            required: null
+            description: "1，弹出\ns3.购买\n4.奖励领取"
+            notes: ""
+          -
+            name: "change_reason_name"
+            source_name: "变化原因名称"
+            type: "string"
+            source_type: "varchar"
+            required: null
+            description: ""
+            notes: ""
+          -
+            name: "ui_name"
+            source_name: "界面名称"
+            type: "string"
+            source_type: "varchar"
+            required: null
+            description: ""
+            notes: ""
+          -
+            name: "good_id"
+            source_name: "按钮id"
+            type: "string"
+            source_type: "varchar"
+            required: null
+            description: ""
+            notes: ""
+      -
+        event_name: "daily_progress"
+        source_name: "每日挑战进度"
+        trigger: "完成每日挑战关卡时"
+        params:
+          -
+            name: "year"
+            source_name: "年"
+            type: "number"
+            source_type: "double"
+            required: null
+            description: ""
+            notes: ""
+          -
+            name: "month"
+            source_name: "月"
+            type: "number"
+            source_type: "double"
+            required: null
+            description: ""
+            notes: ""
+          -
+            name: "progress"
+            source_name: "进度"
+            type: "number"
+            source_type: "double"
+            required: null
+            description: "0-100"
+            notes: ""
+      -
+        event_name: "daily_start"
+        source_name: "每日挑战开始"
+        trigger: "开始每日挑战关卡时"
+        params:
+          -
+            name: "year"
+            source_name: "年"
+            type: "number"
+            source_type: "double"
+            required: null
+            description: ""
+            notes: ""
+          -
+            name: "month"
+            source_name: "月"
+            type: "number"
+            source_type: "double"
+            required: null
+            description: ""
+            notes: ""
+          -
+            name: "day"
+            source_name: "日"
+            type: "number"
+            source_type: "double"
+            required: null
+            description: ""
+            notes: ""
+          -
+            name: "levelID"
+            source_name: "表id"
+            type: "number"
+            source_type: "double"
+            required: null
+            description: ""
+            notes: ""
+          -
+            name: "monthID"
+            source_name: "关卡id"
+            type: "number"
+            source_type: "double"
+            required: null
+            description: ""
+            notes: ""
+      -
+        event_name: "daily_result"
+        source_name: "每日挑战结束"
+        trigger: "结束每日挑战关卡时"
+        params:
+          -
+            name: "year"
+            source_name: "年"
+            type: "number"
+            source_type: "double"
+            required: null
+            description: ""
+            notes: ""
+          -
+            name: "month"
+            source_name: "月"
+            type: "number"
+            source_type: "double"
+            required: null
+            description: ""
+            notes: ""
+          -
+            name: "day"
+            source_name: "日"
+            type: "number"
+            source_type: "double"
+            required: null
+            description: ""
+            notes: ""
+          -
+            name: "levelID"
+            source_name: "表id"
+            type: "number"
+            source_type: "double"
+            required: null
+            description: ""
+            notes: ""
+          -
+            name: "monthID"
+            source_name: "关卡id"
+            type: "number"
+            source_type: "double"
+            required: null
+            description: ""
+            notes: ""
+          -
+            name: "success"
+            source_name: "是否成功"
+            type: "number"
+            source_type: "double"
+            required: null
+            description: "1 成功/2失败/3中途退出/4重玩"
+            notes: ""
+      -
+        event_name: "fishtank_info"
+        source_name: "鱼缸信息"
+        trigger: "鱼缸信息"
+        params:
+          -
+            name: "fishtank_id"
+            source_name: "鱼缸id"
+            type: "number"
+            source_type: "double"
+            required: null
+            description: ""
+            notes: ""
+          -
+            name: "prosperity"
+            source_name: "鱼缸繁荣度"
+            type: "number"
+            source_type: "double"
+            required: null
+            description: ""
+            notes: ""
+          -
+            name: "fishes"
+            source_name: "鱼缸里的鱼"
+            type: "array"
+            source_type: "Array(Object)"
+            required: null
+            description: ""
+            notes: ""
+          -
+            name: "fishes.ids"
+            source_name: "鱼缸里的鱼的id"
+            type: "number"
+            source_type: "double"
+            required: null
+            description: ""
+            notes: ""
+      -
+        event_name: "bg_unlock"
+        source_name: "解锁背景、方块"
+        trigger: "商店里的背景、方块解锁"
+        params:
+          -
+            name: "id"
+            source_name: "解锁id"
+            type: "number"
+            source_type: "double"
+            required: null
+            description: ""
+            notes: ""
+          -
+            name: "type"
+            source_name: "解锁类型"
+            type: "number"
+            source_type: "double"
+            required: null
+            description: "1 背景 2方块"
+            notes: ""
+      -
+        event_name: "bg_use"
+        source_name: "使用背景、方块"
+        trigger: "商店里的背景、方块使用"
+        params:
+          -
+            name: "id"
+            source_name: "使用id"
+            type: "number"
+            source_type: "double"
+            required: null
+            description: ""
+            notes: ""
+          -
+            name: "type"
+            source_name: "使用类型"
+            type: "number"
+            source_type: "double"
+            required: null
+            description: "1 背景 2方块"
+            notes: ""
+      -
+        event_name: "fish_get"
+        source_name: "抽鱼"
+        trigger: "水族馆玩法事件"
+        params:
+          -
+            name: "fishtank_id"
+            source_name: "鱼缸id"
+            type: "number"
+            source_type: "double"
+            required: null
+            description: ""
+            notes: ""
+          -
+            name: "fish_id"
+            source_name: "鱼id"
+            type: "number"
+            source_type: "double"
+            required: null
+            description: ""
+            notes: ""
+      -
+        event_name: "fish_sell"
+        source_name: "卖鱼"
+        trigger: "水族馆玩法事件"
+        params:
+          -
+            name: "fishtank_id"
+            source_name: "鱼缸id"
+            type: "number"
+            source_type: "double"
+            required: null
+            description: ""
+            notes: ""
+          -
+            name: "fish_id"
+            source_name: "鱼id"
+            type: "number"
+            source_type: "double"
+            required: null
+            description: ""
+            notes: ""
+      -
+        event_name: "best_score"
+        source_name: "历史最高分"
+        trigger: "经典模式下的历史最高分"
+        params:
+          -
+            name: "score"
+            source_name: "分数"
+            type: "number"
+            source_type: "double"
+            required: null
+            description: ""
+            notes: ""
+      -
+        event_name: "ad_Interst"
+        source_name: "插屏广告"
+        trigger: "广告展示的时候上报"
+        params:
+          -
+            name: "id"
+            source_name: "广告id"
+            type: "string"
+            source_type: "varchar"
+            required: null
+            description: ""
+            notes: ""
+          -
+            name: "place"
+            source_name: "位置(比如结算,新方块奖励)"
+            type: "string"
+            source_type: "varchar"
+            required: null
+            description: ""
+            notes: ""
+      -
+        event_name: "top_level"
+        source_name: "弱关卡"
+        trigger: "弱关卡通关时上报"
+        params:
+          -
+            name: "top_level"
+            source_name: "分数"
+            type: "number"
+            source_type: "double"
+            required: null
+            description: ""
+            notes: ""
+    user_properties:
+      -
+        name: "#user_id"
+        source_name: "用户在系统中的唯一用户标识"
+        type: "integer"
+        source_type: "bigint"
+        required: null
+        description: ""
+      -
+        name: "#distinct_id"
+        source_name: "访客ID"
+        type: "string"
+        source_type: "varchar"
+        required: null
+        description: "首次打开app，激活SDK，客户端记录设备ID"
+      -
+        name: "#account_id"
+        source_name: "账号ID（角色id）"
+        type: "string"
+        source_type: "varchar"
+        required: null
+        description: "需要拼接game_name+#account_id"
+      -
+        name: "#active_time"
+        source_name: "激活时间"
+        type: "timestamp"
+        source_type: "timestamp"
+        required: null
+        description: "激活时"
+      -
+        name: "#reg_time"
+        source_name: "注册时间"
+        type: "timestamp"
+        source_type: "timestamp"
+        required: null
+        description: "创建角色时记录"
+      -
+        name: "open_id"
+        source_name: "渠道账号id"
+        type: "string"
+        source_type: "varchar"
+        required: null
+        description: "微信登录验证成功时记录"
+      -
+        name: "nb_open_id"
+        source_name: "聚合openID"
+        type: "string"
+        source_type: "varchar"
+        required: null
+        description: "星云聚合openid【项目唯一标识】"
+      -
+        name: "channel_id"
+        source_name: "渠道ID"
+        type: "string"
+        source_type: "varchar"
+        required: null
+        description: ""
+      -
+        name: "code_id"
+        source_name: "包体ID"
+        type: "string"
+        source_type: "varchar"
+        required: null
+        description: ""
+      -
+        name: "domain"
+        source_name: "环境"
+        type: "string"
+        source_type: "varchar"
+        required: null
+        description: "dev开发；release正式"
+      -
+        name: "game_name"
+        source_name: "游戏包名拼音全称"
+        type: "string"
+        source_type: "varchar"
+        required: null
+        description: ""
+      -
+        name: "system"
+        source_name: "应用（ios/安卓）"
+        type: "string"
+        source_type: "varchar"
+        required: null
+        description: "创建角色时记录"
+      -
+        name: "first_login_time"
+        source_name: "创角时间"
+        type: "timestamp"
+        source_type: "timestamp"
+        required: null
+        description: "创建角色时记录"
+      -
+        name: "last_login_time"
+        source_name: "最后登录时间"
+        type: "timestamp"
+        source_type: "timestamp"
+        required: null
+        description: "每次登出时"
+      -
+        name: "last_online_time"
+        source_name: "最后登出时间"
+        type: "timestamp"
+        source_type: "timestamp"
+        required: null
+        description: "每次登出时"
+      -
+        name: "enter_version"
+        source_name: "进入的版本"
+        type: "number"
+        source_type: "double"
+        required: null
+        description: "玩家首次进入游戏记录的客户端功能版本"
+      -
+        name: "current_coin"
+        source_name: "当前金币"
+        type: "number"
+        source_type: "double"
+        required: null
+        description: "当前金币"
+      -
+        name: "current_diamond"
+        source_name: "当前钻石"
+        type: "number"
+        source_type: "double"
+        required: null
+        description: "当前钻石"
+      -
+        name: "max_map_id"
+        source_name: "最大关卡ID"
+        type: "number"
+        source_type: "double"
+        required: null
+        description: ""
+      -
+        name: "gravity_client_id"
+        source_name: "用户 client_id"
+        type: "unknown"
+        source_type: ""
+        required: null
+        description: ""
+      -
+        name: "ad_wx_channel"
+        source_name: "渠道"
+        type: "unknown"
+        source_type: ""
+        required: null
+        description: ""
+      -
+        name: "ad_channel"
+        source_name: "广告渠道"
+        type: "unknown"
+        source_type: ""
+        required: null
+        description: ""
+      -
+        name: "ad_openid"
+        source_name: "微信/抖音 open_id"
+        type: "unknown"
+        source_type: ""
+        required: null
+        description: ""
+      -
+        name: "ad_campaign_id"
+        source_name: "广告计划 ID"
+        type: "unknown"
+        source_type: ""
+        required: null
+        description: ""
+      -
+        name: "ad_campaign_name"
+        source_name: "广告计划名称"
+        type: "unknown"
+        source_type: ""
+        required: null
+        description: ""
+      -
+        name: "ad_id"
+        source_name: "广告id"
+        type: "unknown"
+        source_type: ""
+        required: null
+        description: ""
+      -
+        name: "ad_name"
+        source_name: "广告名称"
+        type: "unknown"
+        source_type: ""
+        required: null
+        description: ""
+      -
+        name: "ad_creative_id"
+        source_name: "广告创意id"
+        type: "unknown"
+        source_type: ""
+        required: null
+        description: ""
+      -
+        name: "ad_creative_name"
+        source_name: "广告创意名称"
+        type: "unknown"
+        source_type: ""
+        required: null
+        description: ""
+      -
+        name: "ad_project_id"
+        source_name: "巨量引擎项目ID"
+        type: "unknown"
+        source_type: ""
+        required: null
+        description: ""
+      -
+        name: "ad_platform"
+        source_name: "媒体平台"
+        type: "unknown"
+        source_type: ""
+        required: null
+        description: ""
+      -
+        name: "ad_MID1"
+        source_name: "巨量引擎图片素材id"
+        type: "unknown"
+        source_type: ""
+        required: null
+        description: ""
+      -
+        name: "ad_MID2"
+        source_name: "巨量引擎标题素材id"
+        type: "unknown"
+        source_type: ""
+        required: null
+        description: ""
+      -
+        name: "ad_MID3"
+        source_name: "巨量引擎视频素材id"
+        type: "unknown"
+        source_type: ""
+        required: null
+        description: ""
+      -
+        name: "ad_MID4"
+        source_name: "巨量引擎搭配试玩素材id"
+        type: "unknown"
+        source_type: ""
+        required: null
+        description: ""
+      -
+        name: "ad_MID5"
+        source_name: "巨量引擎落地页素材id"
+        type: "unknown"
+        source_type: ""
+        required: null
+        description: ""
+      -
+        name: "ad_MID6"
+        source_name: "巨量引擎安卓下载详情页素材id"
+        type: "unknown"
+        source_type: ""
+        required: null
+        description: ""
+      -
+        name: "ad_adverser_id"
+        source_name: "广告主账户 ID"
+        type: "unknown"
+        source_type: ""
+        required: null
+        description: ""
+    common_event_properties:
+      -
+        name: "#user_id"
+        source_name: "用户在系统中的唯一用户标识"
+        type: "integer"
+        source_type: "bigint"
+        required: null
+        description: ""
+      -
+        name: "#distinct_id"
+        source_name: "访客ID"
+        type: "string"
+        source_type: "varchar"
+        required: null
+        description: "同设备ID"
+      -
+        name: "#account_id"
+        source_name: "角色ID"
+        type: "string"
+        source_type: "varchar"
+        required: null
+        description: "需要拼接game_name+#account_id"
+      -
+        name: "create_role_time"
+        source_name: "创角时间"
+        type: "timestamp"
+        source_type: "timestamp"
+        required: null
+        description: "创角的UNIX时间戳"
+      -
+        name: "first_login_time"
+        source_name: "创角时间"
+        type: "timestamp"
+        source_type: "timestamp"
+        required: null
+        description: "创角的UNIX时间戳"
+      -
+        name: "channel_id"
+        source_name: "渠道ID"
+        type: "string"
+        source_type: "varchar"
+        required: null
+        description: "星云channel_id"
+      -
+        name: "nb_open_id"
+        source_name: "聚合openID"
+        type: "string"
+        source_type: "varchar"
+        required: null
+        description: "星云聚合openid【项目唯一标识】"
+      -
+        name: "open_id"
+        source_name: "微信open_id"
+        type: "string"
+        source_type: "varchar"
+        required: null
+        description: "微信登录验证成功时记录"
+      -
+        name: "server_open_time"
+        source_name: "开服时间"
+        type: "string"
+        source_type: "varchar"
+        required: null
+        description: ""
+      -
+        name: "code_id"
+        source_name: "包体ID"
+        type: "string"
+        source_type: "varchar"
+        required: null
+        description: ""
+      -
+        name: "game_name"
+        source_name: "游戏包名拼音全称"
+        type: "string"
+        source_type: "varchar"
+        required: null
+        description: ""
+      -
+        name: "total_login_time"
+        source_name: "累计在线时长(秒)"
+        type: "number"
+        source_type: "double"
+        required: null
+        description: "累计在线时长"
+      -
+        name: "platform"
+        source_name: "平台"
+        type: "number"
+        source_type: "double"
+        required: null
+        description: " \"Android\": 1, \"iOS\": 2, \"Linux\": 3, \"OS X\": 4, \"UNIX\": 5, \"Windows\": 6"
+      -
+        name: "league_id"
+        source_name: "联赛id"
+        type: "number"
+        source_type: "double"
+        required: null
+        description: ""
+      -
+        name: "league_name"
+        source_name: "联赛名称"
+        type: "string"
+        source_type: "varchar"
+        required: null
+        description: "玩家目前所处联赛"
+    online_verified:
+      event_table: "ta.v_event_54"
+      user_table: "ta.v_user_54"
+      game_filter: "game_name = 'yishuajiushangtou'"
+      user_filter: "domain = 'release' AND game_name = 'yishuajiushangtou'"
+      isolation: "IAA_Game为多游戏共用项目；事件与用户范围均固定游戏标识。"
+      identity: "优先非空nb_open_id，缺失时回退#account_id，再回退#user_id；事件与用户表按#user_id关联。"
+      registration: "同一分析身份最早first_login_time；用户表无该值时新增日期保留NULL，不推断。"
+      active: "正式环境且可关联游戏用户的任意事件按自然日去重，与参考基础大盘一致。"
+      channel: "同一身份最早first_login_time对应channel_id；目标用户表未发现ad_platform，分媒体视图改为分渠道ID。"
+      duration:
+        event: "ta_mg_hide"
+        field: "#duration"
+        unit: "seconds"
+        display_unit: "minutes"
+        limitation: "仅统计已上报会话；未完成或未上报会话不估算。"
+      ad_completion: "ad_log.result = '1'"
+      retention: "D1为新增当天，D2至D30按后续自然日活跃计算；目标日必须不晚于昨天，未成熟为NULL；新增日期参数不截断后续事件。"
+      display: "默认使用大图明细数据；总体和渠道行不可相加；全部新增与首日在线超过5/10分钟为重叠人群。"
+      schema_difference: "文档中的ta_app_start/ta_app_end未在本次线上事件列表发现；实际为ta_mg_launch/ta_mg_show/ta_mg_hide。每日挑战、水族馆等文档事件尚未在已上报事件列表发现，不能据此假设已上线。"
+    dashboards:
+      -
+        name: "一耍就上头｜大盘数据"
+        dashboard_id: 2139
+        report_id: 5980
+      -
+        name: "一耍就上头｜留存"
+        dashboard_id: 2140
+        report_id: 5981
+      -
+        name: "一耍就上头｜激活登录"
+        dashboard_id: 2141
+        report_id: 5982
+      -
+        name: "一耍就上头｜玩家行为"
+        dashboard_id: 2142
+        report_id: 5983
+      -
+        name: "一耍就上头｜在线时长"
+        dashboard_id: 2143
+        report_id: 5984
+    notes:
+      - "required未在原表逐字段声明，统一为null。"
+      - "业务字段解析覆盖事件属性、用户属性、公共事件属性；其他6页为接入/类型/身份说明，不转为业务事件。"
+      - "看板属于IAA_Game的当前账号个人空间/未分组；未新建共享权限。"
