@@ -1288,6 +1288,35 @@ projects:
         name: "一耍就上头｜在线时长"
         dashboard_id: 2143
         report_id: 5984
+        additional_report_ids: [5987]
+      -
+        name: "一耍就上头｜广告分析"
+        dashboard_id: 2144
+        report_ids: [5988, 5989, 5990, 5991]
+    advertising_and_duration_update:
+      updated_at: "2026-10-26"
+      project_space_id: 810
+      reference_ad_dashboard: "https://ta-data.feiyu.com/#/panel/panel/37_2023"
+      reference_duration_report: 5664
+      duration_summary_report: 5984
+      daily_duration_distribution_report: 5987
+      ad_point_summary_report: 5988
+      daily_ad_count_distribution_report: 5989
+      ad_map_summary_report: 5990
+      ad_map_detail_report: 5991
+      filters:
+        date: "${PartDate:date1}，统计行为日期"
+        user_type: "${Selector:selector2}，显示名新老用户；默认全部用户，新用户reg_day=date(day)，老用户reg_day<date(day)；reg_day缺失仅计入全部用户"
+        ad_point: "${Variable3}，显示名广告点名称；默认全部，按展示名称精确匹配；用于四张广告报表"
+      ad_point: "优先ad_location_scene，空值依次回退ad_location_name、ad_location_id，最后未知广告点"
+      ad_semantics: "ad_button.action_id=1为弹出、2为点击；ad_log为结束时上报的结果事件，result='1'完播、'2'失败、'3'中途退出，不能将结果次数标作开始曝光"
+      ad_distribution: "每天、每位活跃玩家汇总所选广告点的成功完播次数；以全部当日活跃为全集LEFT JOIN，保留0次用户"
+      daily_duration_distribution: "每天、每位玩家汇总ta_mg_hide.#duration并换算分钟，按参考档位分桶；没有时长记录单列且保留在活跃分母；每天每渠道保留空档0人数"
+      duration_buckets: ["无时长记录", "0–<1分钟", "1–<2分钟", "2–<3分钟", "3–<4分钟", "4–<5分钟", "5–<6分钟", "6–<11分钟", "11–<16分钟", "16–<31分钟", "31–<61分钟", "61–<121分钟", "121–<241分钟", "241–<361分钟", "≥361分钟"]
+      map_analysis: "按玩法类型、玩法名称、map_id及广告点拆分；关卡开始人数取battle_start去重；广告点筛选只限制广告事件，不改变关卡开始基数；日内行为比率不等于同局严格漏斗"
+      unavailable_reference_field: "目标项目没有chapter_speed，不移植萝卜4的关卡进度分档"
+      ratio_precision: "整数比率先乘1.000000后除以NULLIF分母，再ROUND和DECIMAL(18,4)，避免低scale十进制截断"
+      verification: "六张报表计算成功；新老用户及广告点组合筛选已实测；每日时长分布人数/分钟与汇总核对无差异，广告次数分布与广告点汇总的完播总数核对无差异"
     notes:
       - "required未在原表逐字段声明，统一为null。"
       - "业务字段解析覆盖事件属性、用户属性、公共事件属性；其他6页为接入/类型/身份说明，不转为业务事件。"
