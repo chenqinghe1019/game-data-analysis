@@ -48,6 +48,7 @@ classified AS (
     FROM dedup
     WHERE rn = 1
 )
+ , metrics AS (
 SELECT
     part_date AS "日期",
     role_id AS "角色ID",
@@ -71,6 +72,8 @@ SELECT
       / NULLIF(COUNT(*) OVER (PARTITION BY battle_type), 0), 4
     ) AS "该类型零伤害受击对局占比"
 FROM classified
--- 查看所有类型及缺失：注释下一行；只看目标异常：保留下一行
-WHERE scenario = '受击但城墙护盾均未扣血'
-ORDER BY event_time DESC, role_id, battle_uid;
+)
+SELECT * FROM metrics
+-- 若要检查全部类型以及缺失值，注释下一行
+WHERE "受击扣血分类" = '受击但城墙护盾均未扣血'
+ORDER BY "事件时间" DESC, "角色ID", "battle_uid";
