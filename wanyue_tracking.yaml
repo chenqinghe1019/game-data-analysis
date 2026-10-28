@@ -36,7 +36,7 @@ project:
     common_event_property_count: 13
   critical_notes:
     - 'v44 is 弯月勇者; v46 is 方块也疯狂. Never mix them.'
-    - 'Keep source spellings battle_star and rougue_skill_show unless online schema proves otherwise.'
+    - '弯月勇者肉鸽技能弹出事件使用 rogue_skill_show（2026-10-28 用户确认修正）；battle_star 拼写仍按已记录口径核对。'
     - 'region_id type conflict: user property=varchar; common event property=double. Confirm online type before SQL/casting.'
     - 'clan_uid type conflict: user property=double; common event property=varchar. Confirm online type before SQL/casting.'
     - 'boss_battle_result.battle_value conflict: main event sheet=double; anti-cheat sheet=varchar.'
@@ -101,7 +101,7 @@ project:
   event_property_type_conflicts:
     battle_type:
       'double': ['battle_auto', 'boss_battle_result']
-      'varchar': ['pvp_log', 'battle_star', 'rougue_skill_show', 'rogue_skill', 'battle_result']
+      'varchar': ['pvp_log', 'battle_star', 'rogue_skill_show', 'rogue_skill', 'battle_result']
     change_reason:
       'varchar': ['ad_log', 'in_out_log', 'pay_log', 'skin', 'voucher_log', 'money_log', 'item_log', 'click', 'battle_auto', 'guild_wish_log']
       'double': ['hero_get_log', 'equip_log', 'home', 'clan_tech_log']
@@ -139,7 +139,7 @@ project:
     - {name: 'battle_auto', display: '自动战斗', data_type: '客户端', priority: 'P1', tag: '战斗功能', trigger: '战斗开始时判断，且该功能开启/关闭时', properties: ['change_reason:varchar', 'auto_type:varchar', 'battle_uid:varchar', 'battle_type:double', 'map_id:double', 'select_mode:double']}
     - {name: 'pvp_log', display: 'PVP战报', data_type: '服务端', priority: 'P1', tag: '战斗', trigger: 'pvp结束时', properties: ['battle_uid:varchar', 'battle_type:varchar', 'score:varchar', 'opponent_pid:varchar', 'opponent_score:unspecified', 'my_lineup:Array(Object)', 'my_attr_bonus:Array(Object)', 'opponent_lineup:Array(Object)', 'opponent_attr_bonus:Array(Object)', 'winner_pid:varchar', 'score_delta:double']}
     - {name: 'battle_star', display: '战斗开始', data_type: '客户端', priority: 'P0', tag: '战斗', trigger: '战斗开始', properties: ['battle_uid:varchar', 'battle_type:varchar', 'map_id:double', 'battle_array:Array(Object)']}
-    - {name: 'rougue_skill_show', display: '肉鸽技能弹出', data_type: '客户端', priority: 'P0', tag: '战斗', trigger: '肉鸽技能弹出时', properties: ['battle_uid:varchar', 'battle_type:varchar', 'map_id:double', 'battle_time:double', 'skill_source:double', 'is_refresh:double', 'skill_options:Array(Object)']}
+    - {name: 'rogue_skill_show', display: '肉鸽技能弹出', data_type: '客户端', priority: 'P0', tag: '战斗', trigger: '肉鸽技能弹出时', properties: ['battle_uid:varchar', 'battle_type:varchar', 'map_id:double', 'battle_time:double', 'skill_source:double', 'is_refresh:double', 'skill_options:Array(Object)']}
     - {name: 'rogue_skill', display: '肉鸽技能选择', data_type: '客户端', priority: 'P0', tag: '战斗', trigger: '肉鸽技能选择时', properties: ['battle_uid:varchar', 'battle_type:varchar', 'map_id:double', 'battle_time:double', 'skill_source:double', 'is_refresh:double', 'skill_options:Array(Object)', 'skill_chosen:Array(Object)']}
     - {name: 'battle_result', display: '战斗结算', data_type: '客户端', priority: 'P0', tag: '战斗', trigger: '战斗结束（跳关也上报）', properties: ['battle_uid:varchar', 'battle_type:varchar', 'map_id:double', 'battle_array:Array(Object)', 'battle_result:double', 'battlepoint_id:unspecified', 'battle_time:double', 'battle_turn:double']}
     - {name: 'gacha_log', display: '招募', data_type: '服务端', priority: 'P0', tag: '抽卡', trigger: '抽卡结束', properties: ['gacha_type:varchar', 'award_ting:Array(Object)']}
