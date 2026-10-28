@@ -116,7 +116,7 @@ project_memory:
       notes:
         - "固定使用 v44；v46 是方块也疯狂，不能混用。"
         - "处理弯月勇者需求时必须先读取 wanyue_tracking.yaml。"
-        - "原表事件名 battle_star、rougue_skill_show 按原样保留，除非线上表结构确认实际名称不同。"
+        - "弯月勇者肉鸽技能弹出事件已由用户确认改为 rogue_skill_show（2026-10-28）；battle_star 仍依据线上口径。"
         - "region_id：用户属性 varchar、公共事件属性 double；clan_uid：用户属性 double、公共事件属性 varchar；查询前确认线上最终类型。"
         - "boss_battle_result.battle_value 在主事件表为 double、外挂防治 sheet 为 varchar；查询与验收前确认线上最终类型。"
         - "同名属性 battle_type、change_reason、change_type、hero_id 等在原方案中存在类型冲突，数数首次入库类型会锁定，具体见 wanyue_tracking.yaml 的 event_property_type_conflicts。"
