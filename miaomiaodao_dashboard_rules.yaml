@@ -29,3 +29,25 @@ miaomiaodao_dashboard_rules:
   change_discipline:
     - "跨项目复用前确认事件参数维度及枚举；不根据事件名自行代入玩法、任务、付费转化。"
     - "仅按已确认业务口径修改，未确认的中文映射和漏斗顺序不编造。"
+  visualization_reference_20261030:
+    source: "用户提供的激活登录及首日关键行为表格截图"
+    activation:
+      report_id: 6073
+      chart_type: "原生交叉表"
+      row_dimensions: ["node_id"]
+      column_dimensions: ["日期，降序"]
+      metrics: ["人数", "转化率"]
+      ratio: "同日节点去重人数/同日Launch去重人数"
+      style: "无色阶，两位百分数，保留8个原始节点名称和原有节点顺序"
+    first_day_behavior:
+      report_id: 6074
+      chart_type: "原生交叉表"
+      row_dimensions: ["新增日期，降序", "新增玩家数"]
+      column_dimensions: ["关卡ID，按SQL数值顺序"]
+      metrics: ["开始率", "结算率"]
+      ratio: "分母为当日新增玩家数，结算排除主动退出2"
+      style: "无色阶，两位百分数，按实际level_id自动展开关卡列"
+    dashboard_card:
+      display: "图表"
+      size: "大图"
+      save_rule: "保存图表并确认后，返回SQL页更新报表；看板报表设置必须选择图表模式，不能继续显示明细数据。"
