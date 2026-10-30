@@ -7,6 +7,7 @@ yishuajiushangtou_level_analysis:
   dashboard_id: 2165
   reference_dashboard: "37_2024"
   reports_added:
+    level_summary: 6085
     failure_summary: 6083
     failure_remaining_distribution: 6084
     existing_daily_duration_reused: 5987
@@ -23,6 +24,18 @@ yishuajiushangtou_level_analysis:
   validation:
     failure_group_comparison: "156组，原值分布失败次数加总与失败汇总逐组一致；差异0组"
     combined_filter: "新用户与关卡20组合已验证"
-  pending:
-    overall_conversion_denominator: "已询问用户：所选人群当日活跃（推荐）或萝卜的当天新增活跃；尚未收到确认。"
-    level_summary_report: "SQL框架已通过运行验证，暂未保存发布，等待分母确认。"
+  confirmed_conversion:
+    confirmed_at: "2026-10-30"
+    overall_conversion_denominator: "用户明确选择：按所选新老用户的当日活跃人数作分母。"
+    numerator: "该日期、渠道、玩法、关卡的battle_start去重玩家数"
+    ratio: "进入人数/所选人群当日活跃人数；新老用户筛选同时作用于分子、分母。"
+    first_level_conversion: "首个观察关卡以前述当日活跃为基数，后续关卡比较上一观察关卡的进入人数。"
+    resident_rate: "(本关进入人数-下一观察关卡进入人数)/本关进入人数；不是同一批玩家的严格逐局漏斗。"
+    ratio_precision: "计数先乘1.000000000000再除分母，最后ROUND至四位；避免六位中间小数造成二次舍入。"
+  completed:
+    level_summary_report: 6085
+    dashboard_order: [6085, 6083, 6084, 5987]
+    layout: "参照萝卜关卡分析使用宽明细表、大图，关卡汇总置顶；口径便签已更新。"
+    default_filters: "过去7天、全部用户、全部关卡"
+    validation: "关卡汇总346行；失败次数与失败汇总无差异，总转化率逐行重算无差异；老用户+关卡2组合验证8行。"
+    status: "completed"
