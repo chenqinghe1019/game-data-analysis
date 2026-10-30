@@ -1,0 +1,28 @@
+yishuajiushangtou_level_analysis:
+  updated_at: "2026-10-30"
+  project: "IAA_Game"
+  project_id: 54
+  game_name: "yishuajiushangtou"
+  project_space_id: 810
+  dashboard_id: 2165
+  reference_dashboard: "37_2024"
+  reports_added:
+    failure_summary: 6083
+    failure_remaining_distribution: 6084
+    existing_daily_duration_reused: 5987
+  confirmed_rules:
+    - "事件固定game_name=yishuajiushangtou，关联用户也固定同游戏且domain=release。"
+    - "身份和渠道沿用现有一耍看板：优先nb_open_id，回退#account_id/#user_id；注册与注册渠道按同一身份最早first_login_time。"
+    - "关卡开始使用battle_start，关卡字段map_id；玩法按battle_type、battle_type_name分开。"
+    - "battle_result=1成功、2失败、3退出、4重玩；不得套用喵喵岛的level_result枚举。"
+    - "2026-10-30用户明确选择：失败汇总＋按剩余螺丝原值分布。"
+    - "没有独立死亡事件/波次字段，禁止伪造萝卜的死亡或波次指标；失败分布使用battle_result=2的remain_screw_num。"
+    - "同一玩家可在多个剩余螺丝原值上失败，分布人数不可相加；失败事件次数可加总并与汇总核对。"
+    - "全部渠道与各渠道分别展示，不得加在一起。"
+    - "失败分布参数为数据日期、新老用户、关卡ID；默认过去7天、全部用户、全部关卡。"
+  validation:
+    failure_group_comparison: "156组，原值分布失败次数加总与失败汇总逐组一致；差异0组"
+    combined_filter: "新用户与关卡20组合已验证"
+  pending:
+    overall_conversion_denominator: "已询问用户：所选人群当日活跃（推荐）或萝卜的当天新增活跃；尚未收到确认。"
+    level_summary_report: "SQL框架已通过运行验证，暂未保存发布，等待分母确认。"
