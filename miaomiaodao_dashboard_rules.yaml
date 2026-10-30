@@ -1,0 +1,31 @@
+miaomiaodao_dashboard_rules:
+  updated_at: "2026-10-30"
+  source: "用户明确纠正并确认"
+  project: "喵喵岛"
+  project_id: 52
+  event_table: "ta.v_event_52"
+  user_table: "ta.v_user_52"
+  activation_report:
+    report_id: 6073
+    event: "active_log"
+    dimension: "active_node"
+    count: "按日期、节点对#user_id去重"
+    node_names: ["Launch", "BeginLoading", "EndLoading", "Login", "EnterHome", "EndGuideMap", "BeginLiveBoxGuide", "EndLiveBoxGuide"]
+    rule: "全部8个节点分开展示，保留原始名称；不能用active_log事件总人数代替节点人数。节点排列不代表已验证的时序漏斗。"
+  first_day_key_behavior:
+    report_id: 6074
+    dimension: "level_id"
+    start_event: "battle_start"
+    settlement_event: "level_result"
+    settlement_filter: "存在level_result事件，且level_result不为2；属性缺失但存在结算事件时仍计入。"
+    exit_value: 2
+    exit_meaning: "主动退出"
+    rule: "主动退出不计结算；结算人数不能用通关人数代替。开始和结算均按关卡、首日用户去重。"
+    scope: "创角当天"
+    ratio_denominator: "沿用原报表首日新增人数，列名明确写占首日新增；不是通关人数/开始人数。"
+  sibling_consistency:
+    report_id: 6075
+    rule: "首日关卡通关率的结算场次及结算人数也排除level_result=2；通关仍使用level_result=1。"
+  change_discipline:
+    - "跨项目复用前确认事件参数维度及枚举；不根据事件名自行代入玩法、任务、付费转化。"
+    - "仅按已确认业务口径修改，未确认的中文映射和漏斗顺序不编造。"
