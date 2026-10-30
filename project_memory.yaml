@@ -150,15 +150,27 @@ project_memory:
 
     miaomiaodao:
       project_name: "喵喵岛"
-      status: "埋点方案阶段（proposal）"
+      status: "项目52线上字段已核对；节点与结算口径由用户确认（2026-10-30）"
+      project_id: 52
+      table_suffix: 52
+      event_table: "ta.v_event_52"
+      user_table: "ta.v_user_52"
       tracking_directory: "游戏项目/喵喵岛/埋点规则"
+      dashboard_rules: "miaomiaodao_dashboard_rules.yaml"
+      activation:
+        event: "active_log"
+        node_field: "active_node"
+        rule: "激活登录按全部8个active_node分别统计去重人数，保留原始节点名，禁止合并为事件总人数替代节点分析。"
+        nodes: ["Launch", "BeginLoading", "EndLoading", "Login", "EnterHome", "EndGuideMap", "BeginLiveBoxGuide", "EndLiveBoxGuide"]
       battle:
         start_event: "battle_start"
-        result_event: "battle_result"
-        tracking_scope: "对局仅记录开始与结算两个事件"
+        result_event: "level_result"
+        level_field: "level_id"
+        settlement_rule: "存在level_result事件即为结算，但level_result=2为主动退出，不计入结算；不能只用level_result=1通关代替结算。"
       notes:
-        - "数数表后缀、用户表和事件表尚未确认，写 SQL 前必须先确认线上表结构。"
-        - "现有埋点方案与字典分别见 battle_tracking_proposal_20260825.yaml、tracking_dictionary_20260825.yaml。"
+        - "喵喵岛项目52与喵喵岛_逍遥项目27不可混用。"
+        - "2026-10-30用户纠正：首日关键行为按level_id区分开始与结算；节点含义及业务映射不确定时必须确认，不得自行替换业务内容。"
+        - "历史2026-08-25提案中的battle_result不能覆盖本次线上与用户确认的level_result口径。"
 
   tracking_design_rules:
     - "默认不上报入口、页面曝光、按钮曝光；仅在用户明确要求时增加。"
