@@ -172,6 +172,25 @@ project_memory:
         - "2026-10-30用户纠正：首日关键行为按level_id区分开始与结算；节点含义及业务映射不确定时必须确认，不得自行替换业务内容。"
         - "历史2026-08-25提案中的battle_result不能覆盖本次线上与用户确认的level_result口径。"
 
+    yishuajiushangtou:
+      project_name: "一耍就上头"
+      project_type: "IAA游戏"
+      monetization_model: "IAA（应用内广告）"
+      confirmed_at: "2026-11-02"
+      ta_project: "IAA_Game"
+      project_id: 54
+      table_suffix: 54
+      game_name: "yishuajiushangtou"
+      user_table: "ta.v_user_54"
+      event_table: "ta.v_event_54"
+      tracking_yaml: "yishuajiushangtou_tracking.yaml"
+      canonical_dashboard_sql: "sql/yishuajiushangtou/basic_dashboards_20261102.md"
+      project_space_id: 810
+      notes:
+        - "用户确认IAA游戏；IAA_Game是多游戏共用项目，必须固定本游戏game_name及正式用户domain=release。"
+        - "基础看板包含大盘、留存、激活登录、玩家行为、在线时长、广告分析、关卡分析；指标、筛选、展示及报表ID以tracking最新版为准。"
+        - "每日广告次数分布按观看记录ad_log全部result，完播单独按result='1'；禁止复用旧完播次数分布。"
+
   tracking_design_rules:
     - "默认不上报入口、页面曝光、按钮曝光；仅在用户明确要求时增加。"
     - "默认只设计能反映业务结果、资产变化或关键玩法结算的事件。"
