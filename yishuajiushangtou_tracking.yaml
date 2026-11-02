@@ -1,6 +1,10 @@
 projects:
   -
     project: "一耍就上头"
+    project_type: "IAA游戏"
+    monetization_model: "IAA（应用内广告）"
+    classification_confirmed_at: "2026-11-02"
+    classification_source: "用户明确确认本项目为IAA游戏"
     ta_project: "IAA_Game"
     project_id: 54
     source_files:
@@ -1293,6 +1297,10 @@ projects:
         name: "一耍就上头｜广告分析"
         dashboard_id: 2144
         report_ids: [5988, 5989, 5990, 5991]
+      -
+        name: "一耍就上头｜关卡分析"
+        dashboard_id: 2165
+        report_ids: [6085, 6083, 6084, 5987]
     advertising_and_duration_update:
       updated_at: "2026-11-02"
       project_space_id: 810
@@ -1322,6 +1330,9 @@ projects:
       verification: "六张报表计算成功；新老用户及广告点组合筛选已实测；每日时长分布人数/分钟与汇总核对无差异，历史完播核对已被2026-11-02观看次数口径替代；当前观看分布与ad_log记录总数核对无差异"
     dashboard_corrections_20261102:
       status: "当前广告、关卡、在线时长的权威规则；覆盖2026-10-26同名旧规则"
+      canonical_sql: "sql/yishuajiushangtou/basic_dashboards_20261102.md"
+      scope: "IAA基础看板全套：大盘数据、留存、激活登录、玩家行为、在线时长、广告分析、关卡分析；不包含基础生态分析系列。"
+      revenue_boundary: "尚未验证广告收入埋点、金额单位及结算规则；不得以观看次数替代收入或推导IAA LTV。"
       level_dashboard_id: 2165
       level_reports: {failure_summary: 6083, remain_screw_distribution: 6084, level_summary: 6085}
       updated_reports: [5984, 5987, 5988, 5989, 5990, 5991, 6083, 6084, 6085]
