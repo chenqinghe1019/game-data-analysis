@@ -5,7 +5,7 @@ projects:
     project_id: 54
     source_files:
       - "【一耍就上头】埋点说明文档.xlsx"
-    verified_at: "2026-10-26"
+    verified_at: "2026-11-02"
     events:
       -
         event_name: "ta_app_install"
@@ -1265,7 +1265,7 @@ projects:
         limitation: "仅统计已上报会话；未完成或未上报会话不估算。"
       ad_completion: "ad_log.result = '1'"
       retention: "D1为新增当天，D2至D30按后续自然日活跃计算；目标日必须不晚于昨天，未成熟为NULL；新增日期参数不截断后续事件。"
-      display: "默认使用大图明细数据；总体和渠道行不可相加；全部新增与首日在线超过5/10分钟为重叠人群。"
+      display: "广告、关卡、在线时长使用已配置的SQL图表表格（L19）及大图，维度在前、指标在后、比率为两位百分数；其他基础看板沿用既有设置。全部新增与首日在线超过5/10分钟为重叠人群。"
       schema_difference: "文档中的ta_app_start/ta_app_end未在本次线上事件列表发现；实际为ta_mg_launch/ta_mg_show/ta_mg_hide。每日挑战、水族馆等文档事件尚未在已上报事件列表发现，不能据此假设已上线。"
     dashboards:
       -
@@ -1294,7 +1294,7 @@ projects:
         dashboard_id: 2144
         report_ids: [5988, 5989, 5990, 5991]
     advertising_and_duration_update:
-      updated_at: "2026-10-26"
+      updated_at: "2026-11-02"
       project_space_id: 810
       reference_ad_dashboard: "https://ta-data.feiyu.com/#/panel/panel/37_2023"
       reference_duration_report: 5664
@@ -1306,17 +1306,34 @@ projects:
       ad_map_detail_report: 5991
       filters:
         date: "${PartDate:date1}，统计行为日期"
-        user_type: "${Selector:selector2}，显示名新老用户；默认全部用户，新用户reg_day=date(day)，老用户reg_day<date(day)；reg_day缺失仅计入全部用户"
-        ad_point: "${Variable3}，显示名广告点名称；默认全部，按展示名称精确匹配；用于四张广告报表"
+        registration_date: "${PartDate:date2}，显示名注册日期；先按身份最早first_login_time算reg_day，再映射$part_date应用日期参数；默认最近3651天"
+        channel: "${Selector:selector3}，显示名渠道；默认全部渠道，提供3059310与未知；新渠道上线时更新选择项"
+        user_type: "${Selector:selector4}，显示名新老用户；默认全部用户，新用户reg_day=date(day)，老用户reg_day<date(day)"
+        ad_point: "${Variable5}，显示名广告点名称；默认全部，按展示名称精确匹配；用于四张广告报表"
+        level: "广告关卡汇总/明细${Variable6}、三张关卡报表${Variable5}，显示名关卡名称；默认全部，按map_id数值匹配，1和1.0等价"
       ad_point: "优先ad_location_scene，空值依次回退ad_location_name、ad_location_id，最后未知广告点"
       ad_semantics: "ad_button.action_id=1为弹出、2为点击；ad_log为结束时上报的结果事件，result='1'完播、'2'失败、'3'中途退出，不能将结果次数标作开始曝光"
-      ad_distribution: "每天、每位活跃玩家汇总所选广告点的成功完播次数；以全部当日活跃为全集LEFT JOIN，保留0次用户"
-      daily_duration_distribution: "每天、每位玩家汇总ta_mg_hide.#duration并换算分钟，按参考档位分桶；没有时长记录单列且保留在活跃分母；每天每渠道保留空档0人数"
+      ad_distribution: "每天、每位活跃玩家汇总所选广告点的观看次数（ad_log全部result）；以筛选后的当日活跃为全集LEFT JOIN，保留0次用户。2026-11-02用户明确纠正，不按成功完播次数分布。"
+      daily_duration_distribution: "每天、每位玩家汇总ta_mg_hide.#duration并换算分钟，按参考档位分桶；没有时长记录单列且保留在活跃分母；每天在所选渠道及用户范围内保留空档0人数"
       duration_buckets: ["无时长记录", "0–<1分钟", "1–<2分钟", "2–<3分钟", "3–<4分钟", "4–<5分钟", "5–<6分钟", "6–<11分钟", "11–<16分钟", "16–<31分钟", "31–<61分钟", "61–<121分钟", "121–<241分钟", "241–<361分钟", "≥361分钟"]
       map_analysis: "按玩法类型、玩法名称、map_id及广告点拆分；关卡开始人数取battle_start去重；广告点筛选只限制广告事件，不改变关卡开始基数；日内行为比率不等于同局严格漏斗"
       unavailable_reference_field: "目标项目没有chapter_speed，不移植萝卜4的关卡进度分档"
       ratio_precision: "整数比率先乘1.000000后除以NULLIF分母，再ROUND和DECIMAL(18,4)，避免低scale十进制截断"
-      verification: "六张报表计算成功；新老用户及广告点组合筛选已实测；每日时长分布人数/分钟与汇总核对无差异，广告次数分布与广告点汇总的完播总数核对无差异"
+      verification: "六张报表计算成功；新老用户及广告点组合筛选已实测；每日时长分布人数/分钟与汇总核对无差异，历史完播核对已被2026-11-02观看次数口径替代；当前观看分布与ad_log记录总数核对无差异"
+    dashboard_corrections_20261102:
+      status: "当前广告、关卡、在线时长的权威规则；覆盖2026-10-26同名旧规则"
+      level_dashboard_id: 2165
+      level_reports: {failure_summary: 6083, remain_screw_distribution: 6084, level_summary: 6085}
+      updated_reports: [5984, 5987, 5988, 5989, 5990, 5991, 6083, 6084, 6085]
+      common_filters: ["统计日期", "注册日期", "渠道", "新老用户"]
+      population: "固定游戏与正式用户，先算身份最早注册日期与首注册渠道，再按注册日期、渠道、行为日新老过滤。四项筛选用于上述九张报表。"
+      channel_output: "移除总体与各渠道重复输出行；渠道改为筛选维度，所选人群只输出一份汇总。"
+      failure_entry_users: "6083按同日、同玩法、同关卡、同筛选身份范围的battle_start去重人数LEFT JOIN失败汇总，与6085进入人数一致；不以失败人数替代。"
+      ad_views: "视频观看次数及每日广告次数分布=count(ad_log)，不限制result；视频完播次数=count_if(result='1')。ad_log是结束结果上报，观看记录不等于开始曝光。"
+      ad_ratios: "完播率=完播次数/观看次数；完播占比=本组完播次数/所选广告点当日完播总次数；完播人数占比=本组完播人数/所选广告点当日去重完播人数；渗透率=观看人数/当日活跃。按关卡细分仍使用相同当日基数。"
+      ad_level_filters: "广告点只限制广告记录，关卡开始人数及活跃基数保持其各自定义；关卡名称限制对应关卡输出。"
+      graph_display: "九张报表均建立SQL图表表格并保存；三张看板的相关卡片切换L19大图，显示日期、玩法、关卡、广告点等适用维度后展示指标；比率设置2位百分数。"
+      qa: "2026-11-02线上执行一致性核对：失败进入人数对关卡汇总、每日广告分布观看次数对ad_log、每日时长分布人数对时长汇总均零差异；广告明细关卡名称=1实测生效后还原全部。"
     notes:
       - "required未在原表逐字段声明，统一为null。"
       - "业务字段解析覆盖事件属性、用户属性、公共事件属性；其他6页为接入/类型/身份说明，不转为业务事件。"
