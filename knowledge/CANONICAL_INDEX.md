@@ -22,6 +22,7 @@ last_verified: 2026-10-08
 - global/lifecycle_maturity.md：D1-Dn、成熟、历史快照
 - global/identity_channel.md：账号/角色/设备/渠道身份
 - [global/ta_analysis_foundations.md](global/ta_analysis_foundations.md)：数数分析主体、埋点、模型选择与新增留存
+- [global/ta_funnel_distribution.md](global/ta_funnel_distribution.md)：数数漏斗窗口、转化分母与分布区间
 - global/payment_policy.md：支付金额、首日/累计付费、代币与去重
 - global/data_quality_playbook.md：异常排查手册
 - global/field_pitfalls.md：字段/事件/类型易错清单
