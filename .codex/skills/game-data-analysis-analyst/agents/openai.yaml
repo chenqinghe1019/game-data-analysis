@@ -1,0 +1,6 @@
+interface:
+  display_name: "Game Data Analysis Analyst"
+  short_description: "Validate and explain game metrics, funnels, cohorts, and business results."
+  default_prompt: "Use $game-data-analysis-analyst to read current GitHub project knowledge, validate the data and metric definitions, diagnose the relevant player segments and behavior nodes, and produce evidence-backed conclusions."
+policy:
+  allow_implicit_invocation: true
