@@ -97,6 +97,7 @@ SQL 规则优先级：
 2. 将需要的 Skill 目录从 `.codex/skills/` 复制到 `%USERPROFILE%\.codex\skills\`：
    - `.codex/skills/tracking-yaml`
    - `.codex/skills/game-data-sql-analyst`
+   - `.codex/skills/game-data-analysis-analyst`
 3. 打开 Codex 后确认可用 Skill 中出现对应名称。
 4. 数数后台仍按安全策略处理：Codex 打开浏览器，你手动登录，Codex 只接管已登录会话，不保存账号密码。
 
@@ -112,6 +113,10 @@ SQL 规则优先级：
 6. 执行 `.codex/skills/game-data-sql-analyst/references/sql-review-checklist.md` 自检。
 7. 默认输出最终完整 SQL。
 8. 用户确认了长期有效的新规则或纠正后，将规则同步回 GitHub。
+
+## 游戏数据分析 Skill 工作方式
+
+处理分析任务时，先读取 `PROJECT_WORKING_RULES.md` 和 `knowledge/CANONICAL_INDEX.md`，再按项目读取指标定义、数据质量手册、身份/支付/成熟口径及项目 FACTS。按 `.codex/skills/game-data-analysis-analyst/references/analysis-review-checklist.md` 核验数据与结论；遇到重复问题时查阅并维护 `analysis-lessons.md`。SQL 查询实现仍交由 `game-data-sql-analyst`，两者配合完成“取数 → 验数 → 解释 → 汇报”。
 
 ## 同步规则
 
