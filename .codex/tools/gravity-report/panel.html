@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>引力引擎企微播报后台</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f3f7fb;color:#19324a;font:15px/1.55 "Microsoft YaHei",sans-serif}
+main{max-width:1440px;margin:auto;padding:24px 20px}header{margin-bottom:16px}h1{margin:0;font-size:30px}h2{font-size:19px;margin:0 0 12px}h3{font-size:15px;margin:16px 0 8px}
+p{margin:6px 0;color:#52677a}.card{background:white;border:1px solid #dbe6f1;border-radius:12px;padding:20px;margin-bottom:14px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 12px}.wide{grid-column:1/-1}
+.config-columns{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:14px;align-items:start}
+.group{margin:10px 0;padding:10px;border:1px solid #dbe6f1;border-radius:8px;background:#f8fbff}
+.project-entry{grid-template-columns:minmax(0,2fr) minmax(95px,1fr) auto;align-items:end;background:white}
+.entry button{padding:7px 9px;white-space:nowrap}
+.hour-picker{position:relative;width:min(100%,380px);margin-top:10px}
+.hour-picker summary{cursor:pointer;border:1px solid #bfcfe0;border-radius:6px;padding:8px 10px;background:#fff}
+.hour-menu{position:absolute;z-index:2;top:calc(100% + 4px);width:100%;padding:10px;background:#fff;border:1px solid #bfcfe0;border-radius:8px;box-shadow:0 8px 24px #19324a26}
+.hours{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px}
+.toggle{display:flex;align-items:center;gap:6px}.toggle input{width:auto;accent-color:#2565d4}
+@media(max-width:900px){.config-columns{grid-template-columns:1fr;gap:0}}
+@media(max-width:520px){.grid,.project-entry{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+label{display:grid;gap:4px;font-size:13px;color:#354f65}input,textarea{width:100%;padding:8px 10px;border:1px solid #bfcfe0;border-radius:6px;font:inherit;color:#19324a;background:#fff}textarea{resize:vertical}
+button{padding:8px 13px;border:1px solid #bfd1e6;border-radius:7px;background:#f2f7ff;color:#174777;font:inherit;cursor:pointer}button.primary{background:#2565d4;color:white;border-color:#2565d4}button:disabled{opacity:.48;cursor:default}
+.actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.entry{border:1px solid #e1eaf4;border-radius:8px;padding:12px;margin:8px 0}.entry button{justify-self:start}
+pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#f4f8fc;padding:12px;border-radius:6px;min-height:44px;margin-bottom:0}
+#message{color:#9c3824}#output{overflow-wrap:anywhere}
+</style>
+<main>
+<header><h1>引力引擎企微播报后台</h1><p>取北京时间「今日」累计，生成 Excel 和企微播报。</p></header>
+<form id="config" hidden>
+<div class="config-columns">
+<section class="card"><h2>引力报表参数</h2><div id="report" class="grid"></div>
+<label>浏览器模式<select id="browserMode"><option value="existing">复用已登录的 Chrome</option><option value="dedicated">使用独立播报 Chrome</option></select></label>
+<p id="browserHint">在已登录引力的 Chrome 中打开 chrome://inspect/#remote-debugging，开启远程调试并允许连接。</p>
+<details><summary>引力登录账号 <span id="loginStatus"></span></summary>
+<p>引力登录失效时自动填写。凭据加密保存在本机。</p>
+<div class="grid">
+<label>登录邮箱<input id="loginEmail" type="email" autocomplete="username"></label>
+<label>登录密码<input id="loginPassword" type="password" autocomplete="new-password"></label>
+</div>
+<div class="actions"><button id="saveLogin" type="button">保存登录账号</button><button id="clearLogin" type="button">移除登录账号</button></div>
+</details>
+<h3>主表指标列</h3><div id="fields" class="grid"></div></section>
+<section class="card"><h2>项目配置参数</h2><div id="project"></div>
+<h3>播报分组</h3><p>每个分组可组合多个引力项目。</p>
+<div id="groups"></div><button type="button" id="addGroup">添加分组</button>
+<h3>引力自动识别的项目与媒体</h3>
+<p id="discoveryHint"></p><div id="discovery"></div></section>
+</div>
+<section class="card"><h2>小时发送</h2>
+<label class="toggle"><input id="hourlyEnabled" type="checkbox">开启小时发送</label>
+<p>选择每天自动推送的北京时间整点。保存后生效，运行时请保持后台在线。</p>
+<p id="scheduleHint"></p>
+<details id="hourPicker" class="hour-picker">
+<summary id="hourSummary">选择发送小时</summary>
+<div class="hour-menu">
+<div class="actions"><label class="toggle"><input id="allHours" type="checkbox">全选</label><button id="clearHours" type="button">清空</button></div>
+<div id="hours" class="hours"></div>
+</div>
+</details></section>
+<section class="card"><h2>企微推送</h2>
+<label>群机器人 Webhook <span id="webhookStatus"></span>
+<input id="webhookUrl" type="password" autocomplete="new-password" placeholder="粘贴企微群机器人的 Webhook 地址">
+</label>
+<div class="actions"><button id="saveWebhook" type="button">保存 Webhook</button><button id="clearWebhook" type="button">清除 Webhook</button></div>
+</section>
+<section class="card actions"><button class="primary" type="submit">保存参数</button><button id="run" type="button">生成 Excel</button><button id="push" type="button" disabled>生成并推送</button><span id="saved"></span></section>
+</form>
+<section class="card" aria-live="polite"><h2>运行状态</h2><p id="status">正在读取配置</p><p id="message"></p><p id="output"></p><pre id="log" hidden></pre></section>
+</main>
+<script type="module">
+const get = id => document.getElementById(id);
+const fieldLabels = {spend:'消耗',activations:'激活数',activationCost:'激活成本',payers:'首日付费人数',payCost:'首付成本',revenue:'首日付费金额',roi:'ROI'};
+const reportLabels = {url:'报表分享链接',title:'报表标题',product:'产品筛选名称',timeoutSeconds:'查询超时（秒）',retries:'失败重试次数'};
+let busy = false;
+let canPush = false;
+let action = false;
+let loginSource = 'local';
+let loginConfigured = false;
+let webhookSettings = {configured:false,source:'local'};
+
+function showWebhookStatus(status) {
+  webhookSettings = status;
+  get('webhookStatus').textContent = status.source==='environment' ? '由启动环境提供' : status.configured ? '已配置' : '未配置';
+}
+
+async function updateWebhook(clear) {
+  action = true;
+  buttons();
+  get('message').textContent = '';
+  try {
+    showWebhookStatus(await request('/api/webhook','PUT',clear ? null : {url:get('webhookUrl').value.trim()}));
+    get('webhookUrl').value = '';
+    await updateJob();
+  } catch(error) { get('message').textContent = error.message; }
+  finally { action = false; buttons(); }
+}
+
+function showLoginStatus({configured,source}) {
+  loginSource=source;
+  loginConfigured=configured;
+  get('loginStatus').textContent=configured ? (source==='environment'?'由环境变量提供':'已配置') : '未配置';
+  buttons();
+}
+
+async function updateLogin(clear) {
+  action=true;
+  buttons();
+  get('message').textContent='';
+  try {
+    const status=await request('/api/login','PUT',clear?null:{
+      email:get('loginEmail').value.trim(),password:get('loginPassword').value,
+    });
+    get('loginEmail').value='';
+    get('loginPassword').value='';
+    showLoginStatus(status);
+  } catch(error) { get('message').textContent=error.message; }
+  finally { action=false; buttons(); }
+}
+
+function updateHourSelection() {
+  const selected=[...get('hours').querySelectorAll('input:checked')].map(input=>input.parentElement.textContent);
+  const all=get('allHours');
+  all.checked=selected.length===24;
+  all.indeterminate=selected.length>0 && selected.length<24;
+  get('hourSummary').textContent=selected.length===24?'已选全部 24 个整点':
+    selected.length>3?'已选 '+selected.length+' 个整点':
+    selected.length?selected.join('、'):'选择发送小时';
+}
+
+function setHours(checked) {
+  for (const input of get('hours').querySelectorAll('input')) input.checked=checked;
+  updateHourSelection();
+}
+
+async function request(url,method='GET',data) {
+  const response = await fetch(url, method==='GET' ? {} : {
+    method,headers:{'Content-Type':'application/json'},body:JSON.stringify(data),
+  });
+  const result = await response.json();
+  if (!response.ok) throw new Error(result.error);
+  return result;
+}
+
+function input(parent,label,key,value,options={}) {
+  const wrapper=document.createElement('label');
+  wrapper.textContent=label;
+  if (options.wide) wrapper.className='wide';
+  const field=document.createElement(options.multiline?'textarea':'input');
+  field.dataset.key=key;
+  field.value=value;
+  if (options.multiline) field.rows=3;
+  else if (typeof value==='number') field.type='number';
+  wrapper.append(field);
+  parent.append(wrapper);
+}
+
+function addButton(parent,text,action) {
+  const button=document.createElement('button');
+  button.type='button';
+  button.textContent=text;
+  button.onclick=action;
+  parent.append(button);
+}
+
+function entry(parent,item) {
+  const box=document.createElement('div');
+  box.className='entry grid project-entry';
+  input(box,'项目名称','name',item.name);
+  input(box,'APPID','id',item.id);
+  addButton(box,'移除项目',()=>box.remove());
+  parent.append(box);
+}
+
+function groupCard(group) {
+  const card=document.createElement('div');
+  card.className='group';
+  const options=document.createElement('div');
+  options.className='grid';
+  input(options,'分组名称','name',group.name);
+  const entries=document.createElement('div');
+  entries.className='group-projects';
+  for(const item of group.projects) entry(entries,item);
+  const controls=document.createElement('div');
+  controls.className='actions';
+  addButton(controls,'添加项目',()=>entry(entries,{name:'',id:''}));
+  addButton(controls,'移除分组',()=>card.remove());
+  card.append(options,entries,controls);
+  get('groups').append(card);
+}
+
+function values(parent) {
+  return Object.fromEntries([...parent.querySelectorAll('[data-key]')].map(field=>
+    [field.dataset.key,field.type==='number' ? (field.value==='' ? null : Number(field.value)) : field.value.trim()]));
+}
+
+let discovered = {date:null,projects:[]};
+let discoverySignature;
+
+function renderDiscovery() {
+  const groups = [...get('groups').children];
+  const list = get('discovery');
+  list.replaceChildren();
+  get('discoveryHint').textContent = discovered.date
+    ? discovered.date+' 取数结果。选好分组后点击保存。未分组的投放项目会单独显示。'
+    : '运行一次报表后，这里会列出引力返回的项目和媒体，可直接选择分组。';
+  for (const item of discovered.projects) {
+    const line = document.createElement('label');
+    line.className = 'entry grid project-entry';
+    const caption = document.createElement('span');
+    caption.textContent = item.name+'（'+item.id+'） · '+(item.media.join('、') || '无投放媒体');
+    const choice = document.createElement('select');
+    choice.disabled = busy || action;
+    choice.append(new Option('未分组',''));
+    let existing;
+    for (const [index,group] of groups.entries()) {
+      const name = values(group.firstElementChild).name;
+      if (!name) continue;
+      choice.append(new Option(name,String(index)));
+      for (const entryBox of group.querySelector('.group-projects').children) {
+        if (values(entryBox).id === item.id) {
+          existing = entryBox;
+          choice.value = String(index);
+        }
+      }
+    }
+    choice.onchange = () => {
+      const project = existing ? values(existing) : {name:item.name,id:item.id};
+      existing?.remove();
+      if (choice.value !== '') entry(groups[Number(choice.value)].querySelector('.group-projects'),project);
+      renderDiscovery();
+    };
+    line.append(caption,choice);
+    list.append(line);
+  }
+}
+
+function formConfig() {
+  const groups=Array.from(get('groups').children,card=>{
+    const options=card.firstElementChild;
+    const projects=Array.from(card.querySelector('.group-projects').children,values);
+    return {name:values(options).name,projects};
+  });
+  return {report:{...values(get('report')),fields:values(get('fields')),browserMode:get('browserMode').value},
+    project:{...values(get('project')),groups},
+    schedule:{enabled:get('hourlyEnabled').checked,
+      hours:[...get('hours').querySelectorAll('input:checked')].map(input=>Number(input.value))}};
+}
+
+function buttons() {
+  for(const button of get('config').querySelectorAll('button')) button.disabled=busy||action;
+  get('push').disabled=busy||action||!canPush;
+  get('saveLogin').disabled=busy||action||loginSource==='environment';
+  get('clearLogin').disabled=busy||action||!loginConfigured||loginSource==='environment';
+  get('saveWebhook').disabled=busy||action||webhookSettings.source==='environment';
+  get('clearWebhook').disabled=get('saveWebhook').disabled||!webhookSettings.configured;
+  get('webhookUrl').disabled=get('saveWebhook').disabled;
+  get('push').title=canPush?'先发截图，再发标题':'请先保存企微 Webhook';
+  get('scheduleHint').textContent=canPush?'':'在下方「企微推送」保存 Webhook 后即可发送。';
+  for (const select of get('discovery').querySelectorAll('select')) select.disabled=busy||action;
+}
+
+async function updateJob() {
+  const job=await request('/api/job');
+  busy=job.state==='running';
+  canPush=job.canPush;
+  get('status').textContent={idle:'就绪 · 首次运行时可在 Chrome 窗口登录',running:'运行中 · 请留意 Chrome 登录窗口',success:'运行完成',failed:'运行失败 · 请查看日志'}[job.state];
+  if (job.slot) get('status').textContent += ' · 定时 '+job.slot.replace('T',' ')+':00';
+  get('log').textContent=job.log;
+  get('log').hidden=!job.log;
+  get('output').textContent=job.output??'';
+  const signature = job.finishedAt ?? '';
+  if (signature !== discoverySignature) {
+    discovered = await request('/api/projects');
+    discoverySignature = signature;
+    renderDiscovery();
+  }
+  buttons();
+}
+
+async function saveAndRun(push) {
+  action=true;
+  buttons();
+  get('message').textContent='';
+  try {
+    await request('/api/config','PUT',formConfig());
+    get('saved').textContent='参数已保存';
+    if (push!==null) await request('/api/run','POST',{push});
+    await updateJob();
+  } catch(error) { get('message').textContent=error.message; }
+  finally { action=false; buttons(); }
+}
+
+try {
+  const {report,project,schedule}=await request('/api/config');
+  get('hourlyEnabled').checked=schedule.enabled;
+  for (let hour=0; hour<24; hour++) {
+    const label=document.createElement('label');
+    label.className='toggle';
+    const checkbox=document.createElement('input');
+    checkbox.type='checkbox';
+    checkbox.value=hour;
+    checkbox.checked=schedule.hours.includes(hour);
+    label.append(checkbox,String(hour).padStart(2,'0')+':00');
+    get('hours').append(label);
+  }
+  updateHourSelection();
+  get('hours').onchange=updateHourSelection;
+  get('allHours').onchange=event=>setHours(event.target.checked);
+  get('clearHours').onclick=()=>setHours(false);
+  document.addEventListener('click',event=>{
+    if (!get('hourPicker').contains(event.target)) get('hourPicker').open=false;
+  });
+  get('hourPicker').addEventListener('keydown',event=>{
+    if (event.key==='Escape') {
+      get('hourPicker').open=false;
+      get('hourSummary').focus();
+    }
+  });
+  for(const [key,label] of Object.entries(reportLabels)) input(get('report'),label,key,report[key],{wide:key==='url'});
+  const browserMode=get('browserMode');
+  browserMode.value=report.browserMode;
+  const updateBrowserHint=()=>{get('browserHint').hidden=browserMode.value!=='existing';};
+  browserMode.onchange=updateBrowserHint;
+  updateBrowserHint();
+  get('saveLogin').onclick=()=>updateLogin(false);
+  get('clearLogin').onclick=()=>updateLogin(true);
+  showLoginStatus(await request('/api/login'));
+  showWebhookStatus(await request('/api/webhook'));
+  get('saveWebhook').onclick=()=>updateWebhook(false);
+  get('clearWebhook').onclick=()=>updateWebhook(true);
+  for(const [key,label] of Object.entries(fieldLabels)) input(get('fields'),label,key,report.fields[key]);
+  input(get('project'),'项目名称','name',project.name);
+  for(const group of project.groups) groupCard(group);
+  get('addGroup').onclick=()=>{groupCard({name:'',projects:[]});renderDiscovery();};
+  get('groups').addEventListener('change',renderDiscovery);
+  get('groups').addEventListener('click',event=>{
+    if (event.target.tagName==='BUTTON') renderDiscovery();
+  });
+  get('config').onsubmit=event=>{event.preventDefault();saveAndRun(null);};
+  get('run').onclick=()=>saveAndRun(false);
+  get('push').onclick=()=>saveAndRun(true);
+  get('config').hidden=false;
+  await updateJob();
+  setInterval(()=>updateJob().catch(error=>{get('message').textContent=error.message;}),1500);
+} catch(error) { get('message').textContent=error.message; }
+</script>
+</html>

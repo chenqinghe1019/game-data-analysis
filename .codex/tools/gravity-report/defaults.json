@@ -1,0 +1,22 @@
+{
+  "report": {
+    "url": "",
+    "title": "",
+    "product": "",
+    "timeoutSeconds": 120,
+    "retries": 1,
+    "fields": {
+      "spend": "平台_消耗",
+      "activations": "标准_激活数",
+      "activationCost": "标准激活成本",
+      "payers": "标准_首日付费人数",
+      "payCost": "标准_首日付费成本",
+      "revenue": "标准_首日付费金额",
+      "roi": "标准_首日付费ROI"
+    }
+  },
+  "project": {
+    "name": "",
+    "groups": []
+  }
+}
