@@ -1,6 +1,6 @@
 # 倍特工作室项目工作规范 / PROJECT WORKING RULES
 
-更新时间：2026-10-30
+更新时间：2026-11-11
 
 > 本文件是仓库根目录的统一工作入口。处理“倍特工作室”相关 SQL、数据分析、埋点、看板、项目配置、口径核查、报错修复、跨项目迁移等需求时，除当前用户明确指令外，优先读取本文件，再按本文索引读取对应项目和专题知识。
 
@@ -211,6 +211,9 @@ Canonical 读取顺序：
 - `.codex/skills/game-data-sql-analyst/SKILL.md`：SQL 工作流和知识读取顺序。
 - `.codex/skills/game-data-sql-analyst/references/sql-review-checklist.md`：出 SQL 前检查清单。
 - `.codex/skills/tracking-yaml/`：埋点表 → YAML 的 Skill。
+- `.codex/skills/game-data-analysis-analyst/`：游戏数据分析主 Skill，负责数据质量、指标诊断、分群、漏斗、活动/合服分析、图表与报告。
+- `.codex/skills/game-data-analysis-analyst/references/analysis-lessons.md`：项目中反复出现的数据分析问题、错误原因和已确认解决方式。
+- `.codex/skills/game-data-analysis-analyst/references/analysis-review-checklist.md`：数据分析交付前检查清单。
 
 ### 7.5 操作和工作流
 
@@ -264,11 +267,11 @@ Canonical 读取顺序：
 2. **先读取 `PROJECT_WORKING_RULES.md`。**
 3. 读取 `project_memory.yaml` 和对应项目/专题最新知识。
 4. 搜索 `sql/` 是否有最新同类已验证实现。
-5. 明确：cohort、日期、成熟、当日/累计、分子、分母、金额单位、用户身份和 JOIN 键。
-6. 新建或最小化修改 SQL。
-7. 执行 SQL review checklist。
-8. 默认返回最终完整 SQL。
-9. 用户确认了长期有效的新规则或纠正后，同步回 GitHub 对应知识文件；必要时同步更新本文件摘要。
+5. 判断任务类型：SQL 新建/修改/调试使用 `game-data-sql-analyst`；查询结果核验、指标诊断、分群、漏斗、业务解释和报告使用 `game-data-analysis-analyst`；混合任务由两个 Skill 配合。
+6. 明确 cohort、日期、成熟、当日/累计、分子、分母、金额单位、用户身份和统计粒度。
+7. SQL 任务执行 SQL review checklist；分析任务执行 `analysis-review-checklist.md`，并按需查阅 `analysis-lessons.md`。
+8. 默认交付完整 SQL 或带数据证据的分析结论，具体按任务类型执行。
+9. 用户确认了长期有效的新规则或纠正后，同步回 GitHub 对应 Canonical、项目事实或 Skill reference；必要时同步更新本文件摘要。
 
 ---
 
