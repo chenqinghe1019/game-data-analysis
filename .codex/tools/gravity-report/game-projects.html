@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>游戏项目 · 企微播报</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f3f7fb;color:#19324a;font:15px/1.55 Inter,"Microsoft YaHei",sans-serif}
+main{max-width:1000px;margin:auto;padding:28px 20px}
+h1{font-size:30px;margin:0 0 20px}
+h2{font-size:20px;margin:0}
+p{margin:0;color:#52677a}
+#projects{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:14px}
+article{display:grid;align-content:start;gap:12px;padding:20px;background:#fff;border:1px solid #dbe6f1;border-radius:12px}
+a{justify-self:start;color:#174777;text-underline-offset:3px}
+a:focus-visible{outline:2px solid #2565d4;outline-offset:4px}
+</style>
+<main>
+  <h1>游戏项目</h1>
+  <p id="status" role="status">正在读取项目</p>
+  <section id="projects" aria-label="游戏项目列表"></section>
+</main>
+<script type="module">
+const status = document.getElementById('status');
+const list = document.getElementById('projects');
+try {
+  const response = await fetch('/api/game-projects');
+  if (!response.ok) throw new Error('项目列表读取失败');
+  for (const project of await response.json()) {
+    const card = document.createElement('article');
+    const title = document.createElement('h2');
+    title.textContent = project.name;
+    const script = document.createElement('p');
+    script.textContent = project.script ? '播报脚本 · '+project.script : '播报脚本待配置';
+    card.append(title,script);
+    if (project.settings) {
+      const schedule = document.createElement('p');
+      schedule.textContent = project.scheduleEnabled ? '定时发送已开启' : '定时发送已关闭';
+      const link = document.createElement('a');
+      link.href = project.settings;
+      link.textContent = '打开播报配置';
+      card.append(schedule,link);
+    }
+    list.append(card);
+  }
+  status.hidden = true;
+} catch (error) { status.textContent = error.message; }
+</script>
+</html>

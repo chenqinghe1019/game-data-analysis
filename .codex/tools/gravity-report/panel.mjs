@@ -6,13 +6,14 @@ import {fileURLToPath} from 'node:url';
 import {configPath,discoveryPath,loadConfig,validateConfig} from './config.mjs';
 import {clearLogin,loginStatus,saveLogin} from './login.mjs';
 import {readWebhook,saveWebhook,webhookStatus} from './webhook.mjs';
+import {gameProjects,gravityProject,projectScript} from './game-projects.mjs';
 
 const host = '127.0.0.1';
 const port = Number(process.env.GRAVITY_PANEL_PORT ?? 8731);
 if (!Number.isInteger(port) || port < 1024 || port > 65535) throw new Error('后台端口无效');
 const origin = 'http://' + host + ':' + port;
 const page = await readFile(new URL('./panel.html', import.meta.url));
-const runner = fileURLToPath(new URL('./run.mjs', import.meta.url));
+const projectsPage = await readFile(new URL('./game-projects.html', import.meta.url));
 const outputDirectory = fileURLToPath(new URL('../../../outputs/gravity-wecom/', import.meta.url));
 const logDirectory = path.join(path.dirname(configPath),'logs');
 let job = {state:'idle',log:''};
@@ -39,7 +40,7 @@ function startJob(webhook, slot = null) {
   if (slot) env.GRAVITY_REPORT_SLOT = slot;
   else delete env.GRAVITY_REPORT_SLOT;
   const output = path.join(outputDirectory,Date.now()+'.xlsx');
-  const child = spawn(process.execPath,[runner,output],{env,windowsHide:true,timeout:20*60*1000});
+  const child = spawn(process.execPath,[projectScript(gravityProject).entry,output],{env,windowsHide:true,timeout:20*60*1000});
   void logEvent('job-started',{slot,push,startedAt:job.startedAt});
   const append = message => { job.log = (job.log+message).slice(-10000); };
   for (const stream of [child.stdout,child.stderr]) stream.setEncoding('utf8').on('data',append);
@@ -96,9 +97,19 @@ const server = createServer(async (request,response) => {
   try {
     if (request.headers.host !== host+':'+port) return json(response,403,{error:'请使用本机后台地址'});
     const route = request.method + ' ' + request.url;
-    if (route === 'GET /') {
+    if (route === 'GET /' || route === 'GET /projects') {
       response.writeHead(200,{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store','X-Frame-Options':'DENY'});
-      return response.end(page);
+      return response.end(route === 'GET /' ? page : projectsPage);
+    }
+    if (route === 'GET /api/game-projects') {
+      const config = await loadConfig();
+      return json(response,200,gameProjects.map(project=>({
+        id:project.id,
+        name:project.name ?? (config.project.name || '引力投放项目'),
+        script:projectScript(project)?.name ?? null,
+        settings:project.settings,
+        scheduleEnabled:project.id === gravityProject.id && config.schedule.enabled,
+      })));
     }
     if (route === 'GET /api/config') return json(response,200,await loadConfig());
     if (route === 'GET /api/projects') {
