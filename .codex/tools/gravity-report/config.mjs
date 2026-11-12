@@ -79,7 +79,7 @@ export function validateConfig(config, kind = 'gravity') {
   const {url:reportUrl,title,product,timeoutSeconds,retries,browserMode='existing'} = report;
   if (!['existing','dedicated'].includes(browserMode)) throw new Error('浏览器模式无效');
   const layout = kind === 'iaa' ? report.layout ?? 'project' : 'project';
-  if (!['project','daily'].includes(layout)) throw new Error('报表展示维度无效');
+  if (!['project','daily','flat'].includes(layout)) throw new Error('报表展示维度无效');
   return {...config,report:{url:reportUrl,title,product,timeoutSeconds,retries,browserMode,
     fields,...(metrics ? {metrics,layout} : {})},
     project:{name:project.name,groups:project.groups.map(group=>({name:group.name,

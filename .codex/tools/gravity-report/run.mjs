@@ -87,7 +87,7 @@ export async function refreshReport(page, expectedDay, wait = timeout, product =
     observer.observe(button, {attributes:true, attributeFilter:['disabled'], attributeOldValue:true});
     button.click();
   }, undefined, {timeout:remaining()}), remaining(),
-    layout === 'daily' ? '/report/api/v3/adreport/custom_get/' : undefined);
+    layout === 'daily' || layout === 'flat' ? '/report/api/v3/adreport/custom_get/' : undefined);
   await page.locator('html[data-gravity-refresh-started=true]').waitFor({state:'attached',timeout:remaining()});
   await ready();
   if (day() !== expectedDay || !await dateFilter.isVisible() || !await productFilter.isVisible()) {
@@ -103,13 +103,15 @@ function asNumber(value, field, percent) {
 }
 
 async function readGrid(page, {fields,metrics:configuredMetrics,layout}) {
-  const raw = await page.locator(root).evaluate(grid => {
+  const raw = await page.locator(root).evaluate((grid,flat) => {
     const select = (node, selector) => Array.from(node.querySelectorAll(selector));
     const cells = row => select(row, '.report-v2-cell--metric').map(cell => cell.innerText);
     const main = grid.querySelector('.el-table-v2__main');
     const left = grid.querySelector('.el-table-v2__left');
     const total = main.querySelector('.el-table-v2__fixed-header-row');
     const rows = scope => select(scope, '.el-table-v2__row[rowkey]').filter(row => row.getClientRects().length);
+    const flatRows = scope => select(scope,'.el-table-v2__row:not(.is-fixed)').filter(row=>row.getClientRects().length);
+    const position = row => row.getBoundingClientRect().top.toFixed(1);
     return {
       headers: select(main, '.el-table-v2__dynamic-header-row .el-table-v2__header-cell').map(cell => cell.innerText.trim()),
       total: total ? cells(total) : null,
@@ -119,8 +121,10 @@ async function readGrid(page, {fields,metrics:configuredMetrics,layout}) {
         key:row.getAttribute('rowkey'), label:row.innerText.trim(),
         expanded:row.classList.contains('is-expanded'),
       })),
+      flatLabels: flat ? flatRows(left).map(row=>[position(row),select(row,'.el-table-v2__row-cell').map(cell=>cell.innerText.trim())]) : [],
+      flatMetrics: flat ? flatRows(main).map(row=>[position(row),cells(row)]) : [],
     };
-  });
+  },layout === 'flat');
   const pagination = await page.getByText(/^共\s*\d+\s*条$/).innerText();
   const count = Number(pagination.match(/\d+/)[0]);
   if (!count || !raw.total) throw new Error('主表未返回可核验的合计与项目数据');
@@ -140,6 +144,27 @@ async function readGrid(page, {fields,metrics:configuredMetrics,layout}) {
       throw new Error('日期报表的明细与北京时间今日不一致');
     }
     return {total:parse(raw.total),apps:new Map()};
+  }
+  if (layout === 'flat') {
+    const metrics = new Map(raw.flatMetrics);
+    if (raw.flatLabels.length !== count || raw.flatMetrics.length !== count || metrics.size !== count ||
+        new Set(raw.flatLabels.map(([position])=>position)).size !== count) {
+      throw new Error('平铺报表的项目与媒体行未完整加载');
+    }
+    const apps = new Map();
+    for (const [position,dimensions] of raw.flatLabels) {
+      const [date,product,media] = dimensions;
+      const project = product?.match(/^(.*?)\s*APPID\s*(\d+)\s*$/s);
+      if (dimensions.length !== 3 || date !== day() || !project || !media || !metrics.has(position)) {
+        throw new Error('平铺报表须按「日期、产品、媒体平台」排列，且只包含北京时间今日');
+      }
+      const [,label,id] = project;
+      if (!apps.has(id)) apps.set(id,{name:label.trim() || 'APPID '+id,media:new Map()});
+      const app = apps.get(id);
+      if (app.media.has(media)) throw new Error('平铺报表中同一项目出现重复媒体：'+media);
+      app.media.set(media,parse(metrics.get(position)));
+    }
+    return {total:parse(raw.total),apps};
   }
   const metrics = new Map(raw.metrics);
   if (metrics.size !== raw.metrics.length || metrics.size !== raw.labels.length ||
@@ -184,7 +209,14 @@ async function readAppGroupTotal(page, ids, report, timeout) {
   await waitForReportTotals(page, () => dialog.getByRole('button', {name:'应用筛选'}).click({timeout}), timeout);
   const filtered = await readGrid(page,report);
   if (filtered.apps.size !== ids.length || ids.some(id=>!filtered.apps.has(id))) {
-    throw new Error('引力 APP 分组合计的筛选范围与配置不一致');
+    throw new Error('引力项目合计的筛选范围与配置不一致');
+  }
+  if (report.layout === 'flat') {
+    await page.getByRole('button',{name:/^表内筛选\/\s*1$/}).click({timeout});
+    await dialog.getByRole('button',{name:'全部清空'}).click({timeout});
+    await dialog.getByRole('button',{name:'应用筛选'}).click({timeout});
+    await page.getByRole('button',{name:/^表内筛选\/\s*0$/}).waitFor({timeout});
+    await refreshReport(page,day(),timeout,report.product,report.layout);
   }
   return filtered.total;
 }
@@ -194,6 +226,21 @@ export async function collect(page, {report,project} = defaults) {
   const grid = page.locator(root);
   await grid.waitFor({timeout});
   if (report.layout === 'daily') return readGrid(page,report);
+  if (report.layout === 'flat') {
+    const base = await readGrid(page,report);
+    for (const [id,app] of base.apps) {
+      const media = [...app.media.values()];
+      app.data = media.length === 1 || media.every(row=>row.spend === 0)
+        ? media[0] : await readAppGroupTotal(page,[id],report,timeout);
+    }
+    const group = project.groups.find(group=>group.name.toUpperCase()==='APP' && group.projects.length>1);
+    const ids = group?.projects.map(({id})=>id).filter(id=>base.apps.has(id)) ?? [];
+    if (ids.length === 1) base.appGroupTotal = base.apps.get(ids[0]).data;
+    if (ids.length > 1 && ids.some(id=>base.apps.get(id).data.spend !== 0)) {
+      base.appGroupTotal = await readAppGroupTotal(page,ids,report,timeout);
+    }
+    return base;
+  }
   // Read each project's media independently to keep the virtual table compact.
   const collapse = grid.getByRole('button', {name:'收起当前行',exact:true});
   for (let i=0; i<20 && await collapse.count(); i++) await collapse.first().click();
@@ -266,7 +313,8 @@ export async function writeWorkbook(rows, date, output, deps, renderImage = fals
   sheet.showGridLines = false;
   const last = 4 + rows.length;
   const daily = layout === 'daily';
-  const baseColumns = daily ? ['日期','消耗'] : ['分组','项目','媒体','消耗'];
+  const spendInYuan = daily || layout === 'flat';
+  const baseColumns = daily ? ['日期','消耗'] : ['分组','项目','媒体',spendInYuan ? '消耗（元）' : '消耗'];
   const reportColumns = metrics ?? [
     {label:'激活成本',format:'number'},
     {label:kind === 'iaa' ? '广告收入' : '首付成本',format:'number',bar:true},
@@ -280,7 +328,7 @@ export async function writeWorkbook(rows, date, output, deps, renderImage = fals
     sheet.getRange('A'+row+':'+lastColumn+row).merge();
     sheet.getRange('A'+row).values = [[value]];
   }
-  const displayRows = daily ? rows : rows.map(([group,name,media,spend,...metrics]) =>
+  const displayRows = spendInYuan ? rows : rows.map(([group,name,media,spend,...metrics]) =>
     [group,name,media,spend === null ? null : spend / 10_000,...metrics]);
   sheet.getRange('A4:'+lastColumn+last).values = [[...baseColumns,...reportColumns.map(({label})=>label)],...displayRows];
   const all = sheet.getRange('A1:'+lastColumn+(last+2));
@@ -331,8 +379,8 @@ export async function writeWorkbook(rows, date, output, deps, renderImage = fals
     sheet.getRange(column+':'+column).format.columnWidthPx = width;
   });
   const spendColumn = daily ? 'B' : 'D';
-  sheet.getRange(spendColumn+'5:'+spendColumn+last).setNumberFormat(daily ? '#,##0.00' : '#,##0.00"万"');
-  const formats = {number:daily ? '#,##0.0000' : '#,##0.00',integer:'#,##0',percent:'#,##0.00%'};
+  sheet.getRange(spendColumn+'5:'+spendColumn+last).setNumberFormat(spendInYuan ? '#,##0.00' : '#,##0.00"万"');
+  const formats = {number:spendInYuan ? '#,##0.0000' : '#,##0.00',integer:'#,##0',percent:'#,##0.00%'};
   for (const [index,{format,bar}] of reportColumns.entries()) {
     const column = String.fromCharCode(65+baseColumns.length+index);
     const range = sheet.getRange(column+'5:'+column+last);
