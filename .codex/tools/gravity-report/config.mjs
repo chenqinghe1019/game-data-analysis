@@ -32,8 +32,8 @@ export function validateConfig(config, kind = 'gravity') {
   const project = normalizeProject(rawProject);
   const url = URL.parse(report.url);
   if (!url || url.origin !== 'https://web.gravity-engine.com' || url.username || url.password ||
-      !/^#\/pivotReport\/shared\?id=\d+&category=adreport$/.test(url.hash)) {
-    throw new Error('请填写引力引擎投放报表的分享链接');
+      !/^#\/pivotReport\/(?:shared|mine)\?id=\d+&category=adreport$/.test(url.hash)) {
+    throw new Error('请填写引力引擎投放报表的分享地址或「我的报表」地址');
   }
   if (![report.title,report.product,project.name].every(validText)) throw new Error('请填写报表标题、产品筛选和项目名称');
   if (!Number.isInteger(report.timeoutSeconds) || report.timeoutSeconds < 10 || report.timeoutSeconds > 600 ||

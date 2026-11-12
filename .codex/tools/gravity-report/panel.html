@@ -80,7 +80,7 @@ const isIaa = apiPrefix === '/iaa';
 const fieldLabels = isIaa
   ? {spend:'消耗对应的引力原表列名'}
   : {spend:'消耗',activations:'激活数',activationCost:'激活成本',payers:'首日付费人数',payCost:'首付成本',revenue:'首日付费金额',roi:'ROI'};
-const reportLabels = {url:'报表分享链接',title:'报表标题',product:'产品筛选名称',timeoutSeconds:'查询超时（秒）',retries:'失败重试次数'};
+const reportLabels = {url:'引力报表链接',title:'报表标题',product:'产品筛选名称',timeoutSeconds:'查询超时（秒）',retries:'失败重试次数'};
 let busy = false;
 let canPush = false;
 let action = false;

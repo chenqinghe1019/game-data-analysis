@@ -51,7 +51,7 @@ async function openReport(page, {url:reportUrl,title,timeoutSeconds,browserMode}
   }
   const actual = new URL(page.url());
   if (actual.origin + actual.hash !== new URL(reportUrl).origin + new URL(reportUrl).hash) {
-    throw new Error('登录后未进入指定分享报表');
+    throw new Error('登录后未进入指定引力报表');
   }
 }
 
