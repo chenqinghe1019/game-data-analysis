@@ -92,14 +92,14 @@ export async function refreshReport(page, expectedDay, wait = timeout, product =
   }
 }
 
-function asNumber(value, field) {
+function asNumber(value, field, percent) {
   const cleaned = value?.replace(/^\((?:sum|WtAvg)\)\s*/, '').replace(/,/g,'').trim();
-  const pattern = field === 'roi' ? /^-?\d+(?:\.\d+)?%$/ : /^-?\d+(?:\.\d+)?$/;
+  const pattern = percent ? /^-?\d+(?:\.\d+)?%$/ : /^-?\d+(?:\.\d+)?$/;
   if (!cleaned || !pattern.test(cleaned)) throw new Error('指标格式无效：' + field);
-  return Number(cleaned.replace('%','')) / (field === 'roi' ? 100 : 1);
+  return Number(cleaned.replace('%','')) / (percent ? 100 : 1);
 }
 
-async function readGrid(page, fields) {
+async function readGrid(page, {fields,metrics:configuredMetrics}) {
   const raw = await page.locator(root).evaluate(grid => {
     const select = (node, selector) => Array.from(node.querySelectorAll(selector));
     const cells = row => select(row, '.report-v2-cell--metric').map(cell => cell.innerText);
@@ -123,9 +123,12 @@ async function readGrid(page, fields) {
   if (await page.getByRole('button', {name:'下一页'}).isEnabled()) throw new Error('主表有多页，当前配置无法完整核对');
   const indexes = Object.fromEntries(Object.entries(fields).map(([name,label]) => [name, raw.headers.indexOf(label)]));
   if (Object.values(indexes).includes(-1)) throw new Error('主表指标列已变化');
+  const percentFields = new Set(configuredMetrics
+    ? configuredMetrics.flatMap(({format},index)=>format === 'percent' ? ['metric'+index] : []) : ['roi']);
   function parse(cells) {
     if (cells?.length !== raw.headers.length) throw new Error('项目指标未完整加载');
-    return Object.fromEntries(Object.entries(indexes).map(([field,index]) => [field,asNumber(cells[index],field)]));
+    return Object.fromEntries(Object.entries(indexes).map(([field,index]) =>
+      [field,asNumber(cells[index],fields[field],percentFields.has(field))]));
   }
   const metrics = new Map(raw.metrics);
   if (metrics.size !== raw.metrics.length || metrics.size !== raw.labels.length ||
@@ -152,7 +155,7 @@ async function readGrid(page, fields) {
   return {total:parse(raw.total),apps};
 }
 
-async function readAppGroupTotal(page, ids, fields, timeout) {
+async function readAppGroupTotal(page, ids, report, timeout) {
   await page.getByRole('button', {name:/^表内筛选\/\s*0$/}).click({timeout});
   const dialog = page.getByRole('dialog', {name:'表内筛选'});
   await dialog.getByText('请选择', {exact:true}).first().click({timeout});
@@ -168,7 +171,7 @@ async function readAppGroupTotal(page, ids, fields, timeout) {
   }
   await dialog.getByRole('heading').click({timeout});
   await waitForReportTotals(page, () => dialog.getByRole('button', {name:'应用筛选'}).click({timeout}), timeout);
-  const filtered = await readGrid(page,fields);
+  const filtered = await readGrid(page,report);
   if (filtered.apps.size !== ids.length || ids.some(id=>!filtered.apps.has(id))) {
     throw new Error('引力 APP 分组合计的筛选范围与配置不一致');
   }
@@ -183,7 +186,7 @@ export async function collect(page, {report,project} = defaults) {
   const collapse = grid.getByRole('button', {name:'收起当前行',exact:true});
   for (let i=0; i<20 && await collapse.count(); i++) await collapse.first().click();
   if (await collapse.count()) throw new Error('主表存在未收起的行');
-  const base = await readGrid(page,report.fields);
+  const base = await readGrid(page,report);
   for (const [id,app] of base.apps) {
     if (app.data.spend === 0) continue;
     const row = grid.locator('.el-table-v2__left [rowkey]').filter({hasText:new RegExp('APPID\\s*'+id+'\\b')});
@@ -193,7 +196,7 @@ export async function collect(page, {report,project} = defaults) {
     await waitForReportTotals(page, () => expand.click(), timeout);
     await row.getByRole('button', {name:'收起当前行',exact:true}).waitFor();
     await row.locator('xpath=following-sibling::*[1][contains(@class,"el-table-v2__row-depth-1")]').waitFor({state:'visible',timeout});
-    app.media = (await readGrid(page,report.fields)).apps.get(id).media;
+    app.media = (await readGrid(page,report)).apps.get(id).media;
     const mediaSpend = [...app.media.values()].reduce((sum,item)=>sum+item.spend,0);
     if (Math.abs(mediaSpend-app.data.spend) > 0.01+0.005*app.media.size) {
       throw new Error('APPID '+id+' 媒体消耗合计 '+mediaSpend.toFixed(4)+
@@ -204,17 +207,18 @@ export async function collect(page, {report,project} = defaults) {
   const appGroup = project.groups.find(group=>group.name.toUpperCase()==='APP' && group.projects.length>1);
   const appIds = appGroup?.projects.map(({id})=>id).filter(id=>base.apps.has(id)) ?? [];
   if (appIds.length) {
-    base.appGroupTotal = await readAppGroupTotal(page,appIds,report.fields,timeout);
+    base.appGroupTotal = await readAppGroupTotal(page,appIds,report,timeout);
   }
   return base;
 }
 
-export function outputRows({total,apps,appGroupTotal}, project = defaults.project, kind = 'gravity') {
+export function outputRows({total,apps,appGroupTotal}, project = defaults.project, kind = 'gravity', metrics) {
   const rows = [];
-  const add = (group,name,media,metrics) => {
-    if (metrics && metrics.spend !== 0) {
-      rows.push([group,name,media,metrics.spend,metrics.activationCost,
-        kind === 'iaa' ? metrics.revenue : metrics.payCost,metrics.roi]);
+  const add = (group,name,media,source) => {
+    if (source && source.spend !== 0) {
+      const values = metrics ? metrics.map((_,index)=>source['metric'+index])
+        : [source.activationCost,kind === 'iaa' ? source.revenue : source.payCost,source.roi];
+      rows.push([group,name,media,source.spend,...values]);
     }
   };
   const addProject = (group,name,app) => {
@@ -241,7 +245,7 @@ export function outputRows({total,apps,appGroupTotal}, project = defaults.projec
   return rows;
 }
 
-export async function writeWorkbook(rows, date, output, deps, renderImage = false, projectName = defaults.project.name, hour, kind = 'gravity') {
+export async function writeWorkbook(rows, date, output, deps, renderImage = false, projectName = defaults.project.name, hour, kind = 'gravity', metrics) {
   const require = createRequire(path.join(deps,'package.json'));
   const {Workbook,SpreadsheetFile} = await import(pathToFileURL(require.resolve('@oai/artifact-tool')).href);
   const JSZip = require('jszip');
@@ -249,30 +253,35 @@ export async function writeWorkbook(rows, date, output, deps, renderImage = fals
   const sheet = wb.worksheets.add('投放播报');
   sheet.showGridLines = false;
   const last = 4 + rows.length;
+  const reportColumns = metrics ?? [
+    {label:'激活成本',format:'number'},
+    {label:kind === 'iaa' ? '广告收入' : '首付成本',format:'number',bar:true},
+    {label:'ROI',format:'percent'},
+  ];
+  const lastColumn = String.fromCharCode(68+reportColumns.length);
   const period = hour === undefined ? date : date+' '+hour+':00';
   const title = kind === 'iaa' ? 'IAA 播报' : '投放播报';
   for (const [row, value] of [[1,projectName+'｜'+title],[2,period+' · 北京时间「今日」累计'],
     [last+2,'指标取自引力报表。仅展示有消耗的项目及媒体。']]) {
-    sheet.getRange('A'+row+':G'+row).merge();
+    sheet.getRange('A'+row+':'+lastColumn+row).merge();
     sheet.getRange('A'+row).values = [[value]];
   }
   const displayRows = rows.map(([group,name,media,spend,...metrics]) =>
     [group,name,media,spend === null ? null : spend / 10_000,...metrics]);
-  const revenueOrCost = kind === 'iaa' ? '广告收入' : '首付成本';
-  sheet.getRange('A4:G'+last).values = [['分组','项目','媒体','消耗','激活成本',revenueOrCost,'ROI'],...displayRows];
-  const all = sheet.getRange('A1:G'+(last+2));
+  sheet.getRange('A4:'+lastColumn+last).values = [['分组','项目','媒体','消耗',...reportColumns.map(({label})=>label)],...displayRows];
+  const all = sheet.getRange('A1:'+lastColumn+(last+2));
   all.format.font = {name:'Microsoft YaHei',size:11,color:'#18334B'};
   all.format.rowHeight = 25;
   all.format.verticalAlignment = 'center';
-  const heading = sheet.getRange('A1:G1');
+  const heading = sheet.getRange('A1:'+lastColumn+'1');
   heading.format.fill = '#EAF2FF';
   heading.format.rowHeight = 38;
   heading.format.font = {name:'Microsoft YaHei',size:17,bold:true,color:'#153B69'};
-  sheet.getRange('A2:G2').format.font.color = '#536779';
-  sheet.getRange('A3:G3').format.rowHeight = 10;
-  sheet.getRange('A'+(last+1)+':G'+(last+1)).format.rowHeight = 9;
-  sheet.getRange('A'+(last+2)+':G'+(last+2)).format.font = {name:'Microsoft YaHei',size:10,color:'#536779'};
-  const header = sheet.getRange('A4:G4');
+  sheet.getRange('A2:'+lastColumn+'2').format.font.color = '#536779';
+  sheet.getRange('A3:'+lastColumn+'3').format.rowHeight = 10;
+  sheet.getRange('A'+(last+1)+':'+lastColumn+(last+1)).format.rowHeight = 9;
+  sheet.getRange('A'+(last+2)+':'+lastColumn+(last+2)).format.font = {name:'Microsoft YaHei',size:10,color:'#536779'};
+  const header = sheet.getRange('A4:'+lastColumn+'4');
   header.format.fill = '#256FF0';
   header.format.rowHeight = 29;
   header.format.font = {name:'Microsoft YaHei',size:11,bold:true,color:'#FFFFFF'};
@@ -286,7 +295,7 @@ export async function writeWorkbook(rows, date, output, deps, renderImage = fals
   const colors = new Map(groups.map((group,index)=>[group,palette[index%palette.length]]));
   rows.forEach(([group,name,media],index) => {
     const row = index+5;
-    const range = sheet.getRange('A'+row+':G'+row);
+    const range = sheet.getRange('A'+row+':'+lastColumn+row);
     const groupTotal = media === '合计' && (!name || name === group);
     if (group === '全盘') {
       range.format.fill = '#D5E7FF';
@@ -301,14 +310,21 @@ export async function writeWorkbook(rows, date, output, deps, renderImage = fals
       if (name === '媒体合计') sheet.getRange('B'+row).values = [[group+'媒体合计']];
     }
   });
-  [84,220,130,134,105,105,108].forEach((width,index) => {
+  [84,220,130,134,...reportColumns.map(({label,format})=>metrics
+    ? Math.max(108,Math.min(240,label.length*15+28)) : format === 'percent' ? 108 : 105)].forEach((width,index) => {
     const column = String.fromCharCode(65+index);
     sheet.getRange(column+':'+column).format.columnWidthPx = width;
   });
   sheet.getRange('D5:D'+last).setNumberFormat('#,##0.00"万"');
-  sheet.getRange('E5:F'+last).setNumberFormat('#,##0.00');
-  sheet.getRange('G5:G'+last).setNumberFormat('#,##0.00%');
-  const table = sheet.getRange('A4:G'+last);
+  const formats = {number:'#,##0.00',integer:'#,##0',percent:'#,##0.00%'};
+  for (const [index,{format,bar}] of reportColumns.entries()) {
+    const column = String.fromCharCode(69+index);
+    const range = sheet.getRange(column+'5:'+column+last);
+    range.setNumberFormat(formats[format]);
+    if (format === 'percent') range.conditionalFormats.add('dataBar',{color:'#9DD4C1',thresholds:[0,1],gradient:false});
+    else if (bar) range.conditionalFormats.add('dataBar',{color:'#A9A8DF',thresholds:[0,'max'],gradient:false});
+  }
+  const table = sheet.getRange('A4:'+lastColumn+last);
   table.format.horizontalAlignment = 'center';
   table.format.borders = {preset:'all',style:'thin',color:'#697480'};
   for (let start=0;start<rows.length;) {
@@ -329,10 +345,8 @@ export async function writeWorkbook(rows, date, output, deps, renderImage = fals
     }
     start=end;
   }
-  sheet.getRange('F5:F'+last).conditionalFormats.add('dataBar',{color:'#A9A8DF',thresholds:[0,'max'],gradient:false});
-  sheet.getRange('G5:G'+last).conditionalFormats.add('dataBar',{color:'#9DD4C1',thresholds:[0,1],gradient:false});
   const screenshot = renderImage
-    ? await wb.render({sheetName:'投放播报',range:'A1:G'+(last+2),scale:1,headers:false})
+    ? await wb.render({sheetName:'投放播报',range:'A1:'+lastColumn+(last+2),scale:1,headers:false})
     : null;
   const workbook = await SpreadsheetFile.exportXlsx(wb);
   await fs.mkdir(path.dirname(output),{recursive:true});
@@ -348,7 +362,9 @@ export async function writeWorkbook(rows, date, output, deps, renderImage = fals
       changed++;
       return element.replace('>', ' minLength="0" maxLength="100">');
     });
-    if (changed !== 2) throw new Error('ROI 数据条导出校验失败');
+    if (changed !== 2*reportColumns.filter(({format})=>format === 'percent').length) {
+      throw new Error('百分比数据条导出校验失败');
+    }
     zip.file(part,patched);
     await fs.writeFile(pending,await zip.generateAsync({type:'nodebuffer',compression:'DEFLATE'}));
     await fs.rename(pending,output);
@@ -479,8 +495,8 @@ async function main(kind) {
     const pendingDiscovery = discoveryPath+'.'+process.pid+'.tmp';
     await fs.writeFile(pendingDiscovery,JSON.stringify(catalog),'utf8');
     await fs.rename(pendingDiscovery,discoveryPath);
-    const screenshot = await writeWorkbook(outputRows(data,project,kind),date,output,deps,
-      preview||Boolean(webhook),project.name,hour,kind);
+    const screenshot = await writeWorkbook(outputRows(data,project,kind,report.metrics),date,output,deps,
+      preview||Boolean(webhook),project.name,hour,kind,report.metrics);
     console.log(output);
     if (preview) await fs.writeFile(output.slice(0,-5)+'.png',screenshot);
     if (webhook) {

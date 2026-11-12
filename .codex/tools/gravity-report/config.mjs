@@ -9,6 +9,14 @@ export const configPath = process.env.GRAVITY_REPORT_CONFIG ??
   path.join(process.env.LOCALAPPDATA, 'GravityWeComReport', 'config.json');
 export const iaaConfigPath = path.join(path.dirname(configPath),'iaa','config.json');
 
+function iaaMetrics(fields) {
+  return [
+    {label:'激活成本',column:fields.activationCost ?? '',format:'number'},
+    {label:'广告收入',column:fields.revenue ?? '',format:'number'},
+    {label:'广告 ROI',column:fields.roi ?? '',format:'percent'},
+  ];
+}
+
 function normalizeProject(project) {
   if (project.groups !== undefined || !Array.isArray(project.miniGames) || !Array.isArray(project.apps)) return project;
   const groups = project.miniGames.map(item => ({name:item.name,showProjects:false,projects:[item]}));
@@ -32,9 +40,28 @@ export function validateConfig(config, kind = 'gravity') {
       !Number.isInteger(report.retries) || report.retries < 0 || report.retries > 3) {
     throw new Error('查询超时须为 10–600 秒，重试次数须为 0–3 次');
   }
-  const fields = kind === 'iaa' ? ['spend','activationCost','revenue','roi'] : Object.keys(defaults.report.fields);
-  if (!fields.every(key => validText(report.fields?.[key])) ||
-      new Set(fields.map(key => report.fields[key])).size !== fields.length) throw new Error('请填写不同的指标列名');
+  let fields;
+  let metrics;
+  if (kind === 'iaa') {
+    metrics = report.metrics === undefined ? iaaMetrics(report.fields ?? {}) : report.metrics;
+    if (!Array.isArray(metrics) || metrics.length > 20 || metrics.some(metric=>
+      !validText(metric?.label) || !validText(metric?.column) ||
+      !['number','integer','percent'].includes(metric.format))) {
+      throw new Error('请填写指标显示名、引力原表列名和数字格式，最多可添加 20 项');
+    }
+    if (new Set(['消耗',...metrics.map(metric=>metric.label)]).size !== metrics.length+1) {
+      throw new Error('指标显示名不能重复');
+    }
+    metrics = metrics.map(({label,column,format})=>({label,column,format}));
+    fields = {spend:report.fields?.spend,
+      ...Object.fromEntries(metrics.map(({column},index)=>['metric'+index,column]))};
+  } else {
+    fields = Object.fromEntries(Object.keys(defaults.report.fields).map(key=>[key,report.fields?.[key]]));
+  }
+  const columnNames = Object.values(fields);
+  if (!columnNames.every(validText) || new Set(columnNames).size !== columnNames.length) {
+    throw new Error('请填写不同的指标列名');
+  }
   if (!Array.isArray(project.groups) || !project.groups.length || project.groups.some(group=>
       !validText(group?.name) || group.name === '全盘' ||
       !Array.isArray(group.projects)) ||
@@ -52,7 +79,7 @@ export function validateConfig(config, kind = 'gravity') {
   const {url:reportUrl,title,product,timeoutSeconds,retries,browserMode='existing'} = report;
   if (!['existing','dedicated'].includes(browserMode)) throw new Error('浏览器模式无效');
   return {...config,report:{url:reportUrl,title,product,timeoutSeconds,retries,browserMode,
-    fields:Object.fromEntries(fields.map(key=>[key,report.fields[key]]))},
+    fields,...(metrics ? {metrics} : {})},
     project:{name:project.name,groups:project.groups.map(group=>({name:group.name,
       projects:group.projects.map(({name,id})=>({name,id})),
     }))},schedule};
@@ -65,9 +92,8 @@ export async function loadConfig(file = configPath, kind = 'gravity') {
     if (error.code === 'ENOENT' && (kind === 'iaa' || !process.env.GRAVITY_REPORT_CONFIG)) {
       if (kind !== 'iaa') return defaults;
       return {...defaults,project:{name:'IAA 项目',groups:[{name:'IAA',projects:[]}]},
-        report:{...defaults.report,browserMode:'dedicated',fields:{
-          spend:defaults.report.fields.spend,activationCost:defaults.report.fields.activationCost,revenue:'',roi:'',
-        }}};
+        report:{...defaults.report,browserMode:'dedicated',fields:{spend:defaults.report.fields.spend},
+          metrics:iaaMetrics(defaults.report.fields).map((metric,index)=>index === 0 ? metric : {...metric,column:''})}};
     }
     throw error;
   }

@@ -11,6 +11,7 @@ p{margin:6px 0;color:#52677a}.card{background:white;border:1px solid #dbe6f1;bor
 .config-columns{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:14px;align-items:start}
 .group{margin:10px 0;padding:10px;border:1px solid #dbe6f1;border-radius:8px;background:#f8fbff}
 .project-entry{grid-template-columns:minmax(0,2fr) minmax(95px,1fr) auto;align-items:end;background:white}
+.metric-entry{grid-template-columns:minmax(0,1fr) minmax(0,1.4fr) minmax(80px,auto) auto;align-items:end}
 .entry button{padding:7px 9px;white-space:nowrap}
 .hour-picker{position:relative;width:min(100%,380px);margin-top:10px}
 .hour-picker summary{cursor:pointer;border:1px solid #bfcfe0;border-radius:6px;padding:8px 10px;background:#fff}
@@ -18,7 +19,7 @@ p{margin:6px 0;color:#52677a}.card{background:white;border:1px solid #dbe6f1;bor
 .hours{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px}
 .toggle{display:flex;align-items:center;gap:6px}.toggle input{width:auto;accent-color:#2565d4}
 @media(max-width:900px){.config-columns{grid-template-columns:1fr;gap:0}}
-@media(max-width:520px){.grid,.project-entry{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+@media(max-width:520px){.grid,.project-entry,.metric-entry{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
 label{display:grid;gap:4px;font-size:13px;color:#354f65}input,textarea{width:100%;padding:8px 10px;border:1px solid #bfcfe0;border-radius:6px;font:inherit;color:#19324a;background:#fff}textarea{resize:vertical}
 button{padding:8px 13px;border:1px solid #bfd1e6;border-radius:7px;background:#f2f7ff;color:#174777;font:inherit;cursor:pointer}button.primary{background:#2565d4;color:white;border-color:#2565d4}button:disabled{opacity:.48;cursor:default}
 .actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.entry{border:1px solid #e1eaf4;border-radius:8px;padding:12px;margin:8px 0}.entry button{justify-self:start}
@@ -40,7 +41,11 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#f4f8fc;padding:12px;
 </div>
 <div class="actions"><button id="saveLogin" type="button">保存登录账号</button><button id="clearLogin" type="button">移除登录账号</button></div>
 </details>
-<h3>主表指标列</h3><div id="fields" class="grid"></div></section>
+<h3>主表指标列</h3><div id="fields" class="grid"></div>
+<div id="metricEditor" hidden>
+<p>消耗是必填列。其他指标按这里的顺序出现在播报表格中。</p>
+<div id="metrics"></div><button type="button" id="addMetric">添加指标</button>
+</div></section>
 <section class="card"><h2>项目配置参数</h2><div id="project"></div>
 <h3>播报分组</h3><p>每个分组可组合多个引力项目。</p>
 <div id="groups"></div><button type="button" id="addGroup">添加分组</button>
@@ -73,7 +78,7 @@ const get = id => document.getElementById(id);
 const apiPrefix = location.pathname.replace(/\/$/,'');
 const isIaa = apiPrefix === '/iaa';
 const fieldLabels = isIaa
-  ? {spend:'消耗',activationCost:'激活成本',revenue:'广告收入',roi:'广告 ROI'}
+  ? {spend:'消耗对应的引力原表列名'}
   : {spend:'消耗',activations:'激活数',activationCost:'激活成本',payers:'首日付费人数',payCost:'首付成本',revenue:'首日付费金额',roi:'ROI'};
 const reportLabels = {url:'报表分享链接',title:'报表标题',product:'产品筛选名称',timeoutSeconds:'查询超时（秒）',retries:'失败重试次数'};
 let busy = false;
@@ -167,6 +172,25 @@ function addButton(parent,text,action) {
   parent.append(button);
 }
 
+function metricEntry(metric = {label:'',column:'',format:'number'}) {
+  const row=document.createElement('div');
+  row.className='entry grid metric-entry';
+  input(row,'显示名','label',metric.label);
+  input(row,'引力原表列名','column',metric.column);
+  const label=document.createElement('label');
+  label.textContent='格式';
+  const select=document.createElement('select');
+  select.dataset.key='format';
+  for(const [value,text] of [['number','小数'],['integer','整数'],['percent','百分比']]) {
+    select.append(new Option(text,value));
+  }
+  select.value=metric.format;
+  label.append(select);
+  row.append(label);
+  addButton(row,'移除',()=>row.remove());
+  get('metrics').append(row);
+}
+
 function entry(parent,item) {
   const box=document.createElement('div');
   box.className='entry grid project-entry';
@@ -245,7 +269,9 @@ function formConfig() {
     const projects=Array.from(card.querySelector('.group-projects').children,values);
     return {name:values(options).name,projects};
   });
-  return {report:{...values(get('report')),fields:values(get('fields')),browserMode:get('browserMode').value},
+  const report={...values(get('report')),fields:values(get('fields')),browserMode:get('browserMode').value};
+  if (isIaa) report.metrics=Array.from(get('metrics').children,values);
+  return {report,
     project:{...values(get('project')),groups},
     schedule:{enabled:get('hourlyEnabled').checked,
       hours:[...get('hours').querySelectorAll('input:checked')].map(input=>Number(input.value))}};
@@ -301,6 +327,9 @@ try {
   if (isIaa) {
     get('pageTitle').textContent='引力 IAA 播报配置';
     document.title=get('pageTitle').textContent;
+    get('metricEditor').hidden=false;
+    for(const metric of report.metrics) metricEntry(metric);
+    get('addMetric').onclick=()=>metricEntry();
   }
   get('hourlyEnabled').checked=schedule.enabled;
   for (let hour=0; hour<24; hour++) {
