@@ -10,10 +10,10 @@ const root = '.el-table-v2__root';
 const timeout = 120_000;
 const day = () => new Intl.DateTimeFormat('sv-SE', {timeZone:'Asia/Shanghai'}).format(new Date());
 
-async function waitForReportTotals(page, trigger, timeout) {
+async function waitForReportTotals(page, trigger, timeout, endpoint = '/report/api/v3/adreport/custom_get/calc_total/') {
   const [response] = await Promise.all([
     page.waitForResponse(result =>
-      new URL(result.url()).pathname === '/report/api/v3/adreport/custom_get/calc_total/' &&
+      new URL(result.url()).pathname === endpoint &&
       result.request().method() === 'POST', {timeout}),
     trigger(),
   ]);
@@ -57,7 +57,7 @@ async function openReport(page, {url:reportUrl,title,timeoutSeconds,browserMode}
   }
 }
 
-export async function refreshReport(page, expectedDay, wait = timeout, product = defaults.report.product) {
+export async function refreshReport(page, expectedDay, wait = timeout, product = defaults.report.product, layout) {
   const deadline = Date.now() + wait;
   const remaining = () => Math.max(1, deadline - Date.now());
   const refresh = page.getByRole('button', {name:'刷新数据', exact:true});
@@ -86,7 +86,8 @@ export async function refreshReport(page, expectedDay, wait = timeout, product =
     });
     observer.observe(button, {attributes:true, attributeFilter:['disabled'], attributeOldValue:true});
     button.click();
-  }, undefined, {timeout:remaining()}), remaining());
+  }, undefined, {timeout:remaining()}), remaining(),
+    layout === 'daily' ? '/report/api/v3/adreport/custom_get/' : undefined);
   await page.locator('html[data-gravity-refresh-started=true]').waitFor({state:'attached',timeout:remaining()});
   await ready();
   if (day() !== expectedDay || !await dateFilter.isVisible() || !await productFilter.isVisible()) {
@@ -101,7 +102,7 @@ function asNumber(value, field, percent) {
   return Number(cleaned.replace('%','')) / (percent ? 100 : 1);
 }
 
-async function readGrid(page, {fields,metrics:configuredMetrics}) {
+async function readGrid(page, {fields,metrics:configuredMetrics,layout}) {
   const raw = await page.locator(root).evaluate(grid => {
     const select = (node, selector) => Array.from(node.querySelectorAll(selector));
     const cells = row => select(row, '.report-v2-cell--metric').map(cell => cell.innerText);
@@ -112,6 +113,7 @@ async function readGrid(page, {fields,metrics:configuredMetrics}) {
     return {
       headers: select(main, '.el-table-v2__dynamic-header-row .el-table-v2__header-cell').map(cell => cell.innerText.trim()),
       total: total ? cells(total) : null,
+      dimensionText: left?.innerText ?? '',
       metrics: rows(main).map(row => [row.getAttribute('rowkey'), cells(row)]),
       labels: rows(left).map(row => ({
         key:row.getAttribute('rowkey'), label:row.innerText.trim(),
@@ -131,6 +133,13 @@ async function readGrid(page, {fields,metrics:configuredMetrics}) {
     if (cells?.length !== raw.headers.length) throw new Error('项目指标未完整加载');
     return Object.fromEntries(Object.entries(indexes).map(([field,index]) =>
       [field,asNumber(cells[index],fields[field],percentFields.has(field))]));
+  }
+  if (layout === 'daily') {
+    const dateLabels = raw.dimensionText.match(/\b\d{4}-\d{2}-\d{2}\b/g) ?? [];
+    if (!dateLabels.length || dateLabels.some(value=>value !== day())) {
+      throw new Error('日期报表的明细与北京时间今日不一致');
+    }
+    return {total:parse(raw.total),apps:new Map()};
   }
   const metrics = new Map(raw.metrics);
   if (metrics.size !== raw.metrics.length || metrics.size !== raw.labels.length ||
@@ -184,6 +193,7 @@ export async function collect(page, {report,project} = defaults) {
   const timeout = report.timeoutSeconds * 1000;
   const grid = page.locator(root);
   await grid.waitFor({timeout});
+  if (report.layout === 'daily') return readGrid(page,report);
   // Read each project's media independently to keep the virtual table compact.
   const collapse = grid.getByRole('button', {name:'收起当前行',exact:true});
   for (let i=0; i<20 && await collapse.count(); i++) await collapse.first().click();
@@ -247,7 +257,7 @@ export function outputRows({total,apps,appGroupTotal}, project = defaults.projec
   return rows;
 }
 
-export async function writeWorkbook(rows, date, output, deps, renderImage = false, projectName = defaults.project.name, hour, kind = 'gravity', metrics) {
+export async function writeWorkbook(rows, date, output, deps, renderImage = false, projectName = defaults.project.name, hour, kind = 'gravity', metrics, layout = 'project') {
   const require = createRequire(path.join(deps,'package.json'));
   const {Workbook,SpreadsheetFile} = await import(pathToFileURL(require.resolve('@oai/artifact-tool')).href);
   const JSZip = require('jszip');
@@ -255,22 +265,24 @@ export async function writeWorkbook(rows, date, output, deps, renderImage = fals
   const sheet = wb.worksheets.add('投放播报');
   sheet.showGridLines = false;
   const last = 4 + rows.length;
+  const daily = layout === 'daily';
+  const baseColumns = daily ? ['日期','消耗'] : ['分组','项目','媒体','消耗'];
   const reportColumns = metrics ?? [
     {label:'激活成本',format:'number'},
     {label:kind === 'iaa' ? '广告收入' : '首付成本',format:'number',bar:true},
     {label:'ROI',format:'percent'},
   ];
-  const lastColumn = String.fromCharCode(68+reportColumns.length);
+  const lastColumn = String.fromCharCode(64+baseColumns.length+reportColumns.length);
   const period = hour === undefined ? date : date+' '+hour+':00';
   const title = kind === 'iaa' ? 'IAA 播报' : '投放播报';
   for (const [row, value] of [[1,projectName+'｜'+title],[2,period+' · 北京时间「今日」累计'],
-    [last+2,'指标取自引力报表。仅展示有消耗的项目及媒体。']]) {
+    [last+2,daily ? '指标取自引力报表的当日合计。' : '指标取自引力报表。仅展示有消耗的项目及媒体。']]) {
     sheet.getRange('A'+row+':'+lastColumn+row).merge();
     sheet.getRange('A'+row).values = [[value]];
   }
-  const displayRows = rows.map(([group,name,media,spend,...metrics]) =>
+  const displayRows = daily ? rows : rows.map(([group,name,media,spend,...metrics]) =>
     [group,name,media,spend === null ? null : spend / 10_000,...metrics]);
-  sheet.getRange('A4:'+lastColumn+last).values = [['分组','项目','媒体','消耗',...reportColumns.map(({label})=>label)],...displayRows];
+  sheet.getRange('A4:'+lastColumn+last).values = [[...baseColumns,...reportColumns.map(({label})=>label)],...displayRows];
   const all = sheet.getRange('A1:'+lastColumn+(last+2));
   all.format.font = {name:'Microsoft YaHei',size:11,color:'#18334B'};
   all.format.rowHeight = 25;
@@ -299,7 +311,7 @@ export async function writeWorkbook(rows, date, output, deps, renderImage = fals
     const row = index+5;
     const range = sheet.getRange('A'+row+':'+lastColumn+row);
     const groupTotal = media === '合计' && (!name || name === group);
-    if (group === '全盘') {
+    if (daily || group === '全盘') {
       range.format.fill = '#D5E7FF';
       range.format.font = {name:'Microsoft YaHei',size:11,bold:true,color:'#184A91'};
       range.format.rowHeight = 29;
@@ -312,15 +324,17 @@ export async function writeWorkbook(rows, date, output, deps, renderImage = fals
       if (name === '媒体合计') sheet.getRange('B'+row).values = [[group+'媒体合计']];
     }
   });
-  [84,220,130,134,...reportColumns.map(({label,format})=>metrics
+  const baseWidths = daily ? [120,106] : [84,220,130,134];
+  [...baseWidths,...reportColumns.map(({label,format})=>metrics
     ? Math.max(108,Math.min(240,label.length*15+28)) : format === 'percent' ? 108 : 105)].forEach((width,index) => {
     const column = String.fromCharCode(65+index);
     sheet.getRange(column+':'+column).format.columnWidthPx = width;
   });
-  sheet.getRange('D5:D'+last).setNumberFormat('#,##0.00"万"');
-  const formats = {number:'#,##0.00',integer:'#,##0',percent:'#,##0.00%'};
+  const spendColumn = daily ? 'B' : 'D';
+  sheet.getRange(spendColumn+'5:'+spendColumn+last).setNumberFormat(daily ? '#,##0.00' : '#,##0.00"万"');
+  const formats = {number:daily ? '#,##0.0000' : '#,##0.00',integer:'#,##0',percent:'#,##0.00%'};
   for (const [index,{format,bar}] of reportColumns.entries()) {
-    const column = String.fromCharCode(69+index);
+    const column = String.fromCharCode(65+baseColumns.length+index);
     const range = sheet.getRange(column+'5:'+column+last);
     range.setNumberFormat(formats[format]);
     if (format === 'percent') range.conditionalFormats.add('dataBar',{color:'#9DD4C1',thresholds:[0,1],gradient:false});
@@ -329,7 +343,7 @@ export async function writeWorkbook(rows, date, output, deps, renderImage = fals
   const table = sheet.getRange('A4:'+lastColumn+last);
   table.format.horizontalAlignment = 'center';
   table.format.borders = {preset:'all',style:'thin',color:'#697480'};
-  for (let start=0;start<rows.length;) {
+  for (let start=0;!daily && start<rows.length;) {
     let end=start+1;
     while (end<rows.length && rows[end][0]===rows[start][0]) end++;
     const wideLabel = rows[start][0]==='全盘' || rows.slice(start,end).every(([group,name])=>group===name);
@@ -480,7 +494,7 @@ async function main(kind) {
         await openReport(page,report,kind);
         stage = '刷新报表';
         console.log('正在刷新引力报表');
-        await refreshReport(page,date,report.timeoutSeconds*1000,report.product);
+        await refreshReport(page,date,report.timeoutSeconds*1000,report.product,report.layout);
         stage = '读取和校验数据';
         console.log('正在读取和校验项目、媒体及指标');
         data = await collect(page,config);
@@ -501,8 +515,11 @@ async function main(kind) {
     await fs.writeFile(pendingDiscovery,JSON.stringify(catalog),'utf8');
     await fs.rename(pendingDiscovery,discoveryPath);
     console.log('正在生成 Excel'+(webhook ? ' 和企微截图' : ''));
-    const screenshot = await writeWorkbook(outputRows(data,project,kind,report.metrics),date,output,deps,
-      preview||Boolean(webhook),project.name,hour,kind,report.metrics);
+    const rows = report.layout === 'daily'
+      ? [[date,data.total.spend,...report.metrics.map((_,index)=>data.total['metric'+index])]]
+      : outputRows(data,project,kind,report.metrics);
+    const screenshot = await writeWorkbook(rows,date,output,deps,
+      preview||Boolean(webhook),project.name,hour,kind,report.metrics,report.layout);
     console.log(output);
     if (preview) await fs.writeFile(output.slice(0,-5)+'.png',screenshot);
     if (webhook) {

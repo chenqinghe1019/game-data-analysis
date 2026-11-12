@@ -78,8 +78,10 @@ export function validateConfig(config, kind = 'gravity') {
       (schedule.enabled && !schedule.hours.length)) throw new Error('请为小时发送选择有效的北京时间小时');
   const {url:reportUrl,title,product,timeoutSeconds,retries,browserMode='existing'} = report;
   if (!['existing','dedicated'].includes(browserMode)) throw new Error('浏览器模式无效');
+  const layout = kind === 'iaa' ? report.layout ?? 'project' : 'project';
+  if (!['project','daily'].includes(layout)) throw new Error('报表展示维度无效');
   return {...config,report:{url:reportUrl,title,product,timeoutSeconds,retries,browserMode,
-    fields,...(metrics ? {metrics} : {})},
+    fields,...(metrics ? {metrics,layout} : {})},
     project:{name:project.name,groups:project.groups.map(group=>({name:group.name,
       projects:group.projects.map(({name,id})=>({name,id})),
     }))},schedule};
@@ -92,7 +94,7 @@ export async function loadConfig(file = configPath, kind = 'gravity') {
     if (error.code === 'ENOENT' && (kind === 'iaa' || !process.env.GRAVITY_REPORT_CONFIG)) {
       if (kind !== 'iaa') return defaults;
       return {...defaults,project:{name:'IAA 项目',groups:[{name:'IAA',projects:[]}]},
-        report:{...defaults.report,browserMode:'dedicated',fields:{spend:defaults.report.fields.spend},
+        report:{...defaults.report,browserMode:'dedicated',layout:'project',fields:{spend:defaults.report.fields.spend},
           metrics:iaaMetrics(defaults.report.fields).map((metric,index)=>index === 0 ? metric : {...metric,column:''})}};
     }
     throw error;
