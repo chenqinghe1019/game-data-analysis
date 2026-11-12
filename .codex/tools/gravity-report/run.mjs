@@ -304,7 +304,7 @@ export function outputRows({total,apps,appGroupTotal}, project = defaults.projec
   return rows;
 }
 
-export async function writeWorkbook(rows, date, output, deps, renderImage = false, projectName = defaults.project.name, hour, kind = 'gravity', metrics, layout = 'project') {
+export async function writeWorkbook(rows, date, output, deps, renderImage = false, projectName = defaults.project.name, hour, kind = 'gravity', metrics, layout = 'project', spendUnit) {
   const require = createRequire(path.join(deps,'package.json'));
   const {Workbook,SpreadsheetFile} = await import(pathToFileURL(require.resolve('@oai/artifact-tool')).href);
   const JSZip = require('jszip');
@@ -313,8 +313,10 @@ export async function writeWorkbook(rows, date, output, deps, renderImage = fals
   sheet.showGridLines = false;
   const last = 4 + rows.length;
   const daily = layout === 'daily';
-  const spendInYuan = daily || layout === 'flat';
-  const baseColumns = daily ? ['日期','消耗'] : ['分组','项目','媒体',spendInYuan ? '消耗（元）' : '消耗'];
+  const isFlatReport = daily || layout === 'flat';
+  const spendInYuan = spendUnit ? spendUnit === 'yuan' : isFlatReport;
+  const spendLabel = spendInYuan ? '消耗（元）' : '消耗';
+  const baseColumns = daily ? ['日期',spendLabel] : ['分组','项目','媒体',spendLabel];
   const reportColumns = metrics ?? [
     {label:'激活成本',format:'number'},
     {label:kind === 'iaa' ? '广告收入' : '首付成本',format:'number',bar:true},
@@ -328,8 +330,9 @@ export async function writeWorkbook(rows, date, output, deps, renderImage = fals
     sheet.getRange('A'+row+':'+lastColumn+row).merge();
     sheet.getRange('A'+row).values = [[value]];
   }
-  const displayRows = spendInYuan ? rows : rows.map(([group,name,media,spend,...metrics]) =>
-    [group,name,media,spend === null ? null : spend / 10_000,...metrics]);
+  const spendIndex = baseColumns.length-1;
+  const displayRows = spendInYuan ? rows : rows.map(row=>
+    row.map((value,index)=>index === spendIndex && value !== null ? value/10_000 : value));
   sheet.getRange('A4:'+lastColumn+last).values = [[...baseColumns,...reportColumns.map(({label})=>label)],...displayRows];
   const all = sheet.getRange('A1:'+lastColumn+(last+2));
   all.format.font = {name:'Microsoft YaHei',size:11,color:'#18334B'};
@@ -379,8 +382,9 @@ export async function writeWorkbook(rows, date, output, deps, renderImage = fals
     sheet.getRange(column+':'+column).format.columnWidthPx = width;
   });
   const spendColumn = daily ? 'B' : 'D';
-  sheet.getRange(spendColumn+'5:'+spendColumn+last).setNumberFormat(spendInYuan ? '#,##0.00' : '#,##0.00"万"');
-  const formats = {number:spendInYuan ? '#,##0.0000' : '#,##0.00',integer:'#,##0',percent:'#,##0.00%'};
+  const spendDecimals = spendUnit ? '#,##0' : '#,##0.00';
+  sheet.getRange(spendColumn+'5:'+spendColumn+last).setNumberFormat(spendDecimals+(spendInYuan ? '' : '"万"'));
+  const formats = {number:isFlatReport ? '#,##0.0000' : '#,##0.00',integer:'#,##0',percent:'#,##0.00%'};
   for (const [index,{format,bar}] of reportColumns.entries()) {
     const column = String.fromCharCode(65+baseColumns.length+index);
     const range = sheet.getRange(column+'5:'+column+last);
@@ -567,7 +571,7 @@ async function main(kind) {
       ? [[date,data.total.spend,...report.metrics.map((_,index)=>data.total['metric'+index])]]
       : outputRows(data,project,kind,report.metrics);
     const screenshot = await writeWorkbook(rows,date,output,deps,
-      preview||Boolean(webhook),project.name,hour,kind,report.metrics,report.layout);
+      preview||Boolean(webhook),project.name,hour,kind,report.metrics,report.layout,report.spendUnit);
     console.log(output);
     if (preview) await fs.writeFile(output.slice(0,-5)+'.png',screenshot);
     if (webhook) {
