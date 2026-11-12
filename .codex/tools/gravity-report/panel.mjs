@@ -1,6 +1,6 @@
 import {createServer} from 'node:http';
 import {spawn} from 'node:child_process';
-import {readFile, mkdir, writeFile, rename} from 'node:fs/promises';
+import {appendFile, readFile, mkdir, writeFile, rename} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {configPath,discoveryPath,loadConfig,validateConfig} from './config.mjs';
@@ -14,9 +14,21 @@ const origin = 'http://' + host + ':' + port;
 const page = await readFile(new URL('./panel.html', import.meta.url));
 const runner = fileURLToPath(new URL('./run.mjs', import.meta.url));
 const outputDirectory = fileURLToPath(new URL('../../../outputs/gravity-wecom/', import.meta.url));
+const logDirectory = path.join(path.dirname(configPath),'logs');
 let job = {state:'idle',log:''};
 let saving = false;
 let scheduling = false;
+
+async function logEvent(event, details = {}) {
+  const time = new Date();
+  const day = new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Shanghai'}).format(time);
+  try {
+    await mkdir(logDirectory,{recursive:true});
+    await appendFile(path.join(logDirectory,day+'.jsonl'),JSON.stringify({time:time.toISOString(),event,...details})+'\n');
+  } catch (error) {
+    console.error('无法写入播报日志：'+error.message);
+  }
+}
 
 function startJob(webhook, slot = null) {
   const push = Boolean(webhook);
@@ -27,20 +39,23 @@ function startJob(webhook, slot = null) {
   if (slot) env.GRAVITY_REPORT_SLOT = slot;
   else delete env.GRAVITY_REPORT_SLOT;
   const output = path.join(outputDirectory,Date.now()+'.xlsx');
-  const child = spawn(process.execPath,[runner,output],{env,windowsHide:true});
+  const child = spawn(process.execPath,[runner,output],{env,windowsHide:true,timeout:20*60*1000});
+  void logEvent('job-started',{slot,push,startedAt:job.startedAt});
   const append = message => { job.log = (job.log+message).slice(-10000); };
   for (const stream of [child.stdout,child.stderr]) stream.setEncoding('utf8').on('data',append);
   child.once('error',error => append('无法启动脚本：'+error.message));
-  child.once('close',code => {
+  child.once('close',(code,signal) => {
     job.state = code === 0 ? 'success' : 'failed';
     job.finishedAt = new Date().toISOString();
     if (code === 0) job.output = output;
+    if (signal) append('播报进程已终止（'+signal+'）');
+    void logEvent('job-finished',{...job,code,signal,log:job.log.replace(/https?:\/\/[^\s"'<>]+/g,'[URL]')});
   });
 }
 
 async function checkSchedule() {
   const beijing = new Date(Date.now()+8*60*60*1000);
-  if (saving || scheduling || job.state === 'running' || beijing.getUTCMinutes() !== 0) return;
+  if (saving || scheduling || job.state === 'running' || beijing.getUTCMinutes() >= 5) return;
   scheduling = true;
   try {
     const {schedule} = await loadConfig();
@@ -54,7 +69,10 @@ async function checkSchedule() {
     await writeFile(path.join(directory,slot),'started\n',{flag:'wx'});
     startJob(webhook,slot);
   } catch (error) {
-    if (error.code !== 'EEXIST') console.error('小时发送调度失败：'+error.message);
+    if (error.code !== 'EEXIST') {
+      console.error('小时发送调度失败：'+error.message);
+      void logEvent('schedule-error',{message:error.message.replace(/https?:\/\/[^\s"'<>]+/g,'[URL]')});
+    }
   } finally { scheduling = false; }
 }
 
@@ -154,6 +172,7 @@ const server = createServer(async (request,response) => {
 });
 server.listen(port,host,() => {
   console.log('引力引擎播报后台 '+origin);
+  void logEvent('panel-started',{port,pid:process.pid});
   checkSchedule();
   setInterval(checkSchedule,10_000).unref();
 });
