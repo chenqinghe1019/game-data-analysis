@@ -4,6 +4,7 @@ import path from 'node:path';
 export const defaults = JSON.parse(await fs.readFile(new URL('./defaults.json', import.meta.url), 'utf8'));
 defaults.schedule = {enabled:false,hours:[2]};
 defaults.report.browserMode = 'existing';
+defaults.report.spendUnit = 'wan-decimal';
 defaults.project = normalizeProject(defaults.project);
 export const configPath = process.env.GRAVITY_REPORT_CONFIG ??
   path.join(process.env.LOCALAPPDATA, 'GravityWeComReport', 'config.json');
@@ -80,10 +81,10 @@ export function validateConfig(config, kind = 'gravity') {
   if (!['existing','dedicated'].includes(browserMode)) throw new Error('浏览器模式无效');
   const layout = kind === 'iaa' ? report.layout ?? 'project' : 'project';
   if (!['project','daily','flat'].includes(layout)) throw new Error('报表展示维度无效');
-  const spendUnit = report.spendUnit ?? 'yuan';
-  if (kind === 'iaa' && !['yuan','wan'].includes(spendUnit)) throw new Error('消耗显示单位无效');
+  const spendUnit = report.spendUnit ?? (kind === 'iaa' ? 'yuan' : defaults.report.spendUnit);
+  if (!['yuan','wan','wan-decimal'].includes(spendUnit)) throw new Error('消耗显示单位无效');
   return {...config,report:{url:reportUrl,title,product,timeoutSeconds,retries,browserMode,
-    fields,...(metrics ? {metrics,layout,spendUnit} : {})},
+    fields,spendUnit,...(metrics ? {metrics,layout} : {})},
     project:{name:project.name,groups:project.groups.map(group=>({name:group.name,
       projects:group.projects.map(({name,id})=>({name,id})),
     }))},schedule};

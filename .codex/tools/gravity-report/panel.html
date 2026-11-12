@@ -270,11 +270,11 @@ function formConfig() {
     const projects=Array.from(card.querySelector('.group-projects').children,values);
     return {name:values(options).name,projects};
   });
-  const report={...values(get('report')),fields:values(get('fields')),browserMode:get('browserMode').value};
+  const report={...values(get('report')),fields:values(get('fields')),browserMode:get('browserMode').value,
+    spendUnit:get('spendUnit').value};
   if (isIaa) {
     report.metrics=Array.from(get('metrics').children,values);
     report.layout=get('reportLayout').value;
-    report.spendUnit=get('spendUnit').value;
   }
   return {report,
     project:{...values(get('project')),groups},
@@ -374,16 +374,19 @@ try {
   showWebhookStatus(await request('/api/webhook'));
   get('saveWebhook').onclick=()=>updateWebhook(false);
   get('clearWebhook').onclick=()=>updateWebhook(true);
-  for(const [key,label] of Object.entries(fieldLabels)) input(get('fields'),label,key,report.fields[key]);
-  if (isIaa) {
-    const label=document.createElement('label');
-    label.textContent='消耗显示格式';
-    const select=document.createElement('select');
-    select.id='spendUnit';
-    select.append(new Option('整数（元）','yuan'),new Option('整数（万）','wan'));
-    select.value=report.spendUnit;
-    label.append(select);
-    get('fields').append(label);
+  for(const [key,label] of Object.entries(fieldLabels)) {
+    input(get('fields'),label,key,report.fields[key]);
+    if (key==='spend') {
+      const wrapper=document.createElement('label');
+      wrapper.textContent='消耗显示格式';
+      const select=document.createElement('select');
+      select.id='spendUnit';
+      select.append(new Option('整数（元）','yuan'),new Option('整数（万）','wan'),
+        new Option('两位小数（万）','wan-decimal'));
+      select.value=report.spendUnit;
+      wrapper.append(select);
+      get('fields').append(wrapper);
+    }
   }
   input(get('project'),'项目名称','name',project.name);
   for(const group of project.groups) groupCard(group);

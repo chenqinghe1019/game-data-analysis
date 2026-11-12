@@ -382,7 +382,7 @@ export async function writeWorkbook(rows, date, output, deps, renderImage = fals
     sheet.getRange(column+':'+column).format.columnWidthPx = width;
   });
   const spendColumn = daily ? 'B' : 'D';
-  const spendDecimals = spendUnit ? '#,##0' : '#,##0.00';
+  const spendDecimals = spendUnit === 'yuan' || spendUnit === 'wan' ? '#,##0' : '#,##0.00';
   sheet.getRange(spendColumn+'5:'+spendColumn+last).setNumberFormat(spendDecimals+(spendInYuan ? '' : '"万"'));
   const formats = {number:isFlatReport ? '#,##0.0000' : '#,##0.00',integer:'#,##0',percent:'#,##0.00%'};
   for (const [index,{format,bar}] of reportColumns.entries()) {
