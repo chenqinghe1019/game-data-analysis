@@ -35,7 +35,7 @@ try {
     card.append(title,script);
     if (project.settings) {
       const schedule = document.createElement('p');
-      schedule.textContent = project.scheduleEnabled ? '定时发送已开启' : '定时发送已关闭';
+      schedule.textContent = !project.configured ? '待填写报表配置' : project.scheduleEnabled ? '定时发送已开启' : '定时发送已关闭';
       const link = document.createElement('a');
       link.href = project.settings;
       link.textContent = '打开播报配置';

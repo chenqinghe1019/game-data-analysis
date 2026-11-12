@@ -26,14 +26,14 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#f4f8fc;padding:12px;
 #message{color:#9c3824}#output{overflow-wrap:anywhere}
 </style>
 <main>
-<header><nav><a href="/projects">游戏项目</a></nav><h1>引力引擎企微播报后台</h1><p>取北京时间「今日」累计，生成 Excel 和企微播报。</p></header>
+<header><nav><a href="/projects">游戏项目</a></nav><h1 id="pageTitle">引力引擎企微播报后台</h1><p>取北京时间「今日」累计，生成 Excel 和企微播报。</p></header>
 <form id="config" hidden>
 <div class="config-columns">
 <section class="card"><h2>引力报表参数</h2><div id="report" class="grid"></div>
 <label>浏览器模式<select id="browserMode"><option value="existing">复用已登录的 Chrome</option><option value="dedicated">使用独立播报 Chrome</option></select></label>
 <p id="browserHint">在已登录引力的 Chrome 中打开 chrome://inspect/#remote-debugging，开启远程调试并允许连接。</p>
 <details><summary>引力登录账号 <span id="loginStatus"></span></summary>
-<p>引力登录失效时自动填写。凭据加密保存在本机。</p>
+<p>各播报项目共用引力登录账号。凭据加密保存在本机。</p>
 <div class="grid">
 <label>登录邮箱<input id="loginEmail" type="email" autocomplete="username"></label>
 <label>登录密码<input id="loginPassword" type="password" autocomplete="new-password"></label>
@@ -70,7 +70,11 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#f4f8fc;padding:12px;
 </main>
 <script type="module">
 const get = id => document.getElementById(id);
-const fieldLabels = {spend:'消耗',activations:'激活数',activationCost:'激活成本',payers:'首日付费人数',payCost:'首付成本',revenue:'首日付费金额',roi:'ROI'};
+const apiPrefix = location.pathname.replace(/\/$/,'');
+const isIaa = apiPrefix === '/iaa';
+const fieldLabels = isIaa
+  ? {spend:'消耗',activationCost:'激活成本',revenue:'广告收入',roi:'广告 ROI'}
+  : {spend:'消耗',activations:'激活数',activationCost:'激活成本',payers:'首日付费人数',payCost:'首付成本',revenue:'首日付费金额',roi:'ROI'};
 const reportLabels = {url:'报表分享链接',title:'报表标题',product:'产品筛选名称',timeoutSeconds:'查询超时（秒）',retries:'失败重试次数'};
 let busy = false;
 let canPush = false;
@@ -134,7 +138,7 @@ function setHours(checked) {
 }
 
 async function request(url,method='GET',data) {
-  const response = await fetch(url, method==='GET' ? {} : {
+  const response = await fetch(apiPrefix+url, method==='GET' ? {} : {
     method,headers:{'Content-Type':'application/json'},body:JSON.stringify(data),
   });
   const result = await response.json();
@@ -262,9 +266,10 @@ function buttons() {
 
 async function updateJob() {
   const job=await request('/api/job');
-  busy=job.state==='running';
+  busy=job.busy ?? job.state==='running';
   canPush=job.canPush;
   get('status').textContent={idle:'就绪 · 首次运行时可在 Chrome 窗口登录',running:'运行中 · 请留意 Chrome 登录窗口',success:'运行完成',failed:'运行失败 · 请查看日志'}[job.state];
+  if (busy && job.state!=='running') get('status').textContent += ' · 另一个项目正在取数';
   if (job.slot) get('status').textContent += ' · 定时 '+job.slot.replace('T',' ')+':00';
   get('log').textContent=job.log;
   get('log').hidden=!job.log;
@@ -293,6 +298,10 @@ async function saveAndRun(push) {
 
 try {
   const {report,project,schedule}=await request('/api/config');
+  if (isIaa) {
+    get('pageTitle').textContent='引力 IAA 播报配置';
+    document.title=get('pageTitle').textContent;
+  }
   get('hourlyEnabled').checked=schedule.enabled;
   for (let hour=0; hour<24; hour++) {
     const label=document.createElement('label');

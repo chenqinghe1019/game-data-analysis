@@ -3,7 +3,7 @@ import { createHash } from 'node:crypto';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 import { pathToFileURL } from 'node:url';
-import { defaults, discoveryPath, loadConfig } from './config.mjs';
+import { configPath, defaults, iaaConfigPath, loadConfig } from './config.mjs';
 import { readLogin } from './login.mjs';
 
 const root = '.el-table-v2__root';
@@ -209,10 +209,13 @@ export async function collect(page, {report,project} = defaults) {
   return base;
 }
 
-export function outputRows({total,apps,appGroupTotal}, project = defaults.project) {
+export function outputRows({total,apps,appGroupTotal}, project = defaults.project, kind = 'gravity') {
   const rows = [];
   const add = (group,name,media,metrics) => {
-    if (metrics && metrics.spend !== 0) rows.push([group,name,media,metrics.spend,metrics.activationCost,metrics.payCost,metrics.roi]);
+    if (metrics && metrics.spend !== 0) {
+      rows.push([group,name,media,metrics.spend,metrics.activationCost,
+        kind === 'iaa' ? metrics.revenue : metrics.payCost,metrics.roi]);
+    }
   };
   const addProject = (group,name,app) => {
     add(group,name,'合计',app.data);
@@ -238,7 +241,7 @@ export function outputRows({total,apps,appGroupTotal}, project = defaults.projec
   return rows;
 }
 
-export async function writeWorkbook(rows, date, output, deps, renderImage = false, projectName = defaults.project.name, hour) {
+export async function writeWorkbook(rows, date, output, deps, renderImage = false, projectName = defaults.project.name, hour, kind = 'gravity') {
   const require = createRequire(path.join(deps,'package.json'));
   const {Workbook,SpreadsheetFile} = await import(pathToFileURL(require.resolve('@oai/artifact-tool')).href);
   const JSZip = require('jszip');
@@ -247,14 +250,16 @@ export async function writeWorkbook(rows, date, output, deps, renderImage = fals
   sheet.showGridLines = false;
   const last = 4 + rows.length;
   const period = hour === undefined ? date : date+' '+hour+':00';
-  for (const [row, value] of [[1,projectName+'｜投放播报'],[2,period+' · 北京时间「今日」累计'],
+  const title = kind === 'iaa' ? 'IAA 播报' : '投放播报';
+  for (const [row, value] of [[1,projectName+'｜'+title],[2,period+' · 北京时间「今日」累计'],
     [last+2,'指标取自引力报表。仅展示有消耗的项目及媒体。']]) {
     sheet.getRange('A'+row+':G'+row).merge();
     sheet.getRange('A'+row).values = [[value]];
   }
   const displayRows = rows.map(([group,name,media,spend,...metrics]) =>
     [group,name,media,spend === null ? null : spend / 10_000,...metrics]);
-  sheet.getRange('A4:G'+last).values = [['分组','项目','媒体','消耗','激活成本','首付成本','ROI'],...displayRows];
+  const revenueOrCost = kind === 'iaa' ? '广告收入' : '首付成本';
+  sheet.getRange('A4:G'+last).values = [['分组','项目','媒体','消耗','激活成本',revenueOrCost,'ROI'],...displayRows];
   const all = sheet.getRange('A1:G'+(last+2));
   all.format.font = {name:'Microsoft YaHei',size:11,color:'#18334B'};
   all.format.rowHeight = 25;
@@ -414,8 +419,9 @@ async function connectExistingChrome(chromium) {
   }
 }
 
-async function main() {
-  const config = await loadConfig();
+async function main(kind) {
+  const file = kind === 'iaa' && !process.env.GRAVITY_REPORT_CONFIG ? iaaConfigPath : configPath;
+  const config = await loadConfig(file,kind);
   if (!config.report.url) throw new Error('请先在播报后台保存报表配置');
   const {report,project} = config;
   const deps = process.env.GRAVITY_NODE_MODULES ?? path.join(process.env.USERPROFILE,
@@ -468,16 +474,19 @@ async function main() {
     const catalog = {date,reportUrl:report.url,product:report.product,
       projects:[...data.apps].map(([id,app])=>({id,name:app.name,
         media:[...app.media].filter(([,metrics])=>metrics.spend!==0).map(([name])=>name)}))};
+    const discoveryPath = file+'.projects.json';
     await fs.mkdir(path.dirname(discoveryPath),{recursive:true});
     const pendingDiscovery = discoveryPath+'.'+process.pid+'.tmp';
     await fs.writeFile(pendingDiscovery,JSON.stringify(catalog),'utf8');
     await fs.rename(pendingDiscovery,discoveryPath);
-    const screenshot = await writeWorkbook(outputRows(data,project),date,output,deps,preview||Boolean(webhook),project.name,hour);
+    const screenshot = await writeWorkbook(outputRows(data,project,kind),date,output,deps,
+      preview||Boolean(webhook),project.name,hour,kind);
     console.log(output);
     if (preview) await fs.writeFile(output.slice(0,-5)+'.png',screenshot);
     if (webhook) {
       const [year,month,dayOfMonth] = date.split('-');
-      await sendWeComReport(webhook,screenshot,'【'+project.name+'】'+year+'年'+month+'月'+dayOfMonth+'日'+hour+'时 - 小时报');
+      const reportName = kind === 'iaa' ? 'IAA 小时报' : '小时报';
+      await sendWeComReport(webhook,screenshot,'【'+project.name+'】'+year+'年'+month+'月'+dayOfMonth+'日'+hour+'时 - '+reportName);
     }
   } finally {
     if (reuse && page) await page.close().catch(()=>{});
@@ -485,9 +494,11 @@ async function main() {
   }
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  main().catch(error => {
+export function runFromCli(kind = 'gravity') {
+  return main(kind).catch(error => {
     console.error('播报生成失败：'+error.message.split('\n')[0]);
     process.exitCode = 1;
   });
 }
+
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) runFromCli();

@@ -3,7 +3,7 @@ import {spawn} from 'node:child_process';
 import {appendFile, readFile, mkdir, writeFile, rename} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {configPath,discoveryPath,loadConfig,validateConfig} from './config.mjs';
+import {configPath,loadConfig,validateConfig} from './config.mjs';
 import {clearLogin,loginStatus,saveLogin} from './login.mjs';
 import {readWebhook,saveWebhook,webhookStatus} from './webhook.mjs';
 import {gameProjects,gravityProject,projectScript} from './game-projects.mjs';
@@ -16,7 +16,8 @@ const page = await readFile(new URL('./panel.html', import.meta.url));
 const projectsPage = await readFile(new URL('./game-projects.html', import.meta.url));
 const outputDirectory = fileURLToPath(new URL('../../../outputs/gravity-wecom/', import.meta.url));
 const logDirectory = path.join(path.dirname(configPath),'logs');
-let job = {state:'idle',log:''};
+const jobs = new Map();
+const isRunning = () => [...jobs.values()].some(job=>job.state === 'running');
 let saving = false;
 let scheduling = false;
 
@@ -31,17 +32,19 @@ async function logEvent(event, details = {}) {
   }
 }
 
-function startJob(webhook, slot = null) {
+function startJob(project, webhook, slot = null) {
   const push = Boolean(webhook);
-  job = {state:'running',log:'',startedAt:new Date().toISOString(),push,slot};
-  const env = {...process.env};
+  const job = {state:'running',log:'',startedAt:new Date().toISOString(),push,slot};
+  jobs.set(project.id,job);
+  const env = {...process.env,GRAVITY_REPORT_CONFIG:project.config,GRAVITY_LOGIN_CONFIG:configPath};
   if (push) env.GRAVITY_WECOM_WEBHOOK = webhook;
   else delete env.GRAVITY_WECOM_WEBHOOK;
   if (slot) env.GRAVITY_REPORT_SLOT = slot;
   else delete env.GRAVITY_REPORT_SLOT;
-  const output = path.join(outputDirectory,Date.now()+'.xlsx');
-  const child = spawn(process.execPath,[projectScript(gravityProject).entry,output],{env,windowsHide:true,timeout:20*60*1000});
-  void logEvent('job-started',{slot,push,startedAt:job.startedAt});
+  const directory = project === gravityProject ? outputDirectory : path.join(outputDirectory,project.id);
+  const output = path.join(directory,Date.now()+'.xlsx');
+  const child = spawn(process.execPath,[projectScript(project).entry,output],{env,windowsHide:true,timeout:20*60*1000});
+  void logEvent('job-started',{project:project.id,slot,push,startedAt:job.startedAt});
   const append = message => { job.log = (job.log+message).slice(-10000); };
   for (const stream of [child.stdout,child.stderr]) stream.setEncoding('utf8').on('data',append);
   child.once('error',error => append('无法启动脚本：'+error.message));
@@ -50,29 +53,33 @@ function startJob(webhook, slot = null) {
     job.finishedAt = new Date().toISOString();
     if (code === 0) job.output = output;
     if (signal) append('播报进程已终止（'+signal+'）');
-    void logEvent('job-finished',{...job,code,signal,log:job.log.replace(/https?:\/\/[^\s"'<>]+/g,'[URL]')});
+    void logEvent('job-finished',{project:project.id,...job,code,signal,log:job.log.replace(/https?:\/\/[^\s"'<>]+/g,'[URL]')});
   });
 }
 
 async function checkSchedule() {
   const beijing = new Date(Date.now()+8*60*60*1000);
-  if (saving || scheduling || job.state === 'running' || beijing.getUTCMinutes() >= 5) return;
+  if (saving || scheduling || isRunning() || beijing.getUTCMinutes() >= 5) return;
   scheduling = true;
   try {
-    const {schedule} = await loadConfig();
-    if (!schedule.enabled || !schedule.hours.includes(beijing.getUTCHours())) return;
-    const webhook = await readWebhook();
-    if (!webhook) return;
     const slot = beijing.toISOString().slice(0,13);
-    const directory = path.join(path.dirname(configPath),'sent-slots');
-    await mkdir(directory,{recursive:true});
-    // Claim before launching. A restart or an uncertain send must not resend a slot.
-    await writeFile(path.join(directory,slot),'started\n',{flag:'wx'});
-    startJob(webhook,slot);
-  } catch (error) {
-    if (error.code !== 'EEXIST') {
-      console.error('小时发送调度失败：'+error.message);
-      void logEvent('schedule-error',{message:error.message.replace(/https?:\/\/[^\s"'<>]+/g,'[URL]')});
+    for (const project of gameProjects) {
+      try {
+        const {schedule} = await loadConfig(project.config,project.id);
+        if (!schedule.enabled || !schedule.hours.includes(beijing.getUTCHours())) continue;
+        const webhook = await readWebhook(project.config);
+        if (!webhook) continue;
+        const directory = path.join(path.dirname(project.config),'sent-slots');
+        await mkdir(directory,{recursive:true});
+        // Claim before launching so a restart cannot send the same project and slot twice.
+        await writeFile(path.join(directory,slot),'started\n',{flag:'wx'});
+        startJob(project,webhook,slot);
+        return;
+      } catch (error) {
+        if (error.code === 'EEXIST') continue;
+        console.error('小时发送调度失败：'+error.message);
+        void logEvent('schedule-error',{project:project.id,message:error.message.replace(/https?:\/\/[^\s"'<>]+/g,'[URL]')});
+      }
     }
   } finally { scheduling = false; }
 }
@@ -96,26 +103,27 @@ async function bodyOf(request) {
 const server = createServer(async (request,response) => {
   try {
     if (request.headers.host !== host+':'+port) return json(response,403,{error:'请使用本机后台地址'});
-    const route = request.method + ' ' + request.url;
-    if (route === 'GET /' || route === 'GET /projects') {
+    const project = gameProjects.find(item=>item !== gravityProject &&
+      (request.url === item.settings || request.url.startsWith(item.settings+'/'))) ?? gravityProject;
+    const routePath = project === gravityProject ? request.url : request.url.slice(project.settings.length) || '/';
+    const route = request.method + ' ' + routePath;
+    if (route === 'GET /' || (project === gravityProject && route === 'GET /projects')) {
       response.writeHead(200,{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store','X-Frame-Options':'DENY'});
       return response.end(route === 'GET /' ? page : projectsPage);
     }
-    if (route === 'GET /api/game-projects') {
-      const config = await loadConfig();
-      return json(response,200,gameProjects.map(project=>({
-        id:project.id,
-        name:project.name ?? (config.project.name || '引力投放项目'),
-        script:projectScript(project)?.name ?? null,
-        settings:project.settings,
-        scheduleEnabled:project.id === gravityProject.id && config.schedule.enabled,
+    if (project === gravityProject && route === 'GET /api/game-projects') {
+      return json(response,200,await Promise.all(gameProjects.map(async item=>{
+        const config = await loadConfig(item.config,item.id);
+        return {id:item.id,name:config.project.name || item.name || '引力投放项目',
+          script:projectScript(item).name,settings:item.settings,
+          configured:Boolean(config.report.url),scheduleEnabled:config.schedule.enabled};
       })));
     }
-    if (route === 'GET /api/config') return json(response,200,await loadConfig());
+    if (route === 'GET /api/config') return json(response,200,await loadConfig(project.config,project.id));
     if (route === 'GET /api/projects') {
-      const {report} = await loadConfig();
+      const {report} = await loadConfig(project.config,project.id);
       try {
-        const catalog = JSON.parse(await readFile(discoveryPath,'utf8'));
+        const catalog = JSON.parse(await readFile(project.config+'.projects.json','utf8'));
         if (catalog.reportUrl === report.url && catalog.product === report.product) {
           return json(response,200,{date:catalog.date,projects:catalog.projects});
         }
@@ -124,24 +132,27 @@ const server = createServer(async (request,response) => {
       }
       return json(response,200,{date:null,projects:[]});
     }
-    if (route === 'GET /api/job') return json(response,200,{...job,canPush:(await webhookStatus()).configured});
+    if (route === 'GET /api/job') return json(response,200,{
+      ...(jobs.get(project.id) ?? {state:'idle',log:''}),busy:isRunning(),
+      canPush:(await webhookStatus(project.config)).configured,
+    });
     if (route === 'GET /api/login') return json(response,200,await loginStatus());
-    if (route === 'GET /api/webhook') return json(response,200,await webhookStatus());
+    if (route === 'GET /api/webhook') return json(response,200,await webhookStatus(project.config));
     if (request.headers.origin !== origin || !request.headers['content-type']?.startsWith('application/json')) {
       return json(response,403,{error:'请求必须来自本机后台页面'});
     }
     if (route === 'PUT /api/webhook') {
       const settings = await bodyOf(request);
-      if (saving || scheduling || job.state === 'running') return json(response,409,{error:'请等待当前操作完成'});
+      if (saving || scheduling || isRunning()) return json(response,409,{error:'请等待当前操作完成'});
       saving = true;
       try {
-        await saveWebhook(settings === null ? null : settings.url);
-        return json(response,200,await webhookStatus());
+        await saveWebhook(settings === null ? null : settings.url,project.config);
+        return json(response,200,await webhookStatus(project.config));
       } finally { saving = false; }
     }
     if (route === 'PUT /api/login') {
       const login = await bodyOf(request);
-      if (saving || scheduling || job.state === 'running') return json(response,409,{error:'请等待当前操作完成'});
+      if (saving || scheduling || isRunning()) return json(response,409,{error:'请等待当前操作完成'});
       saving = true;
       try {
         if (login === null) await clearLogin();
@@ -150,30 +161,33 @@ const server = createServer(async (request,response) => {
       } finally { saving = false; }
     }
     if (route === 'PUT /api/config') {
-      const config = validateConfig(await bodyOf(request));
-      if (saving || scheduling || job.state === 'running') return json(response,409,{error:'请等待当前操作完成'});
+      const config = validateConfig(await bodyOf(request),project.id);
+      if (saving || scheduling || isRunning()) return json(response,409,{error:'请等待当前操作完成'});
       saving = true;
       try {
-        if (config.schedule.enabled && !(await webhookStatus()).configured && !(await loadConfig()).schedule.enabled) {
+        if (config.schedule.enabled && !(await webhookStatus(project.config)).configured &&
+            !(await loadConfig(project.config,project.id)).schedule.enabled) {
           return json(response,400,{error:'请先在后台保存企微 Webhook'});
         }
-        await mkdir(path.dirname(configPath),{recursive:true});
-        const pending = configPath+'.'+process.pid+'.tmp';
+        await mkdir(path.dirname(project.config),{recursive:true});
+        const pending = project.config+'.'+process.pid+'.tmp';
         await writeFile(pending,JSON.stringify(config,null,2)+'\n','utf8');
-        await rename(pending,configPath);
+        await rename(pending,project.config);
       } finally { saving = false; }
       return json(response,200,config);
     }
     if (route === 'POST /api/run') {
       const {push} = await bodyOf(request);
       if (typeof push !== 'boolean') return json(response,400,{error:'请指定运行模式'});
-      if (saving || scheduling || job.state === 'running') return json(response,409,{error:'请等待当前操作完成'});
+      if (saving || scheduling || isRunning()) return json(response,409,{error:'请等待当前操作完成'});
       saving = true;
       try {
-        const webhook = push ? await readWebhook() : null;
+        const config = await loadConfig(project.config,project.id);
+        if (!config.report.url) return json(response,400,{error:'请先保存该项目的报表配置'});
+        const webhook = push ? await readWebhook(project.config) : null;
         if (push && !webhook) return json(response,400,{error:'请先在后台保存企微 Webhook'});
-        startJob(webhook);
-        return json(response,202,job);
+        startJob(project,webhook);
+        return json(response,202,jobs.get(project.id));
       } finally { saving = false; }
     }
     return json(response,404,{error:'页面不存在'});

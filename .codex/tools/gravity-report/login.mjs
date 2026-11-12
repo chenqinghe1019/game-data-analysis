@@ -3,7 +3,7 @@ import path from 'node:path';
 import {spawn} from 'node:child_process';
 import {configPath} from './config.mjs';
 
-const file = path.join(path.dirname(configPath),'gravity-login.dpapi');
+const file = path.join(path.dirname(process.env.GRAVITY_LOGIN_CONFIG ?? configPath),'gravity-login.dpapi');
 
 export function protect(value, decrypt = false) {
   const method = decrypt ? 'Unprotect' : 'Protect';
