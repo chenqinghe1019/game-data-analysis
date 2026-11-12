@@ -22,9 +22,11 @@ async function waitForReportTotals(page, trigger, timeout) {
   await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
 }
 
-async function openReport(page, {url:reportUrl,title,timeoutSeconds,browserMode}) {
+async function openReport(page, {url:reportUrl,title,timeoutSeconds,browserMode}, kind) {
   await page.goto(reportUrl, {waitUntil:'domcontentloaded',timeout:timeoutSeconds*1000});
-  const report = page.getByText(title, {exact:true});
+  const report = kind === 'iaa'
+    ? page.getByRole('button', {name:'刷新数据',exact:true})
+    : page.getByText(title, {exact:true});
   const login = page.getByRole('button', {name:'登录', exact:true});
   await report.or(login).first().waitFor({timeout:timeoutSeconds*1000});
   if (await login.isVisible()) {
@@ -474,10 +476,13 @@ async function main(kind) {
     for (let attempt=0; attempt<=report.retries; attempt++) {
       let stage = '打开报表或登录';
       try {
-        await openReport(page,report);
+        console.log('正在打开引力报表（第 '+(attempt+1)+' 次）');
+        await openReport(page,report,kind);
         stage = '刷新报表';
+        console.log('正在刷新引力报表');
         await refreshReport(page,date,report.timeoutSeconds*1000,report.product);
         stage = '读取和校验数据';
+        console.log('正在读取和校验项目、媒体及指标');
         data = await collect(page,config);
         if (day() !== date) throw new Error('取数期间跨过北京时间日期');
         break;
@@ -495,6 +500,7 @@ async function main(kind) {
     const pendingDiscovery = discoveryPath+'.'+process.pid+'.tmp';
     await fs.writeFile(pendingDiscovery,JSON.stringify(catalog),'utf8');
     await fs.rename(pendingDiscovery,discoveryPath);
+    console.log('正在生成 Excel'+(webhook ? ' 和企微截图' : ''));
     const screenshot = await writeWorkbook(outputRows(data,project,kind,report.metrics),date,output,deps,
       preview||Boolean(webhook),project.name,hour,kind,report.metrics);
     console.log(output);
