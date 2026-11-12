@@ -238,7 +238,7 @@ export function outputRows({total,apps,appGroupTotal}, project = defaults.projec
   return rows;
 }
 
-export async function writeWorkbook(rows, date, output, deps, renderImage = false, projectName = defaults.project.name) {
+export async function writeWorkbook(rows, date, output, deps, renderImage = false, projectName = defaults.project.name, hour) {
   const require = createRequire(path.join(deps,'package.json'));
   const {Workbook,SpreadsheetFile} = await import(pathToFileURL(require.resolve('@oai/artifact-tool')).href);
   const JSZip = require('jszip');
@@ -246,7 +246,8 @@ export async function writeWorkbook(rows, date, output, deps, renderImage = fals
   const sheet = wb.worksheets.add('投放播报');
   sheet.showGridLines = false;
   const last = 4 + rows.length;
-  for (const [row, value] of [[1,projectName+'｜投放播报'],[2,date+' · 北京时间「今日」累计'],
+  const period = hour === undefined ? date : date+' '+hour+':00';
+  for (const [row, value] of [[1,projectName+'｜投放播报'],[2,period+' · 北京时间「今日」累计'],
     [last+2,'指标取自引力报表。仅展示有消耗的项目及媒体。']]) {
     sheet.getRange('A'+row+':G'+row).merge();
     sheet.getRange('A'+row).values = [[value]];
@@ -326,7 +327,7 @@ export async function writeWorkbook(rows, date, output, deps, renderImage = fals
   sheet.getRange('F5:F'+last).conditionalFormats.add('dataBar',{color:'#A9A8DF',thresholds:[0,'max'],gradient:false});
   sheet.getRange('G5:G'+last).conditionalFormats.add('dataBar',{color:'#9DD4C1',thresholds:[0,1],gradient:false});
   const screenshot = renderImage
-    ? await wb.render({sheetName:'投放播报',range:'A1:G'+(last+2),scale:1})
+    ? await wb.render({sheetName:'投放播报',range:'A1:G'+(last+2),scale:1,headers:false})
     : null;
   const workbook = await SpreadsheetFile.exportXlsx(wb);
   await fs.mkdir(path.dirname(output),{recursive:true});
@@ -429,7 +430,8 @@ async function main() {
   const hour = slot?.slice(11) ?? new Intl.DateTimeFormat('en-GB', {
     timeZone:'Asia/Shanghai',hour:'2-digit',hourCycle:'h23',
   }).format(new Date());
-  const webhook = process.env.GRAVITY_WECOM_WEBHOOK;
+  const preview = process.argv[3] === '--preview';
+  const webhook = preview ? undefined : process.env.GRAVITY_WECOM_WEBHOOK;
   const output = path.resolve(process.argv[2] ?? path.join('outputs','gravity-wecom',date+'_'+Date.now()+'.xlsx'));
   if (path.extname(output).toLowerCase() !== '.xlsx') throw new Error('输出路径需以 .xlsx 结尾');
   const profile = process.env.GRAVITY_PROFILE ?? path.join(process.env.LOCALAPPDATA,'GravityWeComReport','Chrome');
@@ -470,8 +472,9 @@ async function main() {
     const pendingDiscovery = discoveryPath+'.'+process.pid+'.tmp';
     await fs.writeFile(pendingDiscovery,JSON.stringify(catalog),'utf8');
     await fs.rename(pendingDiscovery,discoveryPath);
-    const screenshot = await writeWorkbook(outputRows(data,project),date,output,deps,Boolean(webhook),project.name);
+    const screenshot = await writeWorkbook(outputRows(data,project),date,output,deps,preview||Boolean(webhook),project.name,hour);
     console.log(output);
+    if (preview) await fs.writeFile(output.slice(0,-5)+'.png',screenshot);
     if (webhook) {
       const [year,month,dayOfMonth] = date.split('-');
       await sendWeComReport(webhook,screenshot,'【'+project.name+'】'+year+'年'+month+'月'+dayOfMonth+'日'+hour+'时 - 小时报');
