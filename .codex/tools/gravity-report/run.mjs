@@ -23,8 +23,18 @@ async function waitForReportTotals(page, trigger, timeout, endpoint = '/report/a
   await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
 }
 
-async function openReport(page, {url:reportUrl,title,timeoutSeconds,browserMode}, kind) {
-  await page.goto(reportUrl, {waitUntil:'domcontentloaded',timeout:timeoutSeconds*1000});
+async function openReport(page, {url:reportUrl,title,timeoutSeconds,browserMode}, kind, retry) {
+  const target = new URL(reportUrl);
+  const current = new URL(page.url());
+  // The report/login locator below checks readiness without waiting on unrelated page resources.
+  const options = {waitUntil:'commit',timeout:timeoutSeconds*1000};
+  if (retry && current.origin === target.origin && current.hash === target.hash) {
+    console.log('正在刷新当前引力网页后重试');
+    await page.reload(options);
+  } else {
+    console.log('正在访问引力报表链接');
+    await page.goto(reportUrl, options);
+  }
   const report = kind === 'iaa'
     ? page.getByRole('button', {name:'刷新数据',exact:true})
     : page.getByText(title, {exact:true});
@@ -557,7 +567,7 @@ async function main(kind) {
       let stage = '打开报表或登录';
       try {
         console.log('正在打开引力报表（第 '+(attempt+1)+' 次）');
-        await openReport(page,report,kind);
+        await openReport(page,report,kind,attempt > 0);
         stage = '刷新报表';
         console.log('正在刷新引力报表');
         await refreshReport(page,date,report.timeoutSeconds*1000,report.product,report.layout);
