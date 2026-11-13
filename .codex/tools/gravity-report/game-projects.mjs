@@ -1,5 +1,5 @@
 import {fileURLToPath} from 'node:url';
-import {configPath,iaaConfigPath} from './config.mjs';
+import {configPath,iaaConfigPath,towerConfigPath,towerName} from './config.mjs';
 
 const scripts = {
   'gravity-report': {
@@ -17,6 +17,7 @@ export const gameProjects = [
   gravityProject,
   {id:'iaa', name:'IAA 项目', scriptId:'gravity-iaa', settings:'/iaa',
     config:iaaConfigPath},
+  {id:'tower', name:towerName, scriptId:'gravity-report', settings:'/tower', config:towerConfigPath},
 ];
 
 export function projectScript(project) {

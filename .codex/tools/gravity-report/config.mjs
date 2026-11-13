@@ -9,6 +9,8 @@ defaults.project = normalizeProject(defaults.project);
 export const configPath = process.env.GRAVITY_REPORT_CONFIG ??
   path.join(process.env.LOCALAPPDATA, 'GravityWeComReport', 'config.json');
 export const iaaConfigPath = path.join(path.dirname(configPath),'iaa','config.json');
+export const towerConfigPath = path.join(path.dirname(configPath),'tower','config.json');
+export const towerName = '别推我的塔';
 
 function iaaMetrics(fields) {
   return [
@@ -32,11 +34,14 @@ export function validateConfig(config, kind = 'gravity') {
   if (!report || !rawProject || typeof report.url !== 'string') throw new Error('缺少报表或项目配置');
   const project = normalizeProject(rawProject);
   const url = URL.parse(report.url);
-  if (!url || url.origin !== 'https://web.gravity-engine.com' || url.username || url.password ||
-      !/^#\/pivotReport\/(?:shared|mine)\?id=\d+&category=adreport$/.test(url.hash)) {
+  const draft = kind === 'tower' && report.url === '';
+  if (!draft && (!url || url.origin !== 'https://web.gravity-engine.com' || url.username || url.password ||
+      !/^#\/pivotReport\/(?:shared|mine)\?id=\d+&category=adreport$/.test(url.hash))) {
     throw new Error('请填写引力引擎投放报表的分享地址或「我的报表」地址');
   }
-  if (![report.title,report.product,project.name].every(validText)) throw new Error('请填写报表标题、产品筛选和项目名称');
+  if (!validText(project.name) || ![report.title,report.product].every(value=>validText(value) || (draft && value === ''))) {
+    throw new Error('请填写报表标题、产品筛选和项目名称');
+  }
   if (!Number.isInteger(report.timeoutSeconds) || report.timeoutSeconds < 10 || report.timeoutSeconds > 600 ||
       !Number.isInteger(report.retries) || report.retries < 0 || report.retries > 3) {
     throw new Error('查询超时须为 10–600 秒，重试次数须为 0–3 次');
@@ -63,7 +68,7 @@ export function validateConfig(config, kind = 'gravity') {
   if (!columnNames.every(validText) || new Set(columnNames).size !== columnNames.length) {
     throw new Error('请填写不同的指标列名');
   }
-  if (!Array.isArray(project.groups) || !project.groups.length || project.groups.some(group=>
+  if (!Array.isArray(project.groups) || project.groups.some(group=>
       !validText(group?.name) || group.name === '全盘' ||
       !Array.isArray(group.projects)) ||
       new Set(project.groups.map(group=>group.name)).size !== project.groups.length) {
@@ -77,6 +82,7 @@ export function validateConfig(config, kind = 'gravity') {
       schedule.hours.some(hour => !Number.isInteger(hour) || hour < 0 || hour > 23) ||
       new Set(schedule.hours).size !== schedule.hours.length ||
       (schedule.enabled && !schedule.hours.length)) throw new Error('请为小时发送选择有效的北京时间小时');
+  if (draft && schedule.enabled) throw new Error('请先保存报表链接再启用定时发送');
   const {url:reportUrl,title,product,timeoutSeconds,retries,browserMode='existing'} = report;
   if (!['existing','dedicated'].includes(browserMode)) throw new Error('浏览器模式无效');
   const layout = kind === 'iaa' ? report.layout ?? 'project' : 'project';
@@ -94,6 +100,9 @@ export async function loadConfig(file = configPath, kind = 'gravity') {
   try {
     return validateConfig(JSON.parse(await fs.readFile(file,'utf8')),kind);
   } catch (error) {
+    if (error.code === 'ENOENT' && kind === 'tower') {
+      return {...defaults,project:{name:towerName,groups:[]},schedule:{enabled:false,hours:[]}};
+    }
     if (error.code === 'ENOENT' && (kind === 'iaa' || !process.env.GRAVITY_REPORT_CONFIG)) {
       if (kind !== 'iaa') return defaults;
       return {...defaults,project:{name:'IAA 项目',groups:[{name:'IAA',projects:[]}]},
