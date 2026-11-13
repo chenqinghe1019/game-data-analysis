@@ -9,6 +9,7 @@ import { readLogin } from './login.mjs';
 const root = '.el-table-v2__root';
 const timeout = 120_000;
 const day = () => new Intl.DateTimeFormat('sv-SE', {timeZone:'Asia/Shanghai'}).format(new Date());
+const previousDay = date => new Date(Date.parse(date+'T00:00:00Z')-86_400_000).toISOString().slice(0,10);
 
 async function waitForReportTotals(page, trigger, timeout, endpoint = '/report/api/v3/adreport/custom_get/calc_total/') {
   const [response] = await Promise.all([
@@ -60,16 +61,26 @@ async function openReport(page, {url:reportUrl,title,timeoutSeconds,browserMode}
 export async function refreshReport(page, expectedDay, wait = timeout, product = defaults.report.product, layout) {
   const deadline = Date.now() + wait;
   const remaining = () => Math.max(1, deadline - Date.now());
-  const refresh = page.getByRole('button', {name:'刷新数据', exact:true});
+  const refresh = page.getByRole('button', {name:'刷新数据', exact:true}).and(page.locator('button:not(.is-round)'));
   const ready = () => page.waitForFunction(() => {
     const button = Array.from(document.querySelectorAll('button'))
       .find(item => item.innerText.includes('刷新数据'));
     return button && !button.disabled &&
       !document.querySelector('.el-table-v2__root')?.innerText.includes('计算中，请稍候');
   }, null, {timeout:remaining()});
-  const dateFilter = page.getByRole('button', {name:new RegExp('^今日\\|' + expectedDay + '至' + expectedDay + '$')});
+  const today = day();
+  const preset = expectedDay === today ? '今日' : '昨日';
+  if (preset === '昨日' && expectedDay !== previousDay(today)) throw new Error('报表日期须为北京时间今日或昨日');
+  const dateFilter = page.getByRole('button', {name:preset+'|'+expectedDay+'至'+expectedDay,exact:true});
+  const dateControl = page.getByRole('button', {name:/^(今日|昨日)\|\d{4}-\d{2}-\d{2}至\d{4}-\d{2}-\d{2}$/});
   const productFilter = page.getByText(product, {exact:true});
-  await dateFilter.waitFor({timeout:remaining()});
+  await dateControl.waitFor({timeout:remaining()});
+  if (!await dateFilter.isVisible()) {
+    await dateControl.click({timeout:remaining()});
+    // The first preset is a quick date-range shortcut. It applies both endpoints.
+    await page.getByText(preset,{exact:true}).filter({visible:true}).first().click({timeout:remaining()});
+    await dateFilter.waitFor({timeout:remaining()});
+  }
   await productFilter.waitFor({timeout:remaining()});
   await ready();
   // Trigger the exact button without pointer scrolling, and observe that same button.
@@ -90,7 +101,7 @@ export async function refreshReport(page, expectedDay, wait = timeout, product =
     layout === 'daily' || layout === 'flat' ? '/report/api/v3/adreport/custom_get/' : undefined);
   await page.locator('html[data-gravity-refresh-started=true]').waitFor({state:'attached',timeout:remaining()});
   await ready();
-  if (day() !== expectedDay || !await dateFilter.isVisible() || !await productFilter.isVisible()) {
+  if (day() !== today || !await dateFilter.isVisible() || !await productFilter.isVisible()) {
     throw new Error('查询完成后的日期或产品范围与预期不符');
   }
 }
@@ -102,7 +113,7 @@ function asNumber(value, field, percent) {
   return Number(cleaned.replace('%','')) / (percent ? 100 : 1);
 }
 
-async function readGrid(page, {fields,metrics:configuredMetrics,layout}) {
+async function readGrid(page, {fields,metrics:configuredMetrics,layout}, expectedDay) {
   const raw = await page.locator(root).evaluate((grid,flat) => {
     const select = (node, selector) => Array.from(node.querySelectorAll(selector));
     const cells = row => select(row, '.report-v2-cell--metric').map(cell => cell.innerText);
@@ -140,8 +151,8 @@ async function readGrid(page, {fields,metrics:configuredMetrics,layout}) {
   }
   if (layout === 'daily') {
     const dateLabels = raw.dimensionText.match(/\b\d{4}-\d{2}-\d{2}\b/g) ?? [];
-    if (!dateLabels.length || dateLabels.some(value=>value !== day())) {
-      throw new Error('日期报表的明细与北京时间今日不一致');
+    if (!dateLabels.length || dateLabels.some(value=>value !== expectedDay)) {
+      throw new Error('日期报表的明细与目标日期不一致');
     }
     return {total:parse(raw.total),apps:new Map()};
   }
@@ -155,8 +166,8 @@ async function readGrid(page, {fields,metrics:configuredMetrics,layout}) {
     for (const [position,dimensions] of raw.flatLabels) {
       const [date,product,media] = dimensions;
       const project = product?.match(/^(.*?)\s*APPID\s*(\d+)\s*$/s);
-      if (dimensions.length !== 3 || date !== day() || !project || !media || !metrics.has(position)) {
-        throw new Error('平铺报表须按「日期、产品、媒体平台」排列，且只包含北京时间今日');
+      if (dimensions.length !== 3 || date !== expectedDay || !project || !media || !metrics.has(position)) {
+        throw new Error('平铺报表须按「日期、产品、媒体平台」排列，且只包含目标日期');
       }
       const [,label,id] = project;
       if (!apps.has(id)) apps.set(id,{name:label.trim() || 'APPID '+id,media:new Map()});
@@ -191,7 +202,7 @@ async function readGrid(page, {fields,metrics:configuredMetrics,layout}) {
   return {total:parse(raw.total),apps};
 }
 
-async function readAppGroupTotal(page, ids, report, timeout) {
+async function readAppGroupTotal(page, ids, report, timeout, expectedDay) {
   await page.getByRole('button', {name:/^表内筛选\/\s*0$/}).click({timeout});
   const dialog = page.getByRole('dialog', {name:'表内筛选'});
   await dialog.getByText('请选择', {exact:true}).first().click({timeout});
@@ -207,7 +218,7 @@ async function readAppGroupTotal(page, ids, report, timeout) {
   }
   await dialog.getByRole('heading').click({timeout});
   await waitForReportTotals(page, () => dialog.getByRole('button', {name:'应用筛选'}).click({timeout}), timeout);
-  const filtered = await readGrid(page,report);
+  const filtered = await readGrid(page,report,expectedDay);
   if (filtered.apps.size !== ids.length || ids.some(id=>!filtered.apps.has(id))) {
     throw new Error('引力项目合计的筛选范围与配置不一致');
   }
@@ -216,28 +227,28 @@ async function readAppGroupTotal(page, ids, report, timeout) {
     await dialog.getByRole('button',{name:'全部清空'}).click({timeout});
     await dialog.getByRole('button',{name:'应用筛选'}).click({timeout});
     await page.getByRole('button',{name:/^表内筛选\/\s*0$/}).waitFor({timeout});
-    await refreshReport(page,day(),timeout,report.product,report.layout);
+    await refreshReport(page,expectedDay,timeout,report.product,report.layout);
   }
   return filtered.total;
 }
 
-export async function collect(page, {report,project} = defaults) {
+export async function collect(page, {report,project} = defaults, expectedDay = day()) {
   const timeout = report.timeoutSeconds * 1000;
   const grid = page.locator(root);
   await grid.waitFor({timeout});
-  if (report.layout === 'daily') return readGrid(page,report);
+  if (report.layout === 'daily') return readGrid(page,report,expectedDay);
   if (report.layout === 'flat') {
-    const base = await readGrid(page,report);
+    const base = await readGrid(page,report,expectedDay);
     for (const [id,app] of base.apps) {
       const media = [...app.media.values()];
       app.data = media.length === 1 || media.every(row=>row.spend === 0)
-        ? media[0] : await readAppGroupTotal(page,[id],report,timeout);
+        ? media[0] : await readAppGroupTotal(page,[id],report,timeout,expectedDay);
     }
     const group = project.groups.find(group=>group.name.toUpperCase()==='APP' && group.projects.length>1);
     const ids = group?.projects.map(({id})=>id).filter(id=>base.apps.has(id)) ?? [];
     if (ids.length === 1) base.appGroupTotal = base.apps.get(ids[0]).data;
     if (ids.length > 1 && ids.some(id=>base.apps.get(id).data.spend !== 0)) {
-      base.appGroupTotal = await readAppGroupTotal(page,ids,report,timeout);
+      base.appGroupTotal = await readAppGroupTotal(page,ids,report,timeout,expectedDay);
     }
     return base;
   }
@@ -245,7 +256,7 @@ export async function collect(page, {report,project} = defaults) {
   const collapse = grid.getByRole('button', {name:'收起当前行',exact:true});
   for (let i=0; i<20 && await collapse.count(); i++) await collapse.first().click();
   if (await collapse.count()) throw new Error('主表存在未收起的行');
-  const base = await readGrid(page,report);
+  const base = await readGrid(page,report,expectedDay);
   for (const [id,app] of base.apps) {
     if (app.data.spend === 0) continue;
     const row = grid.locator('.el-table-v2__left [rowkey]').filter({hasText:new RegExp('APPID\\s*'+id+'\\b')});
@@ -255,7 +266,7 @@ export async function collect(page, {report,project} = defaults) {
     await waitForReportTotals(page, () => expand.click(), timeout);
     await row.getByRole('button', {name:'收起当前行',exact:true}).waitFor();
     await row.locator('xpath=following-sibling::*[1][contains(@class,"el-table-v2__row-depth-1")]').waitFor({state:'visible',timeout});
-    app.media = (await readGrid(page,report)).apps.get(id).media;
+    app.media = (await readGrid(page,report,expectedDay)).apps.get(id).media;
     const mediaSpend = [...app.media.values()].reduce((sum,item)=>sum+item.spend,0);
     if (Math.abs(mediaSpend-app.data.spend) > 0.01+0.005*app.media.size) {
       throw new Error('APPID '+id+' 媒体消耗合计 '+mediaSpend.toFixed(4)+
@@ -266,7 +277,7 @@ export async function collect(page, {report,project} = defaults) {
   const appGroup = project.groups.find(group=>group.name.toUpperCase()==='APP' && group.projects.length>1);
   const appIds = appGroup?.projects.map(({id})=>id).filter(id=>base.apps.has(id)) ?? [];
   if (appIds.length) {
-    base.appGroupTotal = await readAppGroupTotal(page,appIds,report,timeout);
+    base.appGroupTotal = await readAppGroupTotal(page,appIds,report,timeout,expectedDay);
   }
   return base;
 }
@@ -304,7 +315,7 @@ export function outputRows({total,apps,appGroupTotal}, project = defaults.projec
   return rows;
 }
 
-export async function writeWorkbook(rows, date, output, deps, renderImage = false, projectName = defaults.project.name, hour, kind = 'gravity', metrics, layout = 'project', spendUnit) {
+export async function writeWorkbook(rows, date, output, deps, renderImage = false, projectName = defaults.project.name, hour, kind = 'gravity', metrics, layout = 'project', spendUnit, fullDay = false) {
   const require = createRequire(path.join(deps,'package.json'));
   const {Workbook,SpreadsheetFile} = await import(pathToFileURL(require.resolve('@oai/artifact-tool')).href);
   const JSZip = require('jszip');
@@ -323,9 +334,10 @@ export async function writeWorkbook(rows, date, output, deps, renderImage = fals
     {label:'ROI',format:'percent'},
   ];
   const lastColumn = String.fromCharCode(64+baseColumns.length+reportColumns.length);
-  const period = hour === undefined ? date : date+' '+hour+':00';
+  const period = fullDay ? date+' 24:00' : hour === undefined ? date : date+' '+hour+':00';
   const title = kind === 'iaa' ? 'IAA 播报' : '投放播报';
-  for (const [row, value] of [[1,projectName+'｜'+title],[2,period+' · 北京时间「今日」累计'],
+  const periodLabel = fullDay ? ' · 北京时间「全天汇总」' : ' · 北京时间「今日」累计';
+  for (const [row, value] of [[1,projectName+'｜'+title],[2,period+periodLabel],
     [last+2,daily ? '指标取自引力报表的当日合计。' : '指标取自引力报表。仅展示有消耗的项目及媒体。']]) {
     sheet.getRange('A'+row+':'+lastColumn+row).merge();
     sheet.getRange('A'+row).values = [[value]];
@@ -512,14 +524,16 @@ async function main(kind) {
     '.cache','codex-runtimes','codex-primary-runtime','dependencies','node','node_modules');
   const require = createRequire(path.join(deps,'package.json'));
   const {chromium} = require('playwright');
-  const date = day();
+  const runDay = day();
   const slot = process.env.GRAVITY_REPORT_SLOT;
-  if (slot && (!/^\d{4}-\d{2}-\d{2}T(?:[01]\d|2[0-3])$/.test(slot) || slot.slice(0,10) !== date)) {
+  if (slot && (!/^\d{4}-\d{2}-\d{2}T(?:[01]\d|2[0-3])$/.test(slot) || slot.slice(0,10) !== runDay)) {
     throw new Error('定时任务时点与当前报表日期不符');
   }
   const hour = slot?.slice(11) ?? new Intl.DateTimeFormat('en-GB', {
     timeZone:'Asia/Shanghai',hour:'2-digit',hourCycle:'h23',
   }).format(new Date());
+  const fullDay = Boolean(slot && hour === '00');
+  const date = fullDay ? previousDay(runDay) : runDay;
   const preview = process.argv[3] === '--preview';
   const webhook = preview ? undefined : process.env.GRAVITY_WECOM_WEBHOOK;
   const output = path.resolve(process.argv[2] ?? path.join('outputs','gravity-wecom',date+'_'+Date.now()+'.xlsx'));
@@ -549,12 +563,12 @@ async function main(kind) {
         await refreshReport(page,date,report.timeoutSeconds*1000,report.product,report.layout);
         stage = '读取和校验数据';
         console.log('正在读取和校验项目、媒体及指标');
-        data = await collect(page,config);
-        if (day() !== date) throw new Error('取数期间跨过北京时间日期');
+        data = await collect(page,config,date);
+        if (day() !== runDay) throw new Error('取数期间跨过北京时间日期');
         break;
       } catch (error) {
         const reason = stage+'失败：'+error.message.split('\n')[0];
-        if (attempt===report.retries || day()!==date) throw new Error(reason);
+        if (attempt===report.retries || day()!==runDay) throw new Error(reason);
         console.warn(reason+'。重新加载报表后重试。');
       }
     }
@@ -571,13 +585,13 @@ async function main(kind) {
       ? [[date,data.total.spend,...report.metrics.map((_,index)=>data.total['metric'+index])]]
       : outputRows(data,project,kind,report.metrics);
     const screenshot = await writeWorkbook(rows,date,output,deps,
-      preview||Boolean(webhook),project.name,hour,kind,report.metrics,report.layout,report.spendUnit);
+      preview||Boolean(webhook),project.name,hour,kind,report.metrics,report.layout,report.spendUnit,fullDay);
     console.log(output);
     if (preview) await fs.writeFile(output.slice(0,-5)+'.png',screenshot);
     if (webhook) {
       const [year,month,dayOfMonth] = date.split('-');
-      const reportName = kind === 'iaa' ? 'IAA 小时报' : '小时报';
-      await sendWeComReport(webhook,screenshot,'【'+project.name+'】'+year+'年'+month+'月'+dayOfMonth+'日'+hour+'时 - '+reportName);
+      const reportName = (kind === 'iaa' ? 'IAA ' : '')+(fullDay ? '全天汇总' : '小时报');
+      await sendWeComReport(webhook,screenshot,'【'+project.name+'】'+year+'年'+month+'月'+dayOfMonth+'日'+(fullDay?'24':hour)+'时 - '+reportName);
     }
   } finally {
     if (reuse && page) await page.close().catch(()=>{});
