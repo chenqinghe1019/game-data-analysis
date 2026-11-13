@@ -89,8 +89,10 @@ export function validateConfig(config, kind = 'gravity') {
   if (!['project','daily','flat'].includes(layout)) throw new Error('报表展示维度无效');
   const spendUnit = report.spendUnit ?? (kind === 'iaa' ? 'yuan' : defaults.report.spendUnit);
   if (!['yuan','wan','wan-decimal'].includes(spendUnit)) throw new Error('消耗显示单位无效');
+  const productAppId = report.productAppId ?? '';
+  if (kind === 'tower' && !draft && !/^\d+$/.test(productAppId)) throw new Error('请填写引力产品 APPID');
   return {...config,report:{url:reportUrl,title,product,timeoutSeconds,retries,browserMode,
-    fields,spendUnit,...(metrics ? {metrics,layout} : {})},
+    fields,spendUnit,...(kind === 'tower' ? {productAppId} : {}),...(metrics ? {metrics,layout} : {})},
     project:{name:project.name,groups:project.groups.map(group=>({name:group.name,
       projects:group.projects.map(({name,id})=>({name,id})),
     }))},schedule};

@@ -68,7 +68,7 @@ async function openReport(page, {url:reportUrl,title,timeoutSeconds,browserMode}
   }
 }
 
-export async function refreshReport(page, expectedDay, wait = timeout, product = defaults.report.product, layout) {
+export async function refreshReport(page, expectedDay, wait = timeout, product = defaults.report.product, layout, productAppId) {
   const deadline = Date.now() + wait;
   const remaining = () => Math.max(1, deadline - Date.now());
   const refresh = page.getByRole('button', {name:'刷新数据', exact:true}).and(page.locator('button:not(.is-round)'));
@@ -83,7 +83,10 @@ export async function refreshReport(page, expectedDay, wait = timeout, product =
   if (preset === '昨日' && expectedDay !== previousDay(today)) throw new Error('报表日期须为北京时间今日或昨日');
   const dateFilter = page.getByRole('button', {name:preset+'|'+expectedDay+'至'+expectedDay,exact:true});
   const dateControl = page.getByRole('button', {name:/^(今日|昨日)\|\d{4}-\d{2}-\d{2}至\d{4}-\d{2}-\d{2}$/});
-  const productFilter = page.getByText(product, {exact:true});
+  const productText = page.getByText(product,{exact:true});
+  const productFilter = productAppId
+    ? page.locator('.el-select__selected-item .label-text').and(productText)
+    : productText;
   await dateControl.waitFor({timeout:remaining()});
   if (!await dateFilter.isVisible()) {
     await dateControl.click({timeout:remaining()});
@@ -114,6 +117,20 @@ export async function refreshReport(page, expectedDay, wait = timeout, product =
   if (day() !== today || !await dateFilter.isVisible() || !await productFilter.isVisible()) {
     throw new Error('查询完成后的日期或产品范围与预期不符');
   }
+}
+
+async function selectReportProduct(page, {product,productAppId,timeoutSeconds}) {
+  const timeout = timeoutSeconds*1000;
+  const selected = page.locator('.el-select__selected-item .label-text').filter({visible:true});
+  await selected.waitFor({timeout});
+  if ((await selected.innerText()).trim() === product) return;
+  await selected.click({timeout});
+  const search = page.getByRole('textbox',{name:/搜索应用名称/});
+  await search.fill(productAppId,{timeout});
+  const picker = page.getByRole('tooltip').filter({has:search});
+  const option = picker.getByText(product,{exact:true});
+  await option.click({timeout});
+  await selected.and(page.getByText(product,{exact:true})).waitFor({timeout});
 }
 
 function asNumber(value, field, percent) {
@@ -267,6 +284,9 @@ export async function collect(page, {report,project} = defaults, expectedDay = d
   for (let i=0; i<20 && await collapse.count(); i++) await collapse.first().click();
   if (await collapse.count()) throw new Error('主表存在未收起的行');
   const base = await readGrid(page,report,expectedDay);
+  if (report.productAppId && (base.apps.size !== 1 || !base.apps.has(report.productAppId))) {
+    throw new Error('报表项目与配置的引力 APPID 不一致');
+  }
   for (const [id,app] of base.apps) {
     if (app.data.spend === 0) continue;
     const row = grid.locator('.el-table-v2__left [rowkey]').filter({hasText:new RegExp('APPID\\s*'+id+'\\b')});
@@ -568,9 +588,10 @@ async function main(kind) {
       try {
         console.log('正在打开引力报表（第 '+(attempt+1)+' 次）');
         await openReport(page,report,kind,attempt > 0);
+        if (report.productAppId) await selectReportProduct(page,report);
         stage = '刷新报表';
         console.log('正在刷新引力报表');
-        await refreshReport(page,date,report.timeoutSeconds*1000,report.product,report.layout);
+        await refreshReport(page,date,report.timeoutSeconds*1000,report.product,report.layout,report.productAppId);
         stage = '读取和校验数据';
         console.log('正在读取和校验项目、媒体及指标');
         data = await collect(page,config,date);
@@ -616,4 +637,6 @@ export function runFromCli(kind = 'gravity') {
   });
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) runFromCli();
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  runFromCli(process.env.GRAVITY_REPORT_KIND ?? 'gravity');
+}

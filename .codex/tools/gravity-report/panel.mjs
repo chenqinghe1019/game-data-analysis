@@ -37,6 +37,7 @@ function startJob(project, webhook, slot = null) {
   const job = {state:'running',log:'',startedAt:new Date().toISOString(),push,slot};
   jobs.set(project.id,job);
   const env = {...process.env,GRAVITY_REPORT_CONFIG:project.config,GRAVITY_LOGIN_CONFIG:configPath};
+  env.GRAVITY_REPORT_KIND = project.id;
   if (push) env.GRAVITY_WECOM_WEBHOOK = webhook;
   else delete env.GRAVITY_WECOM_WEBHOOK;
   if (slot) env.GRAVITY_REPORT_SLOT = slot;
