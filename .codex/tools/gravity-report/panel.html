@@ -47,11 +47,17 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#f4f8fc;padding:12px;
 <p>消耗是必填列。其他指标按这里的顺序出现在播报表格中。</p>
 <div id="metrics"></div><button type="button" id="addMetric">添加指标</button>
 </div></section>
+<div>
+<section class="card" id="taSection" hidden aria-labelledby="taTitle">
+<h2 id="taTitle">数数报表参数</h2><div id="taReport"></div>
+<p>填写已保存的数数 SQL 报表链接。首次取数前，运行 start-external-ta.ps1 并在打开的 Chrome 中登录数数。</p>
+</section>
 <section class="card"><h2>项目配置参数</h2><div id="project"></div>
 <h3>播报分组</h3><p>每个分组可组合多个引力项目。</p>
 <div id="groups"></div><button type="button" id="addGroup">添加分组</button>
 <h3>引力自动识别的项目与媒体</h3>
 <p id="discoveryHint"></p><div id="discovery"></div></section>
+</div>
 </div>
 <section class="card"><h2>小时发送</h2>
 <label class="toggle"><input id="hourlyEnabled" type="checkbox">开启小时发送</label>
@@ -87,7 +93,6 @@ const fieldLabels = isExternal
   : {spend:'消耗',activations:'激活数',activationCost:'激活成本',payers:'首日付费人数',payCost:'首付成本',revenue:'首日付费金额',roi:'ROI'};
 const reportLabels = {url:'引力报表链接',title:'报表标题',product:'产品筛选名称',timeoutSeconds:'查询超时（秒）',retries:'失败重试次数'};
 if (apiPrefix === '/tower' || isExternal) reportLabels.productAppId='引力产品 APPID';
-if (isExternal) reportLabels.taUrl='数数 SQL 报表地址';
 let busy = false;
 let canPush = false;
 let action = false;
@@ -278,6 +283,7 @@ function formConfig() {
   });
   const report={...values(get('report')),fields:values(get('fields')),browserMode:get('browserMode').value,
     spendUnit:get('spendUnit')?.value};
+  if (isExternal) report.taUrl=values(get('taReport')).taUrl;
   if (isIaa) {
     report.metrics=Array.from(get('metrics').children,values);
     report.layout=get('reportLayout').value;
@@ -338,7 +344,9 @@ try {
   if (isExternal) {
     get('pageTitle').textContent='外部小时报';
     document.title='外部小时报 · 企微播报';
-    get('pageDescription').textContent='合并数数经营与留存、引力买量与 ROI。首次取数前运行 start-external-ta.ps1，并在打开的 Chrome 登录数数。';
+    get('pageDescription').textContent='合并数数经营与留存、引力买量与 ROI。';
+    input(get('taReport'),'数数 SQL 报表地址','taUrl',report.taUrl??'');
+    get('taSection').hidden=false;
     for (const id of ['groups','addGroup','discovery','discoveryHint']) get(id).hidden=true;
     get('groups').previousElementSibling.hidden=true;
     get('groups').previousElementSibling.previousElementSibling.hidden=true;
