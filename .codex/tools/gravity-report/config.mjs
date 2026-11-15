@@ -90,6 +90,12 @@ export function validateConfig(config, kind = 'gravity') {
       new Set(schedule.hours).size !== schedule.hours.length ||
       (schedule.enabled && !schedule.hours.length)) throw new Error('请为小时发送选择有效的北京时间小时');
   if (draft && schedule.enabled) throw new Error('请先保存报表链接再启用定时发送');
+  const startAt = schedule.startAt ?? '';
+  if (external && startAt !== '' && (typeof startAt !== 'string' ||
+      !/^\d{4}-\d{2}-\d{2}T(?:[01]\d|2[0-3]):00$/.test(startAt) ||
+      new Date(startAt+'Z').toJSON()?.slice(0,16) !== startAt)) {
+    throw new Error('首报时点须为有效的北京时间整点');
+  }
   const {url:reportUrl,title,product,timeoutSeconds,retries,browserMode='existing'} = report;
   if (!['existing','dedicated'].includes(browserMode)) throw new Error('浏览器模式无效');
   const layout = kind === 'iaa' ? report.layout ?? 'project' : 'project';
@@ -111,7 +117,7 @@ export function validateConfig(config, kind = 'gravity') {
     ...(external ? {taUrl} : {}),...(metrics ? {metrics,layout} : {})},
     project:{name:project.name,groups:project.groups.map(group=>({name:group.name,
       projects:group.projects.map(({name,id})=>({name,id})),
-    }))},schedule};
+    }))},schedule:external ? {...schedule,startAt} : schedule};
 }
 
 export async function loadConfig(file = configPath, kind = 'gravity') {

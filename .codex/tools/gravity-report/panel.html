@@ -61,6 +61,7 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#f4f8fc;padding:12px;
 </div>
 <section class="card"><h2>小时发送</h2>
 <label class="toggle"><input id="hourlyEnabled" type="checkbox">开启小时发送</label>
+<label id="scheduleStartField" hidden>首报时点（北京时间）<input id="scheduleStart" type="datetime-local" step="3600"></label>
 <p>选择每天自动推送的北京时间整点。保存后生效，运行时请保持后台在线。</p>
 <p id="scheduleHint"></p>
 <details id="hourPicker" class="hour-picker">
@@ -291,6 +292,7 @@ function formConfig() {
   return {report,
     project:{...values(get('project')),groups},
     schedule:{enabled:get('hourlyEnabled').checked,
+      ...(isExternal ? {startAt:get('scheduleStart').value} : {}),
       hours:[...get('hours').querySelectorAll('input:checked')].map(input=>Number(input.value))}};
 }
 
@@ -347,6 +349,8 @@ try {
     get('pageDescription').textContent='合并数数经营与留存、引力买量与 ROI。';
     input(get('taReport'),'数数 SQL 报表地址','taUrl',report.taUrl??'');
     get('taSection').hidden=false;
+    get('scheduleStartField').hidden=false;
+    get('scheduleStart').value=schedule.startAt??'';
     for (const id of ['groups','addGroup','discovery','discoveryHint']) get(id).hidden=true;
     get('groups').previousElementSibling.hidden=true;
     get('groups').previousElementSibling.previousElementSibling.hidden=true;

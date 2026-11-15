@@ -68,6 +68,7 @@ async function checkSchedule() {
       try {
         const {schedule} = await loadConfig(project.config,project.id);
         if (!schedule.enabled || !schedule.hours.includes(beijing.getUTCHours())) continue;
+        if (project.id === 'external' && schedule.startAt && slot+':00' < schedule.startAt) continue;
         const webhook = await readWebhook(project.config);
         if (!webhook) continue;
         const directory = path.join(path.dirname(project.config),'sent-slots');

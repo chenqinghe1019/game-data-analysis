@@ -630,7 +630,7 @@ async function main(kind) {
       const ta = previewCsv ? parseTaHourly(await fs.readFile(previewCsv,'utf8'),date)
         : await readTaHourly(chromium,report.taUrl,date,report.timeoutSeconds*1000,report.retries);
       if (day() !== runDay) throw new Error('取数期间跨过北京时间日期');
-      const period = previewCsv ? '数数导出快照' : fullDay ? '截止到 24 点' : slot ? '截止到 '+Number(hour)+' 点'
+      const period = previewCsv ? '数数导出快照' : fullDay ? '截至北京时间 24:00' : slot ? '截至北京时间 '+hour+':00'
         : new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Shanghai',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(new Date())+' 快照';
       const png = await writeExternalHourly({date,period,ta,gravity:data,projectName:project.name},output,deps);
       console.log(output);

@@ -61,7 +61,7 @@ export async function readTaHourly(chromium, url, date, timeout, retries) {
   }
 }
 
-export async function writeExternalHourly({date,period,ta,gravity,projectName}, output, deps) {
+export async function writeExternalHourly({date,period,ta,gravity,projectName,template=false}, output, deps) {
   const require = createRequire(path.join(deps,'package.json'));
   const {Workbook,SpreadsheetFile} = await import(pathToFileURL(require.resolve('@oai/artifact-tool')).href);
   const wb = Workbook.create();
@@ -85,7 +85,8 @@ export async function writeExternalHourly({date,period,ta,gravity,projectName}, 
       paid?.roi ?? null,total?.roi ?? null,ta[6],ta[7]],
   ];
   const sourceNote = '经营与留存取数数同日行。买量和 ROI1 取引力非自然量。ROI(含自然量) 取引力项目合计。';
-  const missingNote = !total ? ' 引力当日无记录。' : !paid ? ' 引力当日无非自然量记录。' : '';
+  const missingNote = template ? ' 格式预览，数据待取。统计窗口从当天 00:00 开始。'
+    : !total ? ' 引力当日无记录。' : !paid ? ' 引力当日无非自然量记录。' : '';
   merged('A6:R6',sourceNote+missingNote);
   const all = sheet.getRange('A1:R6');
   all.format.font = {name:'Microsoft YaHei',size:11,color:'#223046'};
@@ -106,7 +107,7 @@ export async function writeExternalHourly({date,period,ta,gravity,projectName}, 
   for (const column of ['F','G','I','L','M','N']) sheet.getRange(column+'4').setNumberFormat('#,##0.00');
   for (const column of ['H','O','P','Q','R']) sheet.getRange(column+'4').setNumberFormat('0.00%');
   for (const column of ['C','D','E','J','K']) sheet.getRange(column+'4').setNumberFormat('#,##0');
-  [105,110,84,84,84,90,91,72,90,110,110,112,112,181,70,120,109,109].forEach((width,index)=>{
+  [105,150,84,84,84,90,91,72,90,110,110,112,112,181,70,120,109,109].forEach((width,index)=>{
     const column = String.fromCharCode(65+index);
     sheet.getRange(column+':'+column).format.columnWidthPx = width;
   });
