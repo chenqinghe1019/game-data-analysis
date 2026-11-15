@@ -10,6 +10,8 @@ export const configPath = process.env.GRAVITY_REPORT_CONFIG ??
   path.join(process.env.LOCALAPPDATA, 'GravityWeComReport', 'config.json');
 export const iaaConfigPath = path.join(path.dirname(configPath),'iaa','config.json');
 export const towerConfigPath = path.join(path.dirname(configPath),'tower','config.json');
+export const externalConfigPath = path.join(path.dirname(configPath),'external','config.json');
+export const externalName = '外部小时报';
 export const towerName = '别推我的塔';
 
 function iaaMetrics(fields) {
@@ -34,7 +36,8 @@ export function validateConfig(config, kind = 'gravity') {
   if (!report || !rawProject || typeof report.url !== 'string') throw new Error('缺少报表或项目配置');
   const project = normalizeProject(rawProject);
   const url = URL.parse(report.url);
-  const draft = kind === 'tower' && report.url === '';
+  const external = kind === 'external';
+  const draft = (kind === 'tower' || external) && report.url === '';
   if (!draft && (!url || url.origin !== 'https://web.gravity-engine.com' || url.username || url.password ||
       !/^#\/pivotReport\/(?:shared|mine)\?id=\d+&category=adreport$/.test(url.hash))) {
     throw new Error('请填写引力引擎投放报表的分享地址或「我的报表」地址');
@@ -64,6 +67,10 @@ export function validateConfig(config, kind = 'gravity') {
   } else {
     fields = Object.fromEntries(Object.keys(defaults.report.fields).map(key=>[key,report.fields?.[key]]));
   }
+  if (external) {
+    fields = Object.fromEntries(['spend','impressions','registrations','registrationCost','payCost','frequency','roi']
+      .map(key=>[key,report.fields?.[key]]));
+  }
   const columnNames = Object.values(fields);
   if (!columnNames.every(validText) || new Set(columnNames).size !== columnNames.length) {
     throw new Error('请填写不同的指标列名');
@@ -90,9 +97,18 @@ export function validateConfig(config, kind = 'gravity') {
   const spendUnit = report.spendUnit ?? (kind === 'iaa' ? 'yuan' : defaults.report.spendUnit);
   if (!['yuan','wan','wan-decimal'].includes(spendUnit)) throw new Error('消耗显示单位无效');
   const productAppId = report.productAppId ?? '';
-  if (kind === 'tower' && !draft && !/^\d+$/.test(productAppId)) throw new Error('请填写引力产品 APPID');
+  if ((external || kind === 'tower') && !draft && !/^\d+$/.test(productAppId)) throw new Error('请填写引力产品 APPID');
+  const taUrl = report.taUrl ?? '';
+  if (external && (taUrl || !draft)) {
+    const ta = URL.parse(taUrl);
+    if (!ta || ta.origin !== 'https://ta-data.feiyu.com' || ta.username || ta.password ||
+        !/^#\/tga\/ide\/\d+_\d+(?:\?fromPanel=\d+_\d+)?$/.test(ta.hash)) {
+      throw new Error('请填写数数 SQL 报表地址');
+    }
+  }
   return {...config,report:{url:reportUrl,title,product,timeoutSeconds,retries,browserMode,
-    fields,spendUnit,...(kind === 'tower' ? {productAppId} : {}),...(metrics ? {metrics,layout} : {})},
+    fields,spendUnit,...(external || kind === 'tower' ? {productAppId} : {}),
+    ...(external ? {taUrl} : {}),...(metrics ? {metrics,layout} : {})},
     project:{name:project.name,groups:project.groups.map(group=>({name:group.name,
       projects:group.projects.map(({name,id})=>({name,id})),
     }))},schedule};
@@ -102,6 +118,13 @@ export async function loadConfig(file = configPath, kind = 'gravity') {
   try {
     return validateConfig(JSON.parse(await fs.readFile(file,'utf8')),kind);
   } catch (error) {
+    if (error.code === 'ENOENT' && kind === 'external') {
+      return {...defaults,project:{name:externalName,groups:[]},schedule:{enabled:false,hours:[]},
+        report:{...defaults.report,productAppId:'',taUrl:'',fields:{
+          spend:'平台_消耗',impressions:'平台_展示数',registrations:'平台_注册数',registrationCost:'平台_注册成本',
+          payCost:'标准_首日付费成本',frequency:'首日付费频次',roi:'标准_首日付费ROI',
+        }}};
+    }
     if (error.code === 'ENOENT' && kind === 'tower') {
       return {...defaults,project:{name:towerName,groups:[]},schedule:{enabled:false,hours:[]}};
     }

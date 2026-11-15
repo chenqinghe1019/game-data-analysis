@@ -27,7 +27,7 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#f4f8fc;padding:12px;
 #message{color:#9c3824}#output{overflow-wrap:anywhere}
 </style>
 <main>
-<header><nav><a href="/projects">游戏项目</a></nav><h1 id="pageTitle">引力引擎企微播报后台</h1><p>取北京时间「今日」累计，生成 Excel 和企微播报。</p></header>
+<header><nav><a href="/projects">游戏项目</a> · <a href="/external">外部小时报</a></nav><h1 id="pageTitle">引力引擎企微播报后台</h1><p id="pageDescription">取北京时间「今日」累计，生成 Excel 和企微播报。</p></header>
 <form id="config" hidden>
 <div class="config-columns">
 <section class="card"><h2>引力报表参数</h2><div id="report" class="grid"></div>
@@ -78,11 +78,16 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#f4f8fc;padding:12px;
 const get = id => document.getElementById(id);
 const apiPrefix = location.pathname.replace(/\/$/,'');
 const isIaa = apiPrefix === '/iaa';
-const fieldLabels = isIaa
+const isExternal = apiPrefix === '/external';
+const fieldLabels = isExternal
+  ? {spend:'累计消耗',impressions:'累计广告曝光',registrations:'累计注册转化',registrationCost:'人均注册成本',
+    payCost:'人均付费成本',frequency:'新增首日人均付费次数',roi:'首日付费 ROI'}
+  : isIaa
   ? {spend:'消耗对应的引力原表列名'}
   : {spend:'消耗',activations:'激活数',activationCost:'激活成本',payers:'首日付费人数',payCost:'首付成本',revenue:'首日付费金额',roi:'ROI'};
 const reportLabels = {url:'引力报表链接',title:'报表标题',product:'产品筛选名称',timeoutSeconds:'查询超时（秒）',retries:'失败重试次数'};
-if (apiPrefix === '/tower') reportLabels.productAppId='引力产品 APPID';
+if (apiPrefix === '/tower' || isExternal) reportLabels.productAppId='引力产品 APPID';
+if (isExternal) reportLabels.taUrl='数数 SQL 报表地址';
 let busy = false;
 let canPush = false;
 let action = false;
@@ -272,7 +277,7 @@ function formConfig() {
     return {name:values(options).name,projects};
   });
   const report={...values(get('report')),fields:values(get('fields')),browserMode:get('browserMode').value,
-    spendUnit:get('spendUnit').value};
+    spendUnit:get('spendUnit')?.value};
   if (isIaa) {
     report.metrics=Array.from(get('metrics').children,values);
     report.layout=get('reportLayout').value;
@@ -307,7 +312,7 @@ async function updateJob() {
   get('log').hidden=!job.log;
   get('output').textContent=job.output??'';
   const signature = job.finishedAt ?? '';
-  if (signature !== discoverySignature) {
+  if (!isExternal && signature !== discoverySignature) {
     discovered = await request('/api/projects');
     discoverySignature = signature;
     renderDiscovery();
@@ -330,6 +335,16 @@ async function saveAndRun(push) {
 
 try {
   const {report,project,schedule}=await request('/api/config');
+  if (isExternal) {
+    get('pageTitle').textContent='外部小时报';
+    document.title='外部小时报 · 企微播报';
+    get('pageDescription').textContent='合并数数经营与留存、引力买量与 ROI。首次取数前运行 start-external-ta.ps1，并在打开的 Chrome 登录数数。';
+    for (const id of ['groups','addGroup','discovery','discoveryHint']) get(id).hidden=true;
+    get('groups').previousElementSibling.hidden=true;
+    get('groups').previousElementSibling.previousElementSibling.hidden=true;
+    get('discoveryHint').previousElementSibling.hidden=true;
+    get('run').textContent='生成 Excel 和预览图';
+  }
   if (isIaa) {
     get('pageTitle').textContent='引力 IAA 播报配置';
     document.title=get('pageTitle').textContent;
@@ -377,7 +392,7 @@ try {
   get('clearWebhook').onclick=()=>updateWebhook(true);
   for(const [key,label] of Object.entries(fieldLabels)) {
     input(get('fields'),label,key,report.fields[key]);
-    if (key==='spend') {
+    if (key==='spend' && !isExternal) {
       const wrapper=document.createElement('label');
       wrapper.textContent='消耗显示格式';
       const select=document.createElement('select');

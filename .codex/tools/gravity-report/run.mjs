@@ -3,8 +3,9 @@ import { createHash } from 'node:crypto';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 import { pathToFileURL } from 'node:url';
-import { configPath, defaults, iaaConfigPath, loadConfig } from './config.mjs';
+import { configPath, defaults, externalConfigPath, iaaConfigPath, loadConfig } from './config.mjs';
 import { readLogin } from './login.mjs';
+import { parseTaHourly, readTaHourly, writeExternalHourly } from './external-hourly.mjs';
 
 const root = '.el-table-v2__root';
 const timeout = 120_000;
@@ -82,7 +83,7 @@ export async function refreshReport(page, expectedDay, wait = timeout, product =
   const preset = expectedDay === today ? '今日' : '昨日';
   if (preset === '昨日' && expectedDay !== previousDay(today)) throw new Error('报表日期须为北京时间今日或昨日');
   const dateFilter = page.getByRole('button', {name:preset+'|'+expectedDay+'至'+expectedDay,exact:true});
-  const dateControl = page.getByRole('button', {name:/^(今日|昨日)\|\d{4}-\d{2}-\d{2}至\d{4}-\d{2}-\d{2}$/});
+  const dateControl = page.getByRole('button', {name:/^(?:(?:今日|昨日|过去\d+天)\|\d{4}-\d{2}-\d{2}至\d{4}-\d{2}-\d{2}|\d{4}-\d{2}-\d{2} - \d{4}-\d{2}-\d{2})$/});
   const productText = page.getByText(product,{exact:true});
   const productFilter = productAppId
     ? page.locator('.el-select__selected-item .label-text').and(productText)
@@ -111,7 +112,7 @@ export async function refreshReport(page, expectedDay, wait = timeout, product =
     observer.observe(button, {attributes:true, attributeFilter:['disabled'], attributeOldValue:true});
     button.click();
   }, undefined, {timeout:remaining()}), remaining(),
-    layout === 'daily' || layout === 'flat' ? '/report/api/v3/adreport/custom_get/' : undefined);
+    layout === 'daily' || layout === 'flat' || layout === 'external' ? '/report/api/v3/adreport/custom_get/' : undefined);
   await page.locator('html[data-gravity-refresh-started=true]').waitFor({state:'attached',timeout:remaining()});
   await ready();
   if (day() !== today || !await dateFilter.isVisible() || !await productFilter.isVisible()) {
@@ -229,27 +230,32 @@ async function readGrid(page, {fields,metrics:configuredMetrics,layout}, expecte
   return {total:parse(raw.total),apps};
 }
 
-async function readAppGroupTotal(page, ids, report, timeout, expectedDay) {
+async function applyTableFilter(page, dimension, values, timeout) {
   await page.getByRole('button', {name:/^表内筛选\/\s*0$/}).click({timeout});
   const dialog = page.getByRole('dialog', {name:'表内筛选'});
   await dialog.getByText('请选择', {exact:true}).first().click({timeout});
-  await page.getByRole('option', {name:'产品',exact:true}).click({timeout});
+  await page.getByRole('option', {name:dimension,exact:true}).click({timeout});
   await dialog.getByText('操作符', {exact:true}).click({timeout});
   await page.getByRole('option', {name:'等于',exact:true}).click({timeout});
   await dialog.getByText('请选择', {exact:true}).click({timeout});
   const picker = page.getByRole('tooltip').filter({
     has:page.getByRole('textbox', {name:'请输入搜索，支持空格分隔'}),
   });
-  for (const id of ids) {
-    await picker.getByText(new RegExp('\\b'+id+'\\b')).click({timeout});
+  for (const value of values) {
+    await picker.getByText(value,{exact:true}).click({timeout});
   }
   await dialog.getByRole('heading').click({timeout});
   await waitForReportTotals(page, () => dialog.getByRole('button', {name:'应用筛选'}).click({timeout}), timeout);
+}
+
+async function readAppGroupTotal(page, ids, report, timeout, expectedDay) {
+  await applyTableFilter(page,'产品',ids.map(id=>new RegExp('\\b'+id+'\\b')),timeout);
   const filtered = await readGrid(page,report,expectedDay);
   if (filtered.apps.size !== ids.length || ids.some(id=>!filtered.apps.has(id))) {
     throw new Error('引力项目合计的筛选范围与配置不一致');
   }
   if (report.layout === 'flat') {
+    const dialog = page.getByRole('dialog',{name:'表内筛选'});
     await page.getByRole('button',{name:/^表内筛选\/\s*1$/}).click({timeout});
     await dialog.getByRole('button',{name:'全部清空'}).click({timeout});
     await dialog.getByRole('button',{name:'应用筛选'}).click({timeout});
@@ -259,10 +265,11 @@ async function readAppGroupTotal(page, ids, report, timeout, expectedDay) {
   return filtered.total;
 }
 
-export async function collect(page, {report,project} = defaults, expectedDay = day()) {
+export async function collect(page, {report,project} = defaults, expectedDay = day(), external = false) {
   const timeout = report.timeoutSeconds * 1000;
   const grid = page.locator(root);
   await grid.waitFor({timeout});
+  if (external && await page.getByText(/^共\s*0\s*条$/).isVisible()) return {total:null,paid:null};
   if (report.layout === 'daily') return readGrid(page,report,expectedDay);
   if (report.layout === 'flat') {
     const base = await readGrid(page,report,expectedDay);
@@ -288,7 +295,7 @@ export async function collect(page, {report,project} = defaults, expectedDay = d
     throw new Error('报表项目与配置的引力 APPID 不一致');
   }
   for (const [id,app] of base.apps) {
-    if (app.data.spend === 0) continue;
+    if (!external && app.data.spend === 0) continue;
     const row = grid.locator('.el-table-v2__left [rowkey]').filter({hasText:new RegExp('APPID\\s*'+id+'\\b')});
     const expand = row.getByRole('button', {name:'展开当前行',exact:true});
     if (!await expand.count()) throw new Error('APPID '+id+' 有消耗但无法展开媒体明细');
@@ -303,6 +310,18 @@ export async function collect(page, {report,project} = defaults, expectedDay = d
         ' 与项目消耗 '+app.data.spend.toFixed(4)+' 不一致，可能存在漏行');
     }
     await row.getByRole('button', {name:'收起当前行',exact:true}).click();
+  }
+  if (external) {
+    const app = base.apps.get(report.productAppId);
+    const paid = [...app.media].filter(([name])=>name.trim() !== '自然量');
+    if (paid.length <= 1) return {total:app.data,paid:paid[0]?.[1] ?? null};
+    await applyTableFilter(page,'媒体平台',paid.map(([name])=>name),timeout);
+    const filtered = await readGrid(page,report,expectedDay);
+    if (filtered.apps.size !== 1 || !filtered.apps.has(report.productAppId) ||
+        Math.abs(filtered.total.spend-paid.reduce((sum,[,row])=>sum+row.spend,0)) > 0.01) {
+      throw new Error('引力非自然量汇总未通过校验');
+    }
+    return {total:app.data,paid:filtered.total};
   }
   const appGroup = project.groups.find(group=>group.name.toUpperCase()==='APP' && group.projects.length>1);
   const appIds = appGroup?.projects.map(({id})=>id).filter(id=>base.apps.has(id)) ?? [];
@@ -546,7 +565,8 @@ async function connectExistingChrome(chromium) {
 }
 
 async function main(kind) {
-  const file = kind === 'iaa' && !process.env.GRAVITY_REPORT_CONFIG ? iaaConfigPath : configPath;
+  const projectFiles = {iaa:iaaConfigPath,external:externalConfigPath};
+  const file = process.env.GRAVITY_REPORT_CONFIG ?? projectFiles[kind] ?? configPath;
   const config = await loadConfig(file,kind);
   if (!config.report.url) throw new Error('请先在播报后台保存报表配置');
   const {report,project} = config;
@@ -591,10 +611,11 @@ async function main(kind) {
         if (report.productAppId) await selectReportProduct(page,report);
         stage = '刷新报表';
         console.log('正在刷新引力报表');
-        await refreshReport(page,date,report.timeoutSeconds*1000,report.product,report.layout,report.productAppId);
+        await refreshReport(page,date,report.timeoutSeconds*1000,report.product,
+          kind === 'external' ? 'external' : report.layout,report.productAppId);
         stage = '读取和校验数据';
         console.log('正在读取和校验项目、媒体及指标');
-        data = await collect(page,config,date);
+        data = await collect(page,config,date,kind === 'external');
         if (day() !== runDay) throw new Error('取数期间跨过北京时间日期');
         break;
       } catch (error) {
@@ -602,6 +623,19 @@ async function main(kind) {
         if (attempt===report.retries || day()!==runDay) throw new Error(reason);
         console.warn(reason+'。重新加载报表后重试。');
       }
+    }
+    if (kind === 'external') {
+      console.log('正在读取数数每日累计指标');
+      const previewCsv = preview ? process.argv[4] : undefined;
+      const ta = previewCsv ? parseTaHourly(await fs.readFile(previewCsv,'utf8'),date)
+        : await readTaHourly(chromium,report.taUrl,date,report.timeoutSeconds*1000,report.retries);
+      if (day() !== runDay) throw new Error('取数期间跨过北京时间日期');
+      const period = previewCsv ? '数数导出快照' : fullDay ? '截止到 24 点' : slot ? '截止到 '+Number(hour)+' 点'
+        : new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Shanghai',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(new Date())+' 快照';
+      const png = await writeExternalHourly({date,period,ta,gravity:data,projectName:project.name},output,deps);
+      console.log(output);
+      if (webhook) await sendWeComReport(webhook,png,'【外部小时报】'+date+' '+period+' · '+project.name);
+      return;
     }
     const catalog = {date,reportUrl:report.url,product:report.product,
       projects:[...data.apps].map(([id,app])=>({id,name:app.name,
