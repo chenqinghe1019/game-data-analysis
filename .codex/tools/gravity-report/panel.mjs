@@ -7,6 +7,7 @@ import {configPath,loadConfig,validateConfig} from './config.mjs';
 import {clearLogin,loginStatus,saveLogin} from './login.mjs';
 import {readWebhook,saveWebhook,webhookStatus} from './webhook.mjs';
 import {gameProjects,gravityProject,projectScript} from './game-projects.mjs';
+import {externalWorkbookName} from './external-hourly.mjs';
 
 const host = '127.0.0.1';
 const port = Number(process.env.GRAVITY_PANEL_PORT ?? 8731);
@@ -43,7 +44,7 @@ function startJob(project, webhook, slot = null) {
   if (slot) env.GRAVITY_REPORT_SLOT = slot;
   else delete env.GRAVITY_REPORT_SLOT;
   const directory = project === gravityProject ? outputDirectory : path.join(outputDirectory,project.id);
-  const output = path.join(directory,Date.now()+'.xlsx');
+  const output = path.join(directory,project.id === 'external' ? externalWorkbookName : Date.now()+'.xlsx');
   const child = spawn(process.execPath,[projectScript(project).entry,output],{env,windowsHide:true,timeout:20*60*1000});
   void logEvent('job-started',{project:project.id,slot,push,startedAt:job.startedAt});
   const append = message => { job.log = (job.log+message).slice(-10000); };

@@ -5,7 +5,7 @@ import { createRequire } from 'node:module';
 import { pathToFileURL } from 'node:url';
 import { configPath, defaults, externalConfigPath, iaaConfigPath, loadConfig } from './config.mjs';
 import { readLogin } from './login.mjs';
-import { parseTaHourly, readTaHourly, writeExternalHourly } from './external-hourly.mjs';
+import { externalWorkbookName, parseTaHourly, readTaHourly, updateExternalHourly, writeExternalHourly } from './external-hourly.mjs';
 
 const root = '.el-table-v2__root';
 const timeout = 120_000;
@@ -586,8 +586,14 @@ async function main(kind) {
   const date = fullDay ? previousDay(runDay) : runDay;
   const preview = process.argv[3] === '--preview';
   const webhook = preview ? undefined : process.env.GRAVITY_WECOM_WEBHOOK;
-  const output = path.resolve(process.argv[2] ?? path.join('outputs','gravity-wecom',date+'_'+Date.now()+'.xlsx'));
+  const rootOutput = path.join('outputs','gravity-wecom');
+  const externalOutput = path.resolve(rootOutput,'external',externalWorkbookName);
+  const output = path.resolve(process.argv[2] ?? (kind === 'external' && !preview ? externalOutput
+    : path.join(rootOutput,date+'_'+Date.now()+'.xlsx')));
   if (path.extname(output).toLowerCase() !== '.xlsx') throw new Error('输出路径需以 .xlsx 结尾');
+  if (kind === 'external' && preview && path.basename(output).toLowerCase() === externalWorkbookName.toLowerCase()) {
+    throw new Error('请为格式预览使用单独的文件名，避免覆盖累计 Excel');
+  }
   const profile = process.env.GRAVITY_PROFILE ?? path.join(process.env.LOCALAPPDATA,'GravityWeComReport','Chrome');
   const reuse = report.browserMode === 'existing';
   const browser = reuse ? await connectExistingChrome(chromium) :
@@ -630,9 +636,12 @@ async function main(kind) {
       const ta = previewCsv ? parseTaHourly(await fs.readFile(previewCsv,'utf8'),date)
         : await readTaHourly(chromium,report.taUrl,date,report.timeoutSeconds*1000,report.retries);
       if (day() !== runDay) throw new Error('取数期间跨过北京时间日期');
-      const period = previewCsv ? '数数导出快照' : fullDay ? '截至北京时间 24:00' : slot ? '截至北京时间 '+hour+':00'
-        : new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Shanghai',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(new Date())+' 快照';
-      const png = await writeExternalHourly({date,period,ta,gravity:data,projectName:project.name},output,deps);
+      const time = fullDay ? '24:00' : slot ? hour+':00'
+        : new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Shanghai',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(new Date());
+      const period = previewCsv ? '数数导出快照' : '截至北京时间 '+time;
+      const snapshot = {date,time,period,ta,gravity:data,projectName:project.name};
+      const png = preview ? await writeExternalHourly(snapshot,output,deps)
+        : await updateExternalHourly(snapshot,output,deps,path.join(path.dirname(file),'hourly-snapshots.sqlite'));
       console.log(output);
       if (webhook) await sendWeComReport(webhook,png,'【外部小时报】'+date+' '+period+' · '+project.name);
       return;

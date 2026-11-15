@@ -1,9 +1,11 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import {randomUUID} from 'node:crypto';
 import {createRequire} from 'node:module';
 import {pathToFileURL} from 'node:url';
 
 const taColumns = ['累计新进','累计活跃','累计付费人数','累计收入','当前 ARPU','付费率','付费次留','注册次留'];
+export const externalWorkbookName = '外部小时报_累计.xlsx';
 
 export function parseTaHourly(csv, date) {
   const rows = csv.replace(/^\uFEFF/,'').trimEnd().split(/\r?\n/).map(line=>
@@ -61,9 +63,52 @@ export async function readTaHourly(chromium, url, date, timeout, retries) {
   }
 }
 
-export async function writeExternalHourly({date,period,ta,gravity,projectName,template=false}, output, deps) {
+export async function updateExternalHourly(snapshot, output, deps, archive) {
+  const {DatabaseSync} = await import('node:sqlite');
+  await fs.mkdir(path.dirname(archive),{recursive:true});
+  const db = new DatabaseSync(archive);
+  const {date,time} = snapshot;
+  try {
+    db.exec(`PRAGMA busy_timeout=30000;
+      CREATE TABLE IF NOT EXISTS snapshots (date TEXT, time TEXT, payload TEXT NOT NULL, PRIMARY KEY(date,time))`);
+    db.prepare(`INSERT INTO snapshots VALUES (?, ?, ?) ON CONFLICT(date,time) DO UPDATE SET payload=excluded.payload`)
+      .run(date,time,JSON.stringify(snapshot));
+    // Keep the saved snapshot even if Excel has the destination file open.
+    // Serialize workbook replacements so an older export cannot replace a newer one.
+    db.exec('BEGIN IMMEDIATE');
+    const rows = db.prepare('SELECT payload FROM snapshots ORDER BY date,time').all().map(({payload})=>JSON.parse(payload));
+    const png = await writeExternalHourly(snapshot,output,deps,rows);
+    db.exec('COMMIT');
+    return png;
+  } finally {
+    db.close();
+  }
+}
+
+export async function writeExternalHourly(snapshot, output, deps, snapshots = [snapshot]) {
   const require = createRequire(path.join(deps,'package.json'));
   const {Workbook,SpreadsheetFile} = await import(pathToFileURL(require.resolve('@oai/artifact-tool')).href);
+  const all = buildExternalWorkbook(Workbook,snapshots,snapshot);
+  const daily = snapshots.filter(row=>row.date === snapshot.date);
+  const preview = daily.length === snapshots.length ? all : buildExternalWorkbook(Workbook,daily,snapshot);
+  const png = Buffer.from(await (await preview.render({sheetName:'外部小时报',range:'A1:R'+(daily.length+5),headers:false,scale:1})).arrayBuffer());
+  await fs.mkdir(path.dirname(output),{recursive:true});
+  const pending = output.slice(0,-5)+'.'+randomUUID()+'.xlsx';
+  try {
+    await (await SpreadsheetFile.exportXlsx(all)).save(pending);
+    await fs.rename(pending,output);
+  } catch (error) {
+    if (['EBUSY','EPERM','EACCES'].includes(error.code)) throw new Error('无法更新累计 Excel。请关闭正在打开的文件后重试。',{cause:error});
+    throw error;
+  } finally {
+    await fs.rm(pending,{force:true});
+    await fs.rm(pending+'.inspect.ndjson',{force:true});
+  }
+  await fs.writeFile(output.slice(0,-5)+'.png',png);
+  return png;
+}
+
+function buildExternalWorkbook(Workbook, snapshots, {gravity,projectName,template=false}) {
   const wb = Workbook.create();
   const sheet = wb.worksheets.add('外部小时报');
   sheet.showGridLines = false;
@@ -75,20 +120,24 @@ export async function writeExternalHourly({date,period,ta,gravity,projectName,te
   for (const [address,label] of [
     ['A2:B2','时间'],['C2:E2','用户数'],['F2:H2','收入'],['I2:N2','买量'],['O2:P2','ROI'],['Q2:R2','留存'],
   ]) merged(address,label);
-  const {paid,total} = gravity;
-  sheet.getRange('A3:R4').values = [
+  const last = snapshots.length+3;
+  const footer = last+2;
+  sheet.getRange('A3:R'+last).values = [
     ['日期','时间段','累计新进','累计活跃','累计付费','累计收入','当前 ARPU','付费率',
       '累计消耗','累计广告曝光','累计注册转化','人均注册成本','人均付费成本','新增首日人均付费次数',
       'ROI1','ROI(含自然量)','实时付费次留','实时注册次留'],
-    [date,period,...ta.slice(0,6),paid?.spend ?? null,paid?.impressions ?? null,paid?.registrations ?? null,
+    ...snapshots.map(({date,period,ta,gravity:{paid,total}})=>[
+      date,period,...ta.slice(0,6),paid?.spend ?? null,paid?.impressions ?? null,paid?.registrations ?? null,
       paid?.registrationCost ?? null,paid?.payCost ?? null,paid?.frequency ?? null,
-      paid?.roi ?? null,total?.roi ?? null,ta[6],ta[7]],
+      paid?.roi ?? null,total?.roi ?? null,ta[6],ta[7],
+    ]),
   ];
+  const {paid,total} = gravity;
   const sourceNote = '经营与留存取数数同日行。买量和 ROI1 取引力非自然量。ROI(含自然量) 取引力项目合计。';
   const missingNote = template ? ' 格式预览，数据待取。统计窗口从当天 00:00 开始。'
-    : !total ? ' 引力当日无记录。' : !paid ? ' 引力当日无非自然量记录。' : '';
-  merged('A6:R6',sourceNote+missingNote);
-  const all = sheet.getRange('A1:R6');
+    : !total ? ' 本次取数时引力当日无记录。' : !paid ? ' 本次取数时引力当日无非自然量记录。' : '';
+  merged('A'+footer+':R'+footer,sourceNote+missingNote);
+  const all = sheet.getRange('A1:R'+footer);
   all.format.font = {name:'Microsoft YaHei',size:11,color:'#223046'};
   all.format.rowHeight = 26;
   all.format.verticalAlignment = 'center';
@@ -96,24 +145,20 @@ export async function writeExternalHourly({date,period,ta,gravity,projectName,te
   title.format.fill = '#EAF2FF';
   title.format.font = {name:'Microsoft YaHei',size:15,bold:true,color:'#163761'};
   title.format.rowHeight = 34;
-  const table = sheet.getRange('A2:R4');
+  const table = sheet.getRange('A2:R'+last);
   table.format.horizontalAlignment = 'center';
   table.format.borders = {preset:'all',style:'thin',color:'#C2CBD5'};
   const header = sheet.getRange('A2:R3');
   header.format.fill = '#414141';
   header.format.font = {name:'Microsoft YaHei',size:11,bold:true,color:'#FFFFFF'};
   header.format.rowHeight = 30;
-  sheet.getRange('A4:R4').format.fill = '#F3F7FC';
-  for (const column of ['F','G','I','L','M','N']) sheet.getRange(column+'4').setNumberFormat('#,##0.00');
-  for (const column of ['H','O','P','Q','R']) sheet.getRange(column+'4').setNumberFormat('0.00%');
-  for (const column of ['C','D','E','J','K']) sheet.getRange(column+'4').setNumberFormat('#,##0');
+  sheet.getRange('A4:R'+last).format.fill = '#F3F7FC';
+  for (const column of ['F','G','I','L','M','N']) sheet.getRange(column+'4:'+column+last).setNumberFormat('#,##0.00');
+  for (const column of ['H','O','P','Q','R']) sheet.getRange(column+'4:'+column+last).setNumberFormat('0.00%');
+  for (const column of ['C','D','E','J','K']) sheet.getRange(column+'4:'+column+last).setNumberFormat('#,##0');
   [105,150,84,84,84,90,91,72,90,110,110,112,112,181,70,120,109,109].forEach((width,index)=>{
     const column = String.fromCharCode(65+index);
     sheet.getRange(column+':'+column).format.columnWidthPx = width;
   });
-  const png = Buffer.from(await (await wb.render({sheetName:'外部小时报',range:'A1:R6',headers:false,scale:1})).arrayBuffer());
-  await fs.mkdir(path.dirname(output),{recursive:true});
-  await (await SpreadsheetFile.exportXlsx(wb)).save(output);
-  await fs.writeFile(output.slice(0,-5)+'.png',png);
-  return png;
+  return wb;
 }
