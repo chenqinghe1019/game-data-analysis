@@ -9,19 +9,62 @@ import { externalWorkbookName, parseTaHourly, readTaHourly, updateExternalHourly
 
 const root = '.el-table-v2__root';
 const timeout = 120_000;
+const rollupEndpoint = '/report/api/v3/adreport/custom_get/calc_total/';
+const standardMetrics = {
+  spend:'ap_cost',activations:'standard_activate_cnt',activationCost:'standard_activate_cost',
+  payers:'standard_1day_pay_uv',payCost:'standard_1day_pay_cost',revenue:'standard_1day_pay_amount',
+  roi:'standard_1day_pay_amount_roi',
+};
 const day = () => new Intl.DateTimeFormat('sv-SE', {timeZone:'Asia/Shanghai'}).format(new Date());
 const previousDay = date => new Date(Date.parse(date+'T00:00:00Z')-86_400_000).toISOString().slice(0,10);
 
-async function waitForReportTotals(page, trigger, timeout, endpoint = '/report/api/v3/adreport/custom_get/calc_total/') {
+async function waitForReportTotals(page, trigger, timeout, endpoint = rollupEndpoint, matches = () => true) {
   const [response] = await Promise.all([
     page.waitForResponse(result =>
       new URL(result.url()).pathname === endpoint &&
-      result.request().method() === 'POST', {timeout}),
+      result.request().method() === 'POST' && matches(result.request()), {timeout}),
     trigger(),
   ]);
   if (!response.ok() || await response.finished()) throw new Error('引力报表汇总查询失败');
   // Let the page apply the response to the virtual table before copying its cells.
   await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+  return response;
+}
+
+async function readMediaRollup(page, expand, app, id, expectedDay, timeout) {
+  let groups;
+  const response = await waitForReportTotals(page, () => expand.click(), timeout, rollupEndpoint, request => {
+    let query;
+    try { query = request.postDataJSON(); } catch { return false; }
+    const batches = query?.data_list;
+    if (query?.date_list?.length !== 2 || query.date_list.some(date=>date !== expectedDay) ||
+        !Array.isArray(batches) || !batches.length) return false;
+    const matchesProject = batches.every(batch => {
+      const first = batch?.[0];
+      return first?.parentId?.startsWith(app.key+'-') && first.click_company && batch.every(row =>
+        String(row.app_id) === id && row.field === 'operator_id' &&
+        row.parentId === first.parentId && row.click_company === first.click_company);
+    });
+    if (matchesProject) groups = batches;
+    return matchesProject;
+  });
+  const {code,data} = await response.json();
+  const rows = data?.list;
+  if (code !== 0 || !Array.isArray(rows) || rows.length !== groups.length) {
+    throw new Error('APPID '+id+' 的媒体汇总响应不完整');
+  }
+  const rollup = new Map();
+  for (const [index,group] of groups.entries()) {
+    const {parentId} = group[0];
+    const result = rows[index];
+    const spend = group.reduce((sum,row)=>sum+row.ap_cost,0);
+    if (rollup.has(parentId) || !Number.isFinite(spend) || !Number.isFinite(result?.ap_cost) ||
+        Math.abs(result.ap_cost-spend) > 0.01+0.005*group.length) {
+      throw new Error('APPID '+id+' 的媒体汇总响应与请求明细不一致');
+    }
+    rollup.set(parentId,result);
+  }
+  return rollup;
 }
 
 async function openReport(page, {url:reportUrl,title,timeoutSeconds,browserMode}, kind, retry) {
@@ -219,11 +262,12 @@ async function readGrid(page, {fields,metrics:configuredMetrics,layout}, expecte
       const [,label,id] = projectLabel;
       if (apps.has(id)) throw new Error('重复 APPID：' + id);
       current = {key:item.key, name:label.trim() || 'APPID '+id, expanded:item.expanded,
-        data:parse(metrics.get(item.key)), media:new Map()};
+        data:parse(metrics.get(item.key)), media:new Map(),mediaKeys:new Map()};
       apps.set(id,current);
     } else {
       if (!current || current.media.has(item.label)) throw new Error('媒体行未能唯一匹配项目');
       current.media.set(item.label,parse(metrics.get(item.key)));
+      current.mediaKeys.set(item.label,item.key);
     }
   }
   if (apps.size !== count) throw new Error('主表项目未全部加载，已停止导出');
@@ -299,11 +343,24 @@ export async function collect(page, {report,project} = defaults, expectedDay = d
     const row = grid.locator('.el-table-v2__left [rowkey]').filter({hasText:new RegExp('APPID\\s*'+id+'\\b')});
     const expand = row.getByRole('button', {name:'展开当前行',exact:true});
     if (!await expand.count()) throw new Error('APPID '+id+' 有消耗但无法展开媒体明细');
-    // The visible row initially contains provisional ratios. Wait for the report's rollup response.
-    await waitForReportTotals(page, () => expand.click(), timeout);
+    // The provisional row may have the right spend but different costs and ROI.
+    const rollup = await readMediaRollup(page,expand,app,id,expectedDay,timeout);
     await row.getByRole('button', {name:'收起当前行',exact:true}).waitFor();
     await row.locator('xpath=following-sibling::*[1][contains(@class,"el-table-v2__row-depth-1")]').waitFor({state:'visible',timeout});
-    app.media = (await readGrid(page,report,expectedDay)).apps.get(id).media;
+    const expanded = (await readGrid(page,report,expectedDay)).apps.get(id);
+    if (expanded.media.size !== rollup.size) throw new Error('APPID '+id+' 的媒体行数与汇总不一致');
+    for (const [name,metrics] of expanded.media) {
+      const final = rollup.get(expanded.mediaKeys.get(name));
+      if (!final || Math.abs(metrics.spend-final.ap_cost) > 0.01) {
+        throw new Error('APPID '+id+' 的媒体「'+name+'」与汇总无法对应');
+      }
+      for (const [field,key] of Object.entries(standardMetrics)) {
+        if (!report.fields[field] || report.fields[field] !== defaults.report.fields[field]) continue;
+        if (!Number.isFinite(final[key])) throw new Error('媒体汇总缺少指标：'+report.fields[field]);
+        metrics[field] = final[key];
+      }
+    }
+    app.media = expanded.media;
     const mediaSpend = [...app.media.values()].reduce((sum,item)=>sum+item.spend,0);
     if (Math.abs(mediaSpend-app.data.spend) > 0.01+0.005*app.media.size) {
       throw new Error('APPID '+id+' 媒体消耗合计 '+mediaSpend.toFixed(4)+
