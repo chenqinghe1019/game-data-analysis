@@ -346,7 +346,7 @@ try {
   if (isExternal) {
     get('pageTitle').textContent='外部小时报';
     document.title='外部小时报 · 企微播报';
-    get('pageDescription').textContent='合并数数经营与留存、引力买量与 ROI。累计 Excel 保留历日快照，推送图片展示报送日期的所有时点。';
+    get('pageDescription').textContent='合并数数经营与留存、引力买量与 ROI。当天显示各时点，历史日期仅显示 24 点汇总。';
     input(get('taReport'),'数数 SQL 报表地址','taUrl',report.taUrl??'');
     get('taSection').hidden=false;
     get('scheduleStartField').hidden=false;

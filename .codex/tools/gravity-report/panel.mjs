@@ -61,11 +61,14 @@ function startJob(project, webhook, slot = null) {
 
 async function checkSchedule() {
   const beijing = new Date(Date.now()+8*60*60*1000);
-  if (saving || scheduling || isRunning() || beijing.getUTCMinutes() >= 5) return;
+  const minute = beijing.getUTCMinutes();
+  if (saving || scheduling || isRunning() || minute >= 20) return;
   scheduling = true;
   try {
     const slot = beijing.toISOString().slice(0,13);
     for (const project of gameProjects) {
+      // Noon and midnight can already have other projects using the shared browser.
+      if (minute >= 5 && project.id !== 'external') continue;
       try {
         const {schedule} = await loadConfig(project.config,project.id);
         if (!schedule.enabled || !schedule.hours.includes(beijing.getUTCHours())) continue;

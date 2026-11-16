@@ -120,9 +120,15 @@ export async function updateExternalHourly(snapshot, output, deps, archive) {
 export async function writeExternalHourly(snapshot, output, deps, snapshots = [snapshot]) {
   const require = createRequire(path.join(deps,'package.json'));
   const {Workbook,SpreadsheetFile} = await import(pathToFileURL(require.resolve('@oai/artifact-tool')).href);
-  const all = buildExternalWorkbook(Workbook,snapshots,snapshot);
-  const daily = snapshots.filter(row=>row.date === snapshot.date);
-  const preview = daily.length === snapshots.length ? all : buildExternalWorkbook(Workbook,daily,snapshot);
+  const latestDate = snapshots.reduce((latest,row)=>row.date > latest ? row.date : latest,snapshot.date);
+  const settledDates = new Set(snapshots.filter(row=>row.time === '24:00').map(row=>row.date));
+  const visible = snapshots.filter(row=>row.time === '24:00' ||
+    (row.date === latestDate && !settledDates.has(row.date)));
+  const previousDate = new Date(Date.parse(snapshot.date+'T00:00:00Z')-86_400_000).toISOString().slice(0,10);
+  const daily = visible.filter(row=>row.date === snapshot.date ||
+    (snapshot.time !== '24:00' && row.date === previousDate && row.time === '24:00'));
+  const all = buildExternalWorkbook(Workbook,visible,snapshot);
+  const preview = daily.length === visible.length ? all : buildExternalWorkbook(Workbook,daily,snapshot);
   const png = Buffer.from(await (await preview.render({sheetName:'外部小时报',range:'A1:R'+(daily.length+5),headers:false,scale:1})).arrayBuffer());
   await fs.mkdir(path.dirname(output),{recursive:true});
   const pending = output.slice(0,-5)+'.'+randomUUID()+'.xlsx';
@@ -172,7 +178,7 @@ function buildExternalWorkbook(Workbook, snapshots, {gravity,projectName,templat
     start=end;
   }
   const {paid,total} = gravity;
-  const sourceNote = '经营与留存取数数同日行。买量和 ROI1 取引力非自然量。ROI(含自然量) 取引力项目合计。';
+  const sourceNote = '经营与留存取数数同日行。买量和 ROI1 取引力非自然量。ROI(含自然量) 取引力项目合计。历史日期仅显示 24 点汇总。';
   const missingNote = template ? ' 格式预览，数据待取。统计窗口从当天 00:00 开始。'
     : !total ? ' 本次取数时引力当日无记录。' : !paid ? ' 本次取数时引力当日无非自然量记录。' : '';
   merged('A'+footer+':R'+footer,sourceNote+missingNote);
