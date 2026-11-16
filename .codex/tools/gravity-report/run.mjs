@@ -19,6 +19,8 @@ const standardMetrics = {
 const day = () => new Intl.DateTimeFormat('sv-SE', {timeZone:'Asia/Shanghai'}).format(new Date());
 const previousDay = date => new Date(Date.parse(date+'T00:00:00Z')-86_400_000).toISOString().slice(0,10);
 
+class GravityLoginPending extends Error {}
+
 async function waitForReportTotals(page, trigger, timeout, endpoint = rollupEndpoint, matches = () => true) {
   // Ignore responses from requests already in flight before this refresh or expansion.
   const requests = new Set();
@@ -77,7 +79,7 @@ async function readMediaRollup(page, expand, app, id, expectedDay, timeout) {
   return rollup;
 }
 
-async function openReport(page, {url:reportUrl,title,timeoutSeconds,browserMode}, kind, retry) {
+async function openReport(page, {url:reportUrl,title,timeoutSeconds}, kind, retry) {
   const target = new URL(reportUrl);
   const current = new URL(page.url());
   // The report/login locator below checks readiness without waiting on unrelated page resources.
@@ -95,25 +97,36 @@ async function openReport(page, {url:reportUrl,title,timeoutSeconds,browserMode}
   const login = page.getByRole('button', {name:'登录', exact:true});
   await report.or(login).first().waitFor({timeout:timeoutSeconds*1000});
   if (await login.isVisible()) {
+    const loginUrl = new URL(page.url());
+    if (loginUrl.origin !== target.origin || !loginUrl.hash.startsWith('#/login')) {
+      throw new Error('登录页地址校验失败');
+    }
     const credentials = await readLogin();
+    let prefilled = false;
     if (credentials) {
-      const target = new URL(page.url());
-      if (target.origin !== new URL(reportUrl).origin || !target.hash.startsWith('#/login')) {
-        throw new Error('登录页地址校验失败');
-      }
       try {
-        await page.locator('input:visible:not([type=password]):not([type=checkbox])').fill(credentials.email);
-        await page.locator('input[type=password]:visible').fill(credentials.password);
-        await page.getByRole('checkbox', {name:'我已阅读并同意'}).check();
-        await login.click();
-        await report.waitFor({timeout:timeoutSeconds*1000});
+        await page.locator('input:visible:not([type=password]):not([type=checkbox])').fill(credentials.email,{timeout:10_000});
+        await page.locator('input[type=password]:visible').fill(credentials.password,{timeout:10_000});
+        prefilled = true;
       } catch {
-        throw new Error('引力自动登录未完成，请检查账号密码或在浏览器中完成验证');
+        console.log('引力登录表单未能自动填写，请在 Chrome 窗口手动登录。');
       }
-    } else {
-      if (browserMode === 'existing') throw new Error('当前 Chrome 尚未登录引力引擎，请先登录或配置引力账号密码');
-      console.log('请在打开的 Chrome 窗口登录引力引擎，建议勾选七天自动登录。等待最多 5 分钟。');
-      await report.waitFor({timeout:300_000});
+    }
+    console.log('引力正在等待登录：请在 Chrome 窗口勾选同意条款并完成登录。最多等待 5 分钟。');
+    const deadline = Date.now()+300_000;
+    const remaining = () => Math.max(1,deadline-Date.now());
+    try {
+      if (prefilled) {
+        const accepted = page.getByRole('checkbox',{name:'我已阅读并同意'}).and(
+          page.locator('input:checked, [role=checkbox][aria-checked=true]'));
+        await report.or(accepted).first().waitFor({timeout:remaining()});
+        if (await accepted.isVisible() && await login.isVisible()) {
+          await login.click({timeout:Math.min(5_000,remaining())}).catch(()=>{});
+        }
+      }
+      await report.waitFor({timeout:remaining()});
+    } catch {
+      throw new GravityLoginPending('等待引力人工确认条款或登录超时，请完成登录后重新运行');
     }
   }
   const actual = new URL(page.url());
@@ -757,7 +770,7 @@ async function main(kind) {
         break;
       } catch (error) {
         const reason = stage+'失败：'+error.message.split('\n')[0];
-        if (attempt===report.retries || day()!==runDay) throw new Error(reason);
+        if (error instanceof GravityLoginPending || attempt===report.retries || day()!==runDay) throw new Error(reason);
         console.warn(reason+'。重新加载报表后重试。');
       }
     }
