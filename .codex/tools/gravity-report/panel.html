@@ -43,7 +43,7 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#f4f8fc;padding:12px;
 <div class="actions"><button id="saveLogin" type="button">保存登录账号</button><button id="clearLogin" type="button">移除登录账号</button></div>
 </details>
 <h3>主表指标列</h3><div id="fields" class="grid"></div>
-<p id="externalRegistrationHint" hidden>买量注册数取引力「<span id="externalRegistrationSource"></span>」。注册成本按消耗 ÷ 注册数计算。</p>
+<p id="externalRegistrationHint" hidden>买量注册数取<span id="externalRegistrationSource"></span>。注册成本按消耗 ÷ 注册数计算。</p>
 <div id="metricEditor" hidden>
 <p>消耗是必填列。其他指标按这里的顺序出现在播报表格中。</p>
 <div id="metrics"></div><button type="button" id="addMetric">添加指标</button>
@@ -285,7 +285,7 @@ function formConfig() {
   });
   const report={...values(get('report')),fields:values(get('fields')),browserMode:get('browserMode').value,
     spendUnit:get('spendUnit')?.value};
-  if (isExternal) report.taUrl=values(get('taReport')).taUrl;
+  if (isExternal) Object.assign(report,values(get('taReport')));
   if (isIaa) {
     report.metrics=Array.from(get('metrics').children,values);
     report.layout=get('reportLayout').value;
@@ -349,9 +349,16 @@ try {
     document.title='外部小时报 · 企微播报';
     get('pageDescription').textContent='合并数数经营与留存、引力买量与 ROI。当天显示各时点，历史日期仅显示 24 点汇总。';
     input(get('taReport'),'数数 SQL 报表地址','taUrl',report.taUrl??'');
+    input(get('taReport'),'备用口径的数数分媒体报表地址','taMediaUrl',report.taMediaUrl??'');
     get('taSection').hidden=false;
     get('externalRegistrationHint').hidden=false;
-    get('externalRegistrationSource').textContent=report.fields.registrations;
+    const mediaField=get('taReport').querySelector('[data-key="taMediaUrl"]');
+    const updateRegistrationSource=()=>{
+      get('externalRegistrationSource').textContent=mediaField.value.trim()
+        ? '数数分媒体累计新进（排除自然量）' : '引力「'+report.fields.registrations+'」';
+    };
+    mediaField.addEventListener('input',updateRegistrationSource);
+    updateRegistrationSource();
     get('scheduleStartField').hidden=false;
     get('scheduleStart').value=schedule.startAt??'';
     for (const id of ['groups','addGroup','discovery','discoveryHint']) get(id).hidden=true;

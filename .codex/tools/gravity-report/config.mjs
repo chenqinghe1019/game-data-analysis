@@ -114,12 +114,24 @@ export function validateConfig(config, kind = 'gravity') {
       throw new Error('请填写数数 SQL 报表地址');
     }
   }
+  const taMediaUrl = external && report.taMediaUrl ? validateTaMediaUrl(report.taMediaUrl,taUrl) : '';
   return {...config,report:{url:reportUrl,title,product,timeoutSeconds,retries,browserMode,
     fields,spendUnit,...(external || kind === 'tower' ? {productAppId} : {}),
-    ...(external ? {taUrl} : {}),...(metrics ? {metrics,layout} : {})},
+    ...(external ? {taUrl,taMediaUrl} : {}),...(metrics ? {metrics,layout} : {})},
     project:{name:project.name,groups:project.groups.map(group=>({name:group.name,
       projects:group.projects.map(({name,id})=>({name,id})),
     }))},schedule:external ? {...schedule,startAt} : schedule};
+}
+
+export function validateTaMediaUrl(value,totalUrl) {
+  const media = typeof value === 'string' ? URL.parse(value) : null;
+  const total = URL.parse(totalUrl)?.hash.match(/^#\/tga\/ide\/(\d+)_(\d+)/);
+  const match = media?.hash.match(/^#\/tga\/ide\/(\d+)_(\d+)(?:\?fromPanel=\d+_\d+)?$/);
+  if (!media || media.origin !== 'https://ta-data.feiyu.com' || media.username || media.password ||
+      media.pathname !== '/' || media.search || !total || !match || match[1] !== total[1] || match[2] === total[2]) {
+    throw new Error('请填写与数数总表同项目的分媒体 SQL 报表地址');
+  }
+  return media.href;
 }
 
 export async function loadConfig(file = configPath, kind = 'gravity') {

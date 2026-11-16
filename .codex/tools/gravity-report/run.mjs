@@ -3,7 +3,7 @@ import { createHash } from 'node:crypto';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { configPath, defaults, externalConfigPath, iaaConfigPath, loadConfig } from './config.mjs';
+import { configPath, defaults, externalConfigPath, iaaConfigPath, loadConfig, validateTaMediaUrl } from './config.mjs';
 import { readLogin } from './login.mjs';
 import { externalPeriod, externalWorkbookName, parseTaHourly, parseTaPaidHourly, readTaHourly, updateExternalHourly, writeExternalHourly } from './external-hourly.mjs';
 
@@ -715,50 +715,45 @@ async function connectExistingChrome(chromium) {
 }
 
 async function main(kind) {
-  const backup = process.argv[2] === '--backup';
-  const appendBackup = backup && process.argv[4] === '--append-to-history';
-  if (backup && kind !== 'external') throw new Error('该备用入口仅用于外部小时报');
+  const backupCli = process.argv[2] === '--backup';
+  const appendBackup = backupCli && process.argv[4] === '--append-to-history';
+  if (backupCli && kind !== 'external') throw new Error('该备用入口仅用于外部小时报');
   if (appendBackup && process.argv.length > 5) throw new Error('写入累计小时报时不能另指定输出路径');
   const projectFiles = {iaa:iaaConfigPath,external:externalConfigPath};
   const file = appendBackup ? externalConfigPath : process.env.GRAVITY_REPORT_CONFIG ?? projectFiles[kind] ?? configPath;
   const config = await loadConfig(file,kind);
   if (!config.report.url) throw new Error('请先在播报后台保存报表配置');
   const {report,project} = config;
-  let mediaUrl;
-  if (backup) {
-    const media = URL.parse(process.argv[3] ?? '');
-    const [totalId,totalReport] = new URL(report.taUrl).hash.slice('#/tga/ide/'.length).split(/[?_]/);
-    const match = media?.hash.match(/^#\/tga\/ide\/(\d+)_(\d+)(?:\?fromPanel=\d+_\d+)?$/);
-    if (!media || media.origin !== 'https://ta-data.feiyu.com' || media.username || media.password ||
-        media.pathname !== '/' || media.search || match?.[1] !== totalId || match[2] === totalReport) {
-      throw new Error('请填写与数数总表同项目的分媒体 SQL 报表地址');
-    }
-    mediaUrl = media.href;
-    delete report.fields.registrations;
-  }
+  const mediaUrl = backupCli ? validateTaMediaUrl(process.argv[3],report.taUrl) : report.taMediaUrl;
+  if (mediaUrl) delete report.fields.registrations;
   const deps = process.env.GRAVITY_NODE_MODULES ?? path.join(process.env.USERPROFILE,
     '.cache','codex-runtimes','codex-primary-runtime','dependencies','node','node_modules');
   const require = createRequire(path.join(deps,'package.json'));
   const {chromium} = require('playwright');
   const runDay = day();
-  const slot = backup ? undefined : process.env.GRAVITY_REPORT_SLOT;
+  const slot = backupCli ? undefined : process.env.GRAVITY_REPORT_SLOT;
   if (slot && (!/^\d{4}-\d{2}-\d{2}T(?:[01]\d|2[0-3])$/.test(slot) || slot.slice(0,10) !== runDay)) {
     throw new Error('定时任务时点与当前报表日期不符');
   }
   const hour = slot?.slice(11) ?? new Intl.DateTimeFormat('en-GB', {
     timeZone:'Asia/Shanghai',hour:'2-digit',hourCycle:'h23',
   }).format(new Date());
-  const fullDay = (Boolean(slot) || appendBackup) && hour === '00';
+  const fullDay = (Boolean(slot) || appendBackup || (kind === 'external' && !backupCli && Boolean(mediaUrl))) && hour === '00';
   const date = fullDay ? previousDay(runDay) : runDay;
-  const preview = backup ? !appendBackup : process.argv[3] === '--preview';
-  const webhook = preview || backup ? undefined : process.env.GRAVITY_WECOM_WEBHOOK;
+  const preview = backupCli ? !appendBackup : process.argv[3] === '--preview';
+  const webhook = preview || backupCli ? undefined : process.env.GRAVITY_WECOM_WEBHOOK;
+  const cutoffHour = fullDay ? '24' : hour;
+  const time = cutoffHour+':00';
+  if (kind === 'external' && !preview && config.schedule.startAt && date+'T'+time < config.schedule.startAt) {
+    throw new Error('该快照早于外部小时报的正式首报时点');
+  }
   const rootOutput = path.join('outputs','gravity-wecom');
   const externalOutput = path.resolve(rootOutput,'external',externalWorkbookName);
   let outputPath = process.argv[2] ?? (kind === 'external' && !preview ? externalOutput
     : path.join(rootOutput,date+'_'+Date.now()+'.xlsx'));
   if (appendBackup) {
     outputPath = fileURLToPath(new URL('../../../outputs/gravity-wecom/external/'+externalWorkbookName,import.meta.url));
-  } else if (backup) {
+  } else if (backupCli) {
     outputPath = process.argv[4] ?? path.join(rootOutput,'external',date+'_'+Date.now()+'_备用小时报.xlsx');
   }
   const output = path.resolve(outputPath);
@@ -810,21 +805,19 @@ async function main(kind) {
     }
     if (kind === 'external') {
       console.log('正在读取数数每日累计指标');
-      const previewCsv = preview && !backup ? process.argv[4] : undefined;
+      const previewCsv = preview && !backupCli ? process.argv[4] : undefined;
       const ta = previewCsv ? parseTaHourly(await fs.readFile(previewCsv,'utf8'),date)
         : await readTaHourly(chromium,report.taUrl,date,report.timeoutSeconds*1000,report.retries);
       let paidTa;
-      if (backup) {
+      if (mediaUrl) {
         console.log('正在读取数数分媒体买量指标');
         paidTa = await readTaHourly(chromium,mediaUrl,date,report.timeoutSeconds*1000,report.retries,parseTaPaidHourly);
         if (!paidTa) console.warn('数数分媒体当日没有非自然量记录，买量注册和付费相关字段留空');
       }
       if (day() !== runDay) throw new Error('取数期间跨过北京时间日期');
-      const cutoffHour = fullDay ? '24' : hour;
-      const time = cutoffHour+':00';
       const period = previewCsv ? '数数导出快照' : externalPeriod(cutoffHour);
       const snapshot = {date,time,period,ta,gravity:data,projectName:project.name,
-        ...(backup ? {paidTa,backupPreview:preview} : {})};
+        ...(mediaUrl ? {paidTa,backupPreview:preview} : {})};
       const png = preview ? await writeExternalHourly(snapshot,output,deps)
         : await updateExternalHourly(snapshot,output,deps,archive,config.schedule.startAt);
       console.log(output);
