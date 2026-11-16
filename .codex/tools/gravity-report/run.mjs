@@ -9,6 +9,7 @@ import { externalWorkbookName, parseTaHourly, readTaHourly, updateExternalHourly
 
 const root = '.el-table-v2__root';
 const timeout = 120_000;
+const reportEndpoint = '/report/api/v3/adreport/custom_get/';
 const rollupEndpoint = '/report/api/v3/adreport/custom_get/calc_total/';
 const standardMetrics = {
   spend:'ap_cost',activations:'standard_activate_cnt',activationCost:'standard_activate_cost',
@@ -140,8 +141,19 @@ export async function refreshReport(page, expectedDay, wait = timeout, product =
   }
   await productFilter.waitFor({timeout:remaining()});
   await ready();
+  const external = layout === 'external';
+  const unfilteredTable = page.getByRole('button',{name:/^表内筛选\/\s*0$/});
+  if (external && !await unfilteredTable.isVisible()) throw new Error('外部小时报需要先清除引力表内筛选');
+  const matchesExternalTable = request => {
+    let query;
+    try { query = request.postDataJSON(); } catch { return false; }
+    return query?.data_dims?.[0] === 'app_id' && query.data_dims.includes('click_company') &&
+      query.date_list?.length === 2 && query.date_list.every(date=>date === expectedDay) &&
+      query.filters?.some(({field,operator,values})=>field === 'app_id' && operator === 'EQUALS' &&
+        values?.length === 1 && String(values[0]) === productAppId);
+  };
   // Trigger the exact button without pointer scrolling, and observe that same button.
-  await waitForReportTotals(page, () => refresh.evaluate(button => {
+  const response = await waitForReportTotals(page, () => refresh.evaluate(button => {
     if (button.disabled || button.getAttribute('aria-disabled') === 'true' || !button.getClientRects().length) {
       throw new Error('刷新按钮当前不可用');
     }
@@ -155,9 +167,23 @@ export async function refreshReport(page, expectedDay, wait = timeout, product =
     observer.observe(button, {attributes:true, attributeFilter:['disabled'], attributeOldValue:true});
     button.click();
   }, undefined, {timeout:remaining()}), remaining(),
-    layout === 'daily' || layout === 'flat' || layout === 'external' ? '/report/api/v3/adreport/custom_get/' : undefined);
+    layout === 'daily' || layout === 'flat' || external ? reportEndpoint : undefined,
+    external ? matchesExternalTable : undefined);
   await page.locator('html[data-gravity-refresh-started=true]').waitFor({state:'attached',timeout:remaining()});
   await ready();
+  if (external) {
+    const query = response.request().postDataJSON();
+    const {code,data} = await response.json();
+    const count = data?.page_info?.total;
+    if (code !== 0 || !Number.isInteger(count) || count < 0 || !Array.isArray(data.list)) {
+      throw new Error('引力项目及媒体主表未返回有效记录');
+    }
+    if (query.filters.length !== 1 || !await unfilteredTable.isVisible()) {
+      throw new Error('含自然量 ROI 需要仅按 APPID 查询完整项目，当前报表存在额外筛选');
+    }
+    const pagination = count === 0 ? /^共\s*0\s*条$/ : /^共\s*[1-9]\d*\s*条$/;
+    await page.getByText(pagination).waitFor({timeout:remaining()});
+  }
   if (day() !== today || !await dateFilter.isVisible() || !await productFilter.isVisible()) {
     throw new Error('查询完成后的日期或产品范围与预期不符');
   }
@@ -370,15 +396,17 @@ export async function collect(page, {report,project} = defaults, expectedDay = d
   }
   if (external) {
     const app = base.apps.get(report.productAppId);
+    // Preserve the full project rollup before applying any media filter.
+    const total = app.data;
     const paid = [...app.media].filter(([name])=>name.trim() !== '自然量');
-    if (paid.length <= 1) return {total:app.data,paid:paid[0]?.[1] ?? null};
+    if (paid.length <= 1) return {total,paid:paid[0]?.[1] ?? null};
     await applyTableFilter(page,'媒体平台',paid.map(([name])=>name),timeout);
     const filtered = await readGrid(page,report,expectedDay);
     if (filtered.apps.size !== 1 || !filtered.apps.has(report.productAppId) ||
         Math.abs(filtered.total.spend-paid.reduce((sum,[,row])=>sum+row.spend,0)) > 0.01) {
       throw new Error('引力非自然量汇总未通过校验');
     }
-    return {total:app.data,paid:filtered.total};
+    return {total,paid:filtered.total};
   }
   const appGroup = project.groups.find(group=>group.name.toUpperCase()==='APP' && group.projects.length>1);
   const appIds = appGroup?.projects.map(({id})=>id).filter(id=>base.apps.has(id)) ?? [];
