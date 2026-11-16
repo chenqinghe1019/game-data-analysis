@@ -447,12 +447,12 @@ export async function collect(page, {report,project} = defaults, expectedDay = d
       paidTotal = filtered.total;
     }
     if (!paidTotal) return {total,paid:null};
-    const {registrations:standardRegistrations,...metrics} = paidTotal;
-    if (!Number.isSafeInteger(standardRegistrations) || standardRegistrations<0) {
-      throw new Error('引力非自然量的标准注册数须为非负整数');
+    const {registrations:tencentRegistrations,...metrics} = paidTotal;
+    if (!Number.isSafeInteger(tencentRegistrations) || tencentRegistrations<0) {
+      throw new Error('引力非自然量的腾讯注册人数须为非负整数');
     }
-    return {total,paid:{...metrics,standardRegistrations,
-      registrationCost:standardRegistrations === 0 ? null : metrics.spend/standardRegistrations}};
+    return {total,paid:{...metrics,tencentRegistrations,
+      registrationCost:tencentRegistrations === 0 ? null : metrics.spend/tencentRegistrations}};
   }
   const appGroup = project.groups.find(group=>group.name.toUpperCase()==='APP' && group.projects.length>1);
   const appIds = appGroup?.projects.map(({id})=>id).filter(id=>base.apps.has(id)) ?? [];

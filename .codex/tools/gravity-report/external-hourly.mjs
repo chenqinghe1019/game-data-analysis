@@ -169,8 +169,8 @@ function buildExternalWorkbook(Workbook, snapshots, {gravity,projectName,templat
       'ROI1','ROI(含自然量)','实时付费次留','实时注册次留'],
     ...snapshots.map(({date,period,ta,gravity:{paid,total}})=>[
       date,period.replace(/^截至北京时间 (\d{2}):\d{2}$/,(_,hour)=>externalPeriod(hour)),
-      ...ta.slice(0,6),paid?.spend ?? null,paid?.impressions ?? null,paid?.standardRegistrations ?? null,
-      paid?.standardRegistrations === undefined ? null : paid.registrationCost,
+      ...ta.slice(0,6),paid?.spend ?? null,paid?.impressions ?? null,paid?.tencentRegistrations ?? null,
+      paid?.tencentRegistrations === undefined ? null : paid.registrationCost,
       paid?.payCost ?? null,paid?.frequency ?? null,
       paid?.roi ?? null,total?.roi ?? null,ta[6],ta[7],
     ]),
@@ -185,7 +185,7 @@ function buildExternalWorkbook(Workbook, snapshots, {gravity,projectName,templat
   const sourceNote = '经营与留存取数数同日行。买量和 ROI1 取引力非自然量。ROI(含自然量) 取引力项目合计。历史日期仅显示 24 点汇总。';
   const missingNote = template ? ' 格式预览，数据待取。统计窗口从当天 00:00 开始。'
     : !total ? ' 本次取数时引力当日无记录。' : !paid ? ' 本次取数时引力当日无非自然量记录。' : '';
-  const legacyNote = snapshots.some(row=>row.gravity.paid && row.gravity.paid.standardRegistrations === undefined)
+  const legacyNote = snapshots.some(row=>row.gravity.paid && row.gravity.paid.tencentRegistrations === undefined)
     ? ' 旧口径的注册指标留空。' : '';
   merged('A'+footer+':R'+footer,sourceNote+missingNote+legacyNote);
   const all = sheet.getRange('A1:R'+footer);

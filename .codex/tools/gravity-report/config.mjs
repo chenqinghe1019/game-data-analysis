@@ -12,6 +12,7 @@ export const iaaConfigPath = path.join(path.dirname(configPath),'iaa','config.js
 export const towerConfigPath = path.join(path.dirname(configPath),'tower','config.json');
 export const externalConfigPath = path.join(path.dirname(configPath),'external','config.json');
 export const externalName = '外部小时报';
+export const externalRegistrationColumn = '腾讯_注册人数(平台上报)(激活时间)';
 export const towerName = '别推我的塔';
 
 function iaaMetrics(fields) {
@@ -70,7 +71,7 @@ export function validateConfig(config, kind = 'gravity') {
   if (external) {
     fields = Object.fromEntries(['spend','impressions','payCost','frequency','roi']
       .map(key=>[key,report.fields?.[key]]));
-    fields.registrations = '标准_注册数';
+    fields.registrations = externalRegistrationColumn;
   }
   const columnNames = Object.values(fields);
   if (!columnNames.every(validText) || new Set(columnNames).size !== columnNames.length) {
@@ -128,7 +129,7 @@ export async function loadConfig(file = configPath, kind = 'gravity') {
     if (error.code === 'ENOENT' && kind === 'external') {
       return {...defaults,project:{name:externalName,groups:[]},schedule:{enabled:false,hours:[]},
         report:{...defaults.report,productAppId:'',taUrl:'',fields:{
-          spend:'平台_消耗',impressions:'平台_展示数',registrations:'标准_注册数',
+          spend:'平台_消耗',impressions:'平台_展示数',registrations:externalRegistrationColumn,
           payCost:'标准_首日付费成本',frequency:'首日付费频次',roi:'标准_首日付费ROI',
         }}};
     }
