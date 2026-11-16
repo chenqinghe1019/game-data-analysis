@@ -5,7 +5,7 @@ import { createRequire } from 'node:module';
 import { pathToFileURL } from 'node:url';
 import { configPath, defaults, externalConfigPath, iaaConfigPath, loadConfig } from './config.mjs';
 import { readLogin } from './login.mjs';
-import { externalWorkbookName, parseTaHourly, readTaHourly, updateExternalHourly, writeExternalHourly } from './external-hourly.mjs';
+import { externalPeriod, externalWorkbookName, parseTaHourly, readTaHourly, updateExternalHourly, writeExternalHourly } from './external-hourly.mjs';
 
 const root = '.el-table-v2__root';
 const timeout = 120_000;
@@ -721,9 +721,9 @@ async function main(kind) {
       const ta = previewCsv ? parseTaHourly(await fs.readFile(previewCsv,'utf8'),date)
         : await readTaHourly(chromium,report.taUrl,date,report.timeoutSeconds*1000,report.retries);
       if (day() !== runDay) throw new Error('取数期间跨过北京时间日期');
-      const time = fullDay ? '24:00' : slot ? hour+':00'
-        : new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Shanghai',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(new Date());
-      const period = previewCsv ? '数数导出快照' : '截至北京时间 '+time;
+      const cutoffHour = fullDay ? '24' : hour;
+      const time = cutoffHour+':00';
+      const period = previewCsv ? '数数导出快照' : externalPeriod(cutoffHour);
       const snapshot = {date,time,period,ta,gravity:data,projectName:project.name};
       const png = preview ? await writeExternalHourly(snapshot,output,deps)
         : await updateExternalHourly(snapshot,output,deps,path.join(path.dirname(file),'hourly-snapshots.sqlite'));

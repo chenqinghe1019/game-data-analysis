@@ -7,6 +7,10 @@ import {pathToFileURL} from 'node:url';
 const taColumns = ['累计新进','累计活跃','累计付费人数','累计收入','当前 ARPU','付费率','付费次留','注册次留'];
 export const externalWorkbookName = '外部小时报_累计.xlsx';
 
+export function externalPeriod(hour) {
+  return '截至北京时间 '+Number(hour)+' 点';
+}
+
 export function parseTaHourly(csv, date) {
   const rows = csv.replace(/^\uFEFF/,'').trimEnd().split(/\r?\n/).map(line=>
     line.split(',').map(cell=>cell.trim().replace(/^"(.*)"$/,'$1')));
@@ -127,7 +131,8 @@ function buildExternalWorkbook(Workbook, snapshots, {gravity,projectName,templat
       '累计消耗','累计广告曝光','累计注册转化','人均注册成本','人均付费成本','新增首日人均付费次数',
       'ROI1','ROI(含自然量)','实时付费次留','实时注册次留'],
     ...snapshots.map(({date,period,ta,gravity:{paid,total}})=>[
-      date,period,...ta.slice(0,6),paid?.spend ?? null,paid?.impressions ?? null,paid?.registrations ?? null,
+      date,period.replace(/^截至北京时间 (\d{2}):\d{2}$/,(_,hour)=>externalPeriod(hour)),
+      ...ta.slice(0,6),paid?.spend ?? null,paid?.impressions ?? null,paid?.registrations ?? null,
       paid?.registrationCost ?? null,paid?.payCost ?? null,paid?.frequency ?? null,
       paid?.roi ?? null,total?.roi ?? null,ta[6],ta[7],
     ]),
