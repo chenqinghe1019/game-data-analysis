@@ -95,11 +95,13 @@ export async function readTaHourly(chromium, url, date, timeout, retries) {
   }
 }
 
-export async function updateExternalHourly(snapshot, output, deps, archive) {
+export async function updateExternalHourly(snapshot, output, deps, archive, startAt = '') {
+  const {date,time} = snapshot;
+  if (date+'T'+time < startAt) throw new Error('该快照早于外部小时报的正式首报时点');
+  const [firstDate,firstTime=''] = startAt.split('T');
   const {DatabaseSync} = await import('node:sqlite');
   await fs.mkdir(path.dirname(archive),{recursive:true});
   const db = new DatabaseSync(archive);
-  const {date,time} = snapshot;
   try {
     db.exec(`PRAGMA busy_timeout=30000;
       CREATE TABLE IF NOT EXISTS snapshots (date TEXT, time TEXT, payload TEXT NOT NULL, PRIMARY KEY(date,time))`);
@@ -108,7 +110,8 @@ export async function updateExternalHourly(snapshot, output, deps, archive) {
     // Keep the saved snapshot even if Excel has the destination file open.
     // Serialize workbook replacements so an older export cannot replace a newer one.
     db.exec('BEGIN IMMEDIATE');
-    const rows = db.prepare('SELECT payload FROM snapshots ORDER BY date,time').all().map(({payload})=>JSON.parse(payload));
+    const rows = db.prepare('SELECT payload FROM snapshots WHERE (date,time) >= (?,?) ORDER BY date,time')
+      .all(firstDate,firstTime).map(({payload})=>JSON.parse(payload));
     const png = await writeExternalHourly(snapshot,output,deps,rows);
     db.exec('COMMIT');
     return png;

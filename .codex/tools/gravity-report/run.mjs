@@ -763,7 +763,7 @@ async function main(kind) {
       const period = previewCsv ? '数数导出快照' : externalPeriod(cutoffHour);
       const snapshot = {date,time,period,ta,gravity:data,projectName:project.name};
       const png = preview ? await writeExternalHourly(snapshot,output,deps)
-        : await updateExternalHourly(snapshot,output,deps,path.join(path.dirname(file),'hourly-snapshots.sqlite'));
+        : await updateExternalHourly(snapshot,output,deps,path.join(path.dirname(file),'hourly-snapshots.sqlite'),config.schedule.startAt);
       console.log(output);
       if (webhook) await sendWeComReport(webhook,png,'【外部小时报】'+date+' '+period+' · '+project.name);
       return;
