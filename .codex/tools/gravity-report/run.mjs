@@ -102,31 +102,36 @@ async function openReport(page, {url:reportUrl,title,timeoutSeconds}, kind, retr
       throw new Error('登录页地址校验失败');
     }
     const credentials = await readLogin();
-    let prefilled = false;
     if (credentials) {
       try {
-        await page.locator('input:visible:not([type=password]):not([type=checkbox])').fill(credentials.email,{timeout:10_000});
-        await page.locator('input[type=password]:visible').fill(credentials.password,{timeout:10_000});
-        prefilled = true;
+        await page.getByPlaceholder('请输入邮箱地址',{exact:true}).fill(credentials.email,{timeout:10_000});
+        await page.getByPlaceholder('请输入登录密码',{exact:true}).fill(credentials.password,{timeout:10_000});
       } catch {
-        console.log('引力登录表单未能自动填写，请在 Chrome 窗口手动登录。');
+        throw new Error('引力登录表单无法填写');
       }
-    }
-    console.log('引力正在等待登录：请在 Chrome 窗口勾选同意条款并完成登录。最多等待 5 分钟。');
-    const deadline = Date.now()+300_000;
-    const remaining = () => Math.max(1,deadline-Date.now());
-    try {
-      if (prefilled) {
-        const accepted = page.getByRole('checkbox',{name:'我已阅读并同意'}).and(
-          page.locator('input:checked, [role=checkbox][aria-checked=true]'));
-        await report.or(accepted).first().waitFor({timeout:remaining()});
-        if (await accepted.isVisible() && await login.isVisible()) {
-          await login.click({timeout:Math.min(5_000,remaining())}).catch(()=>{});
-        }
+      const label = page.locator('label').filter({hasText:/^我已阅读并同意$/});
+      const checkbox = label.locator('input[type=checkbox]');
+      try {
+        // The checkbox input is covered by Element UI's visible label.
+        if (!await checkbox.isChecked({timeout:5_000})) await label.click({timeout:5_000});
+        if (!await checkbox.isChecked({timeout:5_000})) throw new Error('勾选状态未生效');
+      } catch {
+        throw new Error('引力同意条款未能勾选');
       }
-      await report.waitFor({timeout:remaining()});
-    } catch {
-      throw new GravityLoginPending('等待引力人工确认条款或登录超时，请完成登录后重新运行');
+      console.log('引力条款已勾选，正在自动登录。');
+      try {
+        await login.click({timeout:10_000});
+        await report.waitFor({timeout:timeoutSeconds*1000});
+      } catch {
+        throw new Error('引力已尝试登录，未进入报表，请检查账号或额外验证要求');
+      }
+    } else {
+      console.log('当前未配置引力账号，请在 Chrome 窗口登录。最多等待 5 分钟。');
+      try {
+        await report.waitFor({timeout:300_000});
+      } catch {
+        throw new GravityLoginPending('等待引力登录超时');
+      }
     }
   }
   const actual = new URL(page.url());
