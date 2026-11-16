@@ -429,21 +429,30 @@ export async function collect(page, {report,project} = defaults, expectedDay = d
     // Preserve the full project rollup before applying any media filter.
     const total = app.data;
     const paid = [...app.media].filter(([name])=>name.trim() !== '自然量');
-    if (paid.length <= 1) return {total,paid:paid[0]?.[1] ?? null};
-    await applyTableFilter(page,'媒体平台',paid.map(([name])=>name),timeout,request=>{
-      let query;
-      try { query=request.postDataJSON(); } catch { return false; }
-      const rows=query?.data_list?.flat();
-      return query?.date_list?.length === 2 && query.date_list.every(date=>date === expectedDay) &&
-        rows?.length > 0 && rows.every(row=>String(row.app_id) === report.productAppId &&
-          row.click_company && row.click_company !== 'natural');
-    });
-    const filtered = await readGrid(page,report,expectedDay);
-    if (filtered.apps.size !== 1 || !filtered.apps.has(report.productAppId) ||
-        Math.abs(filtered.total.spend-paid.reduce((sum,[,row])=>sum+row.spend,0)) > 0.01) {
-      throw new Error('引力非自然量汇总未通过校验');
+    let paidTotal = paid[0]?.[1];
+    if (paid.length>1) {
+      await applyTableFilter(page,'媒体平台',paid.map(([name])=>name),timeout,request=>{
+        let query;
+        try { query=request.postDataJSON(); } catch { return false; }
+        const rows=query?.data_list?.flat();
+        return query?.date_list?.length === 2 && query.date_list.every(date=>date === expectedDay) &&
+          rows?.length > 0 && rows.every(row=>String(row.app_id) === report.productAppId &&
+            row.click_company && row.click_company !== 'natural');
+      });
+      const filtered = await readGrid(page,report,expectedDay);
+      if (filtered.apps.size !== 1 || !filtered.apps.has(report.productAppId) ||
+          Math.abs(filtered.total.spend-paid.reduce((sum,[,row])=>sum+row.spend,0)) > 0.01) {
+        throw new Error('引力非自然量汇总未通过校验');
+      }
+      paidTotal = filtered.total;
     }
-    return {total,paid:filtered.total};
+    if (!paidTotal) return {total,paid:null};
+    const {registrations:standardRegistrations,...metrics} = paidTotal;
+    if (!Number.isSafeInteger(standardRegistrations) || standardRegistrations<0) {
+      throw new Error('引力非自然量的标准注册数须为非负整数');
+    }
+    return {total,paid:{...metrics,standardRegistrations,
+      registrationCost:standardRegistrations === 0 ? null : metrics.spend/standardRegistrations}};
   }
   const appGroup = project.groups.find(group=>group.name.toUpperCase()==='APP' && group.projects.length>1);
   const appIds = appGroup?.projects.map(({id})=>id).filter(id=>base.apps.has(id)) ?? [];

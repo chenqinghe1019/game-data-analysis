@@ -68,8 +68,9 @@ export function validateConfig(config, kind = 'gravity') {
     fields = Object.fromEntries(Object.keys(defaults.report.fields).map(key=>[key,report.fields?.[key]]));
   }
   if (external) {
-    fields = Object.fromEntries(['spend','impressions','registrations','registrationCost','payCost','frequency','roi']
+    fields = Object.fromEntries(['spend','impressions','payCost','frequency','roi']
       .map(key=>[key,report.fields?.[key]]));
+    fields.registrations = '标准_注册数';
   }
   const columnNames = Object.values(fields);
   if (!columnNames.every(validText) || new Set(columnNames).size !== columnNames.length) {
@@ -127,7 +128,7 @@ export async function loadConfig(file = configPath, kind = 'gravity') {
     if (error.code === 'ENOENT' && kind === 'external') {
       return {...defaults,project:{name:externalName,groups:[]},schedule:{enabled:false,hours:[]},
         report:{...defaults.report,productAppId:'',taUrl:'',fields:{
-          spend:'平台_消耗',impressions:'平台_展示数',registrations:'平台_注册数',registrationCost:'平台_注册成本',
+          spend:'平台_消耗',impressions:'平台_展示数',registrations:'标准_注册数',
           payCost:'标准_首日付费成本',frequency:'首日付费频次',roi:'标准_首日付费ROI',
         }}};
     }
