@@ -15,16 +15,36 @@ export function parseTaHourly(csv, date) {
   const rows = csv.replace(/^\uFEFF/,'').trimEnd().split(/\r?\n/).map(line=>
     line.split(',').map(cell=>cell.trim().replace(/^"(.*)"$/,'$1')));
   const [headers,...data] = rows;
-  const indexes = ['日期',...taColumns].map(label=>headers.indexOf(label));
-  if (indexes.includes(-1)) throw new Error('数数查询结果缺少小时报所需列');
+  const indexes = ['日期',...taColumns].map(label=>{
+    const index = headers.indexOf(label);
+    if (index === -1 || index !== headers.lastIndexOf(label)) throw new Error('数数指标列缺失或重复：'+label);
+    return index;
+  });
   const matches = data.filter(row=>row[indexes[0]] === date);
   if (matches.length !== 1) throw new Error('数数查询结果没有唯一的 '+date+' 数据行');
-  return indexes.slice(1).map(index=>{
+  if (matches[0].length !== headers.length) throw new Error('数数目标日期的数据列不完整');
+  const values = indexes.slice(1).map(index=>{
     const value = matches[0][index];
     if (value === '') return null;
-    if (!/^-?\d+(?:\.\d+)?$/.test(value)) throw new Error('数数指标不是有效数值：'+headers[index]);
-    return Number(value);
+    const numeric = Number(value);
+    if (!/^\d+(?:\.\d+)?$/.test(value) || !Number.isFinite(numeric)) {
+      throw new Error('数数指标不是有效的非负数：'+headers[index]);
+    }
+    return numeric;
   });
+  const [newUsers,active,payers,revenue,arpu,payRate,payerRetention,registrationRetention] = values;
+  if (![newUsers,active,payers].every(Number.isSafeInteger) || revenue === null) {
+    throw new Error('数数新进、活跃、付费人数或收入缺失，或人数不是整数');
+  }
+  if (active === 0 ? arpu !== null || payRate !== null :
+      arpu === null || payRate === null || Math.abs(arpu-revenue/active) > 0.0051+0.005/active ||
+      Math.abs(payRate-payers/active) > 0.0000501) {
+    throw new Error('数数 ARPU 或付费率与当日基础指标不一致');
+  }
+  if ([payerRetention,registrationRetention].some(value=>value !== null && value > 1)) {
+    throw new Error('数数次留比例超出 0% 至 100%');
+  }
+  return values;
 }
 
 export async function readTaHourly(chromium, url, date, timeout, retries) {
@@ -46,16 +66,24 @@ export async function readTaHourly(chromium, url, date, timeout, retries) {
         else await page.goto(url,{waitUntil:'commit',timeout});
         const calculate = page.getByRole('button',{name:'计算',exact:true});
         const result = page.getByRole('tabpanel',{name:'查询结果'});
-        const queryId = result.getByText(/^SQL_ID[：:]/);
+        const queryId = result.getByText(/^SQL_ID[：:]/).filter({visible:true});
+        const queryError = result.getByText(/SQLException|查询失败|计算失败/).filter({visible:true});
         const download = result.getByRole('button',{name:'全量下载',exact:true});
         await calculate.waitFor({timeout:Math.min(timeout,30_000)});
         if (page.url() !== url) throw new Error('数数未进入指定查询，请检查登录状态和报表权限');
-        await queryId.or(download).first().waitFor({timeout});
-        const previous = await queryId.count() ? await queryId.innerText() : '';
+        const previous = await queryId.isVisible() ? await queryId.innerText() : '';
         await calculate.click();
-        await (previous ? queryId.filter({hasNotText:previous}) : queryId).waitFor({timeout});
+        const fresh = previous ? queryId.filter({hasNotText:previous}) : queryId;
+        // The query engine can legitimately queue requests longer than normal report loads.
+        await fresh.or(queryError).first().waitFor({timeout:Math.max(timeout,300_000)});
+        if (!await fresh.isVisible()) throw new Error('数数查询失败：'+await queryError.first().innerText());
+        const completed = await fresh.innerText();
         const [file] = await Promise.all([page.waitForEvent('download',{timeout}),download.click()]);
-        return parseTaHourly(await fs.readFile(await file.path(),'utf8'),date);
+        const filename = await file.path();
+        if (!filename || !await fresh.isVisible() || await fresh.innerText() !== completed) {
+          throw new Error('数数下载未对应本次查询结果');
+        }
+        return parseTaHourly(await fs.readFile(filename,'utf8'),date);
       } catch (error) {
         if (attempt === retries) throw error;
         console.warn('数数取数失败，重新加载查询后重试：'+error.message.split('\n')[0]);
@@ -137,6 +165,12 @@ function buildExternalWorkbook(Workbook, snapshots, {gravity,projectName,templat
       paid?.roi ?? null,total?.roi ?? null,ta[6],ta[7],
     ]),
   ];
+  for (let start=0;start<snapshots.length;) {
+    let end=start+1;
+    while (end<snapshots.length && snapshots[end].date === snapshots[start].date) end++;
+    if (end>start+1) merged('A'+(start+4)+':A'+(end+3),snapshots[start].date);
+    start=end;
+  }
   const {paid,total} = gravity;
   const sourceNote = '经营与留存取数数同日行。买量和 ROI1 取引力非自然量。ROI(含自然量) 取引力项目合计。';
   const missingNote = template ? ' 格式预览，数据待取。统计窗口从当天 00:00 开始。'

@@ -20,12 +20,21 @@ const day = () => new Intl.DateTimeFormat('sv-SE', {timeZone:'Asia/Shanghai'}).f
 const previousDay = date => new Date(Date.parse(date+'T00:00:00Z')-86_400_000).toISOString().slice(0,10);
 
 async function waitForReportTotals(page, trigger, timeout, endpoint = rollupEndpoint, matches = () => true) {
-  const [response] = await Promise.all([
-    page.waitForResponse(result =>
-      new URL(result.url()).pathname === endpoint &&
-      result.request().method() === 'POST' && matches(result.request()), {timeout}),
-    trigger(),
-  ]);
+  // Ignore responses from requests already in flight before this refresh or expansion.
+  const requests = new Set();
+  const observe = request => {
+    if (request.method() === 'POST' && new URL(request.url()).pathname === endpoint) requests.add(request);
+  };
+  page.on('request',observe);
+  let response;
+  try {
+    [response] = await Promise.all([
+      page.waitForResponse(result=>requests.has(result.request()) && matches(result.request()),{timeout}),
+      trigger(),
+    ]);
+  } finally {
+    page.off('request',observe);
+  }
   if (!response.ok() || await response.finished()) throw new Error('引力报表汇总查询失败');
   // Let the page apply the response to the virtual table before copying its cells.
   await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
@@ -171,11 +180,13 @@ export async function refreshReport(page, expectedDay, wait = timeout, product =
     external ? matchesExternalTable : undefined);
   await page.locator('html[data-gravity-refresh-started=true]').waitFor({state:'attached',timeout:remaining()});
   await ready();
+  let source;
   if (external) {
     const query = response.request().postDataJSON();
     const {code,data} = await response.json();
     const count = data?.page_info?.total;
-    if (code !== 0 || !Number.isInteger(count) || count < 0 || !Array.isArray(data.list)) {
+    if (code !== 0 || !Number.isInteger(count) || count < 0 || !Array.isArray(data.list) ||
+        data.list.length !== count || data.list.some(row=>String(row.app_id) !== productAppId)) {
       throw new Error('引力项目及媒体主表未返回有效记录');
     }
     if (query.filters.length !== 1 || !await unfilteredTable.isVisible()) {
@@ -183,10 +194,13 @@ export async function refreshReport(page, expectedDay, wait = timeout, product =
     }
     const pagination = count === 0 ? /^共\s*0\s*条$/ : /^共\s*[1-9]\d*\s*条$/;
     await page.getByText(pagination).waitFor({timeout:remaining()});
+    if (count > 0 && !Number.isFinite(data.total?.ap_cost)) throw new Error('引力原始项目汇总缺少消耗');
+    source = {count,spend:data.total?.ap_cost};
   }
   if (day() !== today || !await dateFilter.isVisible() || !await productFilter.isVisible()) {
     throw new Error('查询完成后的日期或产品范围与预期不符');
   }
+  return source;
 }
 
 async function selectReportProduct(page, {product,productAppId,timeoutSeconds}) {
@@ -300,7 +314,7 @@ async function readGrid(page, {fields,metrics:configuredMetrics,layout}, expecte
   return {total:parse(raw.total),apps};
 }
 
-async function applyTableFilter(page, dimension, values, timeout) {
+async function applyTableFilter(page, dimension, values, timeout, matches) {
   await page.getByRole('button', {name:/^表内筛选\/\s*0$/}).click({timeout});
   const dialog = page.getByRole('dialog', {name:'表内筛选'});
   await dialog.getByText('请选择', {exact:true}).first().click({timeout});
@@ -315,7 +329,8 @@ async function applyTableFilter(page, dimension, values, timeout) {
     await picker.getByText(value,{exact:true}).click({timeout});
   }
   await dialog.getByRole('heading').click({timeout});
-  await waitForReportTotals(page, () => dialog.getByRole('button', {name:'应用筛选'}).click({timeout}), timeout);
+  await waitForReportTotals(page, () => dialog.getByRole('button', {name:'应用筛选'}).click({timeout}),
+    timeout, rollupEndpoint, matches);
 }
 
 async function readAppGroupTotal(page, ids, report, timeout, expectedDay) {
@@ -335,11 +350,19 @@ async function readAppGroupTotal(page, ids, report, timeout, expectedDay) {
   return filtered.total;
 }
 
-export async function collect(page, {report,project} = defaults, expectedDay = day(), external = false) {
+export async function collect(page, {report,project} = defaults, expectedDay = day(), source) {
   const timeout = report.timeoutSeconds * 1000;
+  const external = Boolean(source);
   const grid = page.locator(root);
   await grid.waitFor({timeout});
-  if (external && await page.getByText(/^共\s*0\s*条$/).isVisible()) return {total:null,paid:null};
+  if (external) {
+    const empty = await page.getByText(/^共\s*0\s*条$/).isVisible();
+    if (empty !== (source.count === 0)) throw new Error('引力页面与本次查询记录数不一致');
+    if (empty) {
+      console.log('引力原始查询已确认当天无记录');
+      return {total:null,paid:null};
+    }
+  }
   if (report.layout === 'daily') return readGrid(page,report,expectedDay);
   if (report.layout === 'flat') {
     const base = await readGrid(page,report,expectedDay);
@@ -363,6 +386,13 @@ export async function collect(page, {report,project} = defaults, expectedDay = d
   const base = await readGrid(page,report,expectedDay);
   if (report.productAppId && (base.apps.size !== 1 || !base.apps.has(report.productAppId))) {
     throw new Error('报表项目与配置的引力 APPID 不一致');
+  }
+  if (external) {
+    const {data} = base.apps.get(report.productAppId);
+    if (Math.abs(data.spend-source.spend) > 0.01 || Math.abs(data.spend-base.total.spend) > 0.01 ||
+        Math.abs(data.roi-base.total.roi) > 0.000051) {
+      throw new Error('引力项目行与本次完整项目汇总的消耗或 ROI 不一致');
+    }
   }
   for (const [id,app] of base.apps) {
     if (!external && app.data.spend === 0) continue;
@@ -400,7 +430,14 @@ export async function collect(page, {report,project} = defaults, expectedDay = d
     const total = app.data;
     const paid = [...app.media].filter(([name])=>name.trim() !== '自然量');
     if (paid.length <= 1) return {total,paid:paid[0]?.[1] ?? null};
-    await applyTableFilter(page,'媒体平台',paid.map(([name])=>name),timeout);
+    await applyTableFilter(page,'媒体平台',paid.map(([name])=>name),timeout,request=>{
+      let query;
+      try { query=request.postDataJSON(); } catch { return false; }
+      const rows=query?.data_list?.flat();
+      return query?.date_list?.length === 2 && query.date_list.every(date=>date === expectedDay) &&
+        rows?.length > 0 && rows.every(row=>String(row.app_id) === report.productAppId &&
+          row.click_company && row.click_company !== 'natural');
+    });
     const filtered = await readGrid(page,report,expectedDay);
     if (filtered.apps.size !== 1 || !filtered.apps.has(report.productAppId) ||
         Math.abs(filtered.total.spend-paid.reduce((sum,[,row])=>sum+row.spend,0)) > 0.01) {
@@ -702,11 +739,11 @@ async function main(kind) {
         if (report.productAppId) await selectReportProduct(page,report);
         stage = '刷新报表';
         console.log('正在刷新引力报表');
-        await refreshReport(page,date,report.timeoutSeconds*1000,report.product,
+        const source = await refreshReport(page,date,report.timeoutSeconds*1000,report.product,
           kind === 'external' ? 'external' : report.layout,report.productAppId);
         stage = '读取和校验数据';
         console.log('正在读取和校验项目、媒体及指标');
-        data = await collect(page,config,date,kind === 'external');
+        data = await collect(page,config,date,source);
         if (day() !== runDay) throw new Error('取数期间跨过北京时间日期');
         break;
       } catch (error) {
