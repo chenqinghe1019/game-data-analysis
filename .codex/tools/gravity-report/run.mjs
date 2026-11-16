@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import path from 'node:path';
 import { createRequire } from 'node:module';
-import { pathToFileURL } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { configPath, defaults, externalConfigPath, iaaConfigPath, loadConfig } from './config.mjs';
 import { readLogin } from './login.mjs';
 import { externalPeriod, externalWorkbookName, parseTaHourly, parseTaPaidHourly, readTaHourly, updateExternalHourly, writeExternalHourly } from './external-hourly.mjs';
@@ -715,15 +715,17 @@ async function connectExistingChrome(chromium) {
 }
 
 async function main(kind) {
+  const backup = process.argv[2] === '--backup';
+  const appendBackup = backup && process.argv[4] === '--append-to-history';
+  if (backup && kind !== 'external') throw new Error('该备用入口仅用于外部小时报');
+  if (appendBackup && process.argv.length > 5) throw new Error('写入累计小时报时不能另指定输出路径');
   const projectFiles = {iaa:iaaConfigPath,external:externalConfigPath};
-  const file = process.env.GRAVITY_REPORT_CONFIG ?? projectFiles[kind] ?? configPath;
+  const file = appendBackup ? externalConfigPath : process.env.GRAVITY_REPORT_CONFIG ?? projectFiles[kind] ?? configPath;
   const config = await loadConfig(file,kind);
   if (!config.report.url) throw new Error('请先在播报后台保存报表配置');
   const {report,project} = config;
-  const backup = process.argv[2] === '--backup';
   let mediaUrl;
   if (backup) {
-    if (kind !== 'external') throw new Error('该备用入口仅用于外部小时报');
     const media = URL.parse(process.argv[3] ?? '');
     const [totalId,totalReport] = new URL(report.taUrl).hash.slice('#/tga/ide/'.length).split(/[?_]/);
     const match = media?.hash.match(/^#\/tga\/ide\/(\d+)_(\d+)(?:\?fromPanel=\d+_\d+)?$/);
@@ -746,19 +748,29 @@ async function main(kind) {
   const hour = slot?.slice(11) ?? new Intl.DateTimeFormat('en-GB', {
     timeZone:'Asia/Shanghai',hour:'2-digit',hourCycle:'h23',
   }).format(new Date());
-  const fullDay = Boolean(slot && hour === '00');
+  const fullDay = (Boolean(slot) || appendBackup) && hour === '00';
   const date = fullDay ? previousDay(runDay) : runDay;
-  const preview = backup || process.argv[3] === '--preview';
-  const webhook = preview ? undefined : process.env.GRAVITY_WECOM_WEBHOOK;
+  const preview = backup ? !appendBackup : process.argv[3] === '--preview';
+  const webhook = preview || backup ? undefined : process.env.GRAVITY_WECOM_WEBHOOK;
   const rootOutput = path.join('outputs','gravity-wecom');
   const externalOutput = path.resolve(rootOutput,'external',externalWorkbookName);
-  const output = path.resolve(backup
-    ? process.argv[4] ?? path.join(rootOutput,'external',date+'_'+Date.now()+'_备用小时报.xlsx')
-    : process.argv[2] ?? (kind === 'external' && !preview ? externalOutput
-    : path.join(rootOutput,date+'_'+Date.now()+'.xlsx')));
+  let outputPath = process.argv[2] ?? (kind === 'external' && !preview ? externalOutput
+    : path.join(rootOutput,date+'_'+Date.now()+'.xlsx'));
+  if (appendBackup) {
+    outputPath = fileURLToPath(new URL('../../../outputs/gravity-wecom/external/'+externalWorkbookName,import.meta.url));
+  } else if (backup) {
+    outputPath = process.argv[4] ?? path.join(rootOutput,'external',date+'_'+Date.now()+'_备用小时报.xlsx');
+  }
+  const output = path.resolve(outputPath);
   if (path.extname(output).toLowerCase() !== '.xlsx') throw new Error('输出路径需以 .xlsx 结尾');
   if (kind === 'external' && preview && path.basename(output).toLowerCase() === externalWorkbookName.toLowerCase()) {
     throw new Error('请为格式预览使用单独的文件名，避免覆盖累计 Excel');
+  }
+  const archive = path.join(path.dirname(file),'hourly-snapshots.sqlite');
+  if (appendBackup) {
+    await fs.access(archive).catch(error => {
+      throw new Error('找不到原小时报的累计存档，请检查外部小时报配置',{cause:error});
+    });
   }
   const profile = process.env.GRAVITY_PROFILE ?? path.join(process.env.LOCALAPPDATA,'GravityWeComReport','Chrome');
   const reuse = report.browserMode === 'existing';
@@ -811,9 +823,10 @@ async function main(kind) {
       const cutoffHour = fullDay ? '24' : hour;
       const time = cutoffHour+':00';
       const period = previewCsv ? '数数导出快照' : externalPeriod(cutoffHour);
-      const snapshot = {date,time,period,ta,gravity:data,projectName:project.name,...(backup ? {paidTa} : {})};
+      const snapshot = {date,time,period,ta,gravity:data,projectName:project.name,
+        ...(backup ? {paidTa,backupPreview:preview} : {})};
       const png = preview ? await writeExternalHourly(snapshot,output,deps)
-        : await updateExternalHourly(snapshot,output,deps,path.join(path.dirname(file),'hourly-snapshots.sqlite'),config.schedule.startAt);
+        : await updateExternalHourly(snapshot,output,deps,archive,config.schedule.startAt);
       console.log(output);
       if (webhook) await sendWeComReport(webhook,png,'【外部小时报】'+date+' '+period+' · '+project.name);
       return;

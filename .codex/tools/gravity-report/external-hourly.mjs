@@ -197,7 +197,7 @@ export async function writeExternalHourly(snapshot, output, deps, snapshots = [s
   return png;
 }
 
-function buildExternalWorkbook(Workbook, snapshots, {gravity,projectName,template=false,paidTa}) {
+function buildExternalWorkbook(Workbook, snapshots, {gravity,projectName,template=false,paidTa,backupPreview=false}) {
   const wb = Workbook.create();
   const sheet = wb.worksheets.add('外部小时报');
   sheet.showGridLines = false;
@@ -205,8 +205,7 @@ function buildExternalWorkbook(Workbook, snapshots, {gravity,projectName,templat
     sheet.getRange(address).merge();
     sheet.getRange(address.split(':')[0]).values = [[text]];
   };
-  const backup = paidTa !== undefined;
-  merged('A1:R1',projectName+'｜外部小时报'+(backup ? '（备用）' : ''));
+  merged('A1:R1',projectName+'｜外部小时报'+(backupPreview ? '（备用）' : ''));
   for (const [address,label] of [
     ['A2:B2','时间'],['C2:E2','用户数'],['F2:H2','收入'],['I2:N2','买量'],['O2:P2','ROI'],['Q2:R2','留存'],
   ]) merged(address,label);
@@ -216,7 +215,7 @@ function buildExternalWorkbook(Workbook, snapshots, {gravity,projectName,templat
     ['日期','时间段','累计新进','累计活跃','累计付费','累计收入','当前 ARPU','付费率',
       '累计消耗','累计广告曝光','累计注册转化','人均注册成本','人均付费成本','新增首日人均付费次数',
       'ROI1','ROI(含自然量)','实时付费次留','实时注册次留'],
-    ...snapshots.map(({date,period,ta,paidTa,gravity:{paid,total}})=>{
+    ...snapshots.map(({date,period,ta,paidTa,backupPreview,gravity:{paid,total}})=>{
       const backupRow = paidTa !== undefined;
       const hasTaFrequency = ta.length>8;
       const payers = backupRow ? paidTa?.payers : ta[2];
@@ -226,7 +225,8 @@ function buildExternalWorkbook(Workbook, snapshots, {gravity,projectName,templat
         : registrations === undefined ? null : paid.registrationCost;
       const frequency = backupRow ? paidTa?.firstDayFrequency ?? null : hasTaFrequency ? ta[8] : paid?.frequency ?? null;
       return [
-        date,period.replace(/^截至北京时间 (\d{2}):\d{2}$/,(_,hour)=>externalPeriod(hour)),
+        date,period.replace(/^截至北京时间 (\d{2}):\d{2}$/,(_,hour)=>externalPeriod(hour))+
+          (backupRow && !backupPreview ? '（备用）' : ''),
         ...ta.slice(0,6),paid?.spend ?? null,paid?.impressions ?? null,registrations ?? null,
         regCost,payCost,frequency,
         paid?.roi ?? null,total?.roi ?? null,ta[6],ta[7],
@@ -240,7 +240,8 @@ function buildExternalWorkbook(Workbook, snapshots, {gravity,projectName,templat
     start=end;
   }
   const {paid,total} = gravity;
-  const sourceNote = backup ? '经营和留存取数数总表；买量注册和付费频次取数数分媒体。成本＝引力买量消耗 ÷ 数数买量人数；曝光及两种 ROI 取引力。'
+  const sourceNote = snapshots.some(row=>row.paidTa !== undefined)
+    ? '备用行的买量注册和付费频次取数数分媒体，成本按对应买量人数计算。经营与留存取数数总表。消耗、曝光及两种 ROI 取引力。'
     : '经营、留存与首日付费频次取数数。人均付费成本按非自然量消耗 ÷ 数数累计付费人数计算。ROI(含自然量) 取引力项目合计。历史日期仅显示 24 点汇总。';
   const missingNote = template ? ' 格式预览，数据待取。统计窗口从当天 00:00 开始。'
     : !total ? ' 本次取数时引力当日无记录。' : !paid ? ' 本次取数时引力当日无非自然量记录。' : '';
