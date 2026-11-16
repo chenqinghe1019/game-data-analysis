@@ -69,7 +69,7 @@ export function validateConfig(config, kind = 'gravity') {
     fields = Object.fromEntries(Object.keys(defaults.report.fields).map(key=>[key,report.fields?.[key]]));
   }
   if (external) {
-    fields = Object.fromEntries(['spend','impressions','payCost','frequency','roi']
+    fields = Object.fromEntries(['spend','impressions','roi']
       .map(key=>[key,report.fields?.[key]]));
     fields.registrations = externalRegistrationColumn;
   }
@@ -130,7 +130,7 @@ export async function loadConfig(file = configPath, kind = 'gravity') {
       return {...defaults,project:{name:externalName,groups:[]},schedule:{enabled:false,hours:[]},
         report:{...defaults.report,productAppId:'',taUrl:'',fields:{
           spend:'平台_消耗',impressions:'平台_展示数',registrations:externalRegistrationColumn,
-          payCost:'标准_首日付费成本',frequency:'首日付费频次',roi:'标准_首日付费ROI',
+          roi:'标准_首日付费ROI',
         }}};
     }
     if (error.code === 'ENOENT' && kind === 'tower') {

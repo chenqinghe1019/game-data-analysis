@@ -4,7 +4,8 @@ import {randomUUID} from 'node:crypto';
 import {createRequire} from 'node:module';
 import {pathToFileURL} from 'node:url';
 
-const taColumns = ['累计新进','累计活跃','累计付费人数','累计收入','当前 ARPU','付费率','付费次留','注册次留'];
+const taColumns = ['累计新进','累计活跃','累计付费人数','累计收入','当前 ARPU','付费率','付费次留','注册次留',
+  '首日付费玩家人均付费频次','首日付费玩家数'];
 export const externalWorkbookName = '外部小时报_累计.xlsx';
 
 export function externalPeriod(hour) {
@@ -32,7 +33,7 @@ export function parseTaHourly(csv, date) {
     }
     return numeric;
   });
-  const [newUsers,active,payers,revenue,arpu,payRate,payerRetention,registrationRetention] = values;
+  const [newUsers,active,payers,revenue,arpu,payRate,payerRetention,registrationRetention,firstDayFrequency,firstDayPayers] = values;
   if (![newUsers,active,payers].every(Number.isSafeInteger) || revenue === null) {
     throw new Error('数数新进、活跃、付费人数或收入缺失，或人数不是整数');
   }
@@ -44,7 +45,11 @@ export function parseTaHourly(csv, date) {
   if ([payerRetention,registrationRetention].some(value=>value !== null && value > 1)) {
     throw new Error('数数次留比例超出 0% 至 100%');
   }
-  return values;
+  if (!Number.isSafeInteger(firstDayPayers) || firstDayPayers > Math.min(newUsers,payers) ||
+      (firstDayPayers === 0 ? firstDayFrequency !== null : firstDayFrequency === null || firstDayFrequency < 1)) {
+    throw new Error('数数首日付费玩家数与付费频次不一致');
+  }
+  return values.slice(0,-1);
 }
 
 export async function readTaHourly(chromium, url, date, timeout, retries) {
@@ -167,13 +172,17 @@ function buildExternalWorkbook(Workbook, snapshots, {gravity,projectName,templat
     ['日期','时间段','累计新进','累计活跃','累计付费','累计收入','当前 ARPU','付费率',
       '累计消耗','累计广告曝光','累计注册转化','人均注册成本','人均付费成本','新增首日人均付费次数',
       'ROI1','ROI(含自然量)','实时付费次留','实时注册次留'],
-    ...snapshots.map(({date,period,ta,gravity:{paid,total}})=>[
-      date,period.replace(/^截至北京时间 (\d{2}):\d{2}$/,(_,hour)=>externalPeriod(hour)),
-      ...ta.slice(0,6),paid?.spend ?? null,paid?.impressions ?? null,paid?.tencentRegistrations ?? null,
-      paid?.tencentRegistrations === undefined ? null : paid.registrationCost,
-      paid?.payCost ?? null,paid?.frequency ?? null,
-      paid?.roi ?? null,total?.roi ?? null,ta[6],ta[7],
-    ]),
+    ...snapshots.map(({date,period,ta,gravity:{paid,total}})=>{
+      const hasTaFrequency = ta.length>8;
+      const payCost = hasTaFrequency ? (paid && ta[2]>0 ? paid.spend/ta[2] : null) : paid?.payCost ?? null;
+      return [
+        date,period.replace(/^截至北京时间 (\d{2}):\d{2}$/,(_,hour)=>externalPeriod(hour)),
+        ...ta.slice(0,6),paid?.spend ?? null,paid?.impressions ?? null,paid?.tencentRegistrations ?? null,
+        paid?.tencentRegistrations === undefined ? null : paid.registrationCost,
+        payCost,hasTaFrequency ? ta[8] : paid?.frequency ?? null,
+        paid?.roi ?? null,total?.roi ?? null,ta[6],ta[7],
+      ];
+    }),
   ];
   for (let start=0;start<snapshots.length;) {
     let end=start+1;
@@ -182,12 +191,14 @@ function buildExternalWorkbook(Workbook, snapshots, {gravity,projectName,templat
     start=end;
   }
   const {paid,total} = gravity;
-  const sourceNote = '经营与留存取数数同日行。买量和 ROI1 取引力非自然量。ROI(含自然量) 取引力项目合计。历史日期仅显示 24 点汇总。';
+  const sourceNote = '经营、留存与首日付费频次取数数。人均付费成本按非自然量消耗 ÷ 数数累计付费人数计算。ROI(含自然量) 取引力项目合计。历史日期仅显示 24 点汇总。';
   const missingNote = template ? ' 格式预览，数据待取。统计窗口从当天 00:00 开始。'
     : !total ? ' 本次取数时引力当日无记录。' : !paid ? ' 本次取数时引力当日无非自然量记录。' : '';
   const legacyNote = snapshots.some(row=>row.gravity.paid && row.gravity.paid.tencentRegistrations === undefined)
     ? ' 旧口径的注册指标留空。' : '';
-  merged('A'+footer+':R'+footer,sourceNote+missingNote+legacyNote);
+  const oldPaymentNote = snapshots.some(row=>row.ta.length<=8 && row.gravity.paid)
+    ? ' 旧版快照的付费成本与频次保留归档值。' : '';
+  merged('A'+footer+':R'+footer,sourceNote+missingNote+legacyNote+oldPaymentNote);
   const all = sheet.getRange('A1:R'+footer);
   all.format.font = {name:'Microsoft YaHei',size:11,color:'#223046'};
   all.format.rowHeight = 26;

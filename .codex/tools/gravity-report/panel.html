@@ -52,6 +52,7 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#f4f8fc;padding:12px;
 <section class="card" id="taSection" hidden aria-labelledby="taTitle">
 <h2 id="taTitle">数数报表参数</h2><div id="taReport"></div>
 <p>填写已保存的数数 SQL 报表链接。首次取数前，运行 start-external-ta.ps1 并在打开的 Chrome 中登录数数。</p>
+<p>新增首日付费频次取数数「首日付费玩家人均付费频次」。人均付费成本按引力非自然量消耗 ÷ 数数累计付费人数计算。</p>
 </section>
 <section class="card"><h2>项目配置参数</h2><div id="project"></div>
 <h3>播报分组</h3><p>每个分组可组合多个引力项目。</p>
@@ -88,8 +89,7 @@ const apiPrefix = location.pathname.replace(/\/$/,'');
 const isIaa = apiPrefix === '/iaa';
 const isExternal = apiPrefix === '/external';
 const fieldLabels = isExternal
-  ? {spend:'累计消耗',impressions:'累计广告曝光',
-    payCost:'人均付费成本',frequency:'新增首日人均付费次数',roi:'首日付费 ROI'}
+  ? {spend:'累计消耗',impressions:'累计广告曝光',roi:'首日付费 ROI'}
   : isIaa
   ? {spend:'消耗对应的引力原表列名'}
   : {spend:'消耗',activations:'激活数',activationCost:'激活成本',payers:'首日付费人数',payCost:'首付成本',revenue:'首日付费金额',roi:'ROI'};
