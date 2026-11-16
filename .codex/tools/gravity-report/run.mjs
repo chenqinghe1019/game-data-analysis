@@ -5,7 +5,7 @@ import { createRequire } from 'node:module';
 import { pathToFileURL } from 'node:url';
 import { configPath, defaults, externalConfigPath, iaaConfigPath, loadConfig } from './config.mjs';
 import { readLogin } from './login.mjs';
-import { externalPeriod, externalWorkbookName, parseTaHourly, readTaHourly, updateExternalHourly, writeExternalHourly } from './external-hourly.mjs';
+import { externalPeriod, externalWorkbookName, parseTaHourly, parseTaPaidHourly, readTaHourly, updateExternalHourly, writeExternalHourly } from './external-hourly.mjs';
 
 const root = '.el-table-v2__root';
 const timeout = 120_000;
@@ -465,6 +465,7 @@ export async function collect(page, {report,project} = defaults, expectedDay = d
       paidTotal = filtered.total;
     }
     if (!paidTotal) return {total,paid:null};
+    if (!report.fields.registrations) return {total,paid:paidTotal};
     const {registrations:tencentRegistrations,...metrics} = paidTotal;
     if (!Number.isSafeInteger(tencentRegistrations) || tencentRegistrations<0) {
       throw new Error('引力非自然量的腾讯注册人数须为非负整数');
@@ -719,12 +720,26 @@ async function main(kind) {
   const config = await loadConfig(file,kind);
   if (!config.report.url) throw new Error('请先在播报后台保存报表配置');
   const {report,project} = config;
+  const backup = process.argv[2] === '--backup';
+  let mediaUrl;
+  if (backup) {
+    if (kind !== 'external') throw new Error('该备用入口仅用于外部小时报');
+    const media = URL.parse(process.argv[3] ?? '');
+    const [totalId,totalReport] = new URL(report.taUrl).hash.slice('#/tga/ide/'.length).split(/[?_]/);
+    const match = media?.hash.match(/^#\/tga\/ide\/(\d+)_(\d+)(?:\?fromPanel=\d+_\d+)?$/);
+    if (!media || media.origin !== 'https://ta-data.feiyu.com' || media.username || media.password ||
+        media.pathname !== '/' || media.search || match?.[1] !== totalId || match[2] === totalReport) {
+      throw new Error('请填写与数数总表同项目的分媒体 SQL 报表地址');
+    }
+    mediaUrl = media.href;
+    delete report.fields.registrations;
+  }
   const deps = process.env.GRAVITY_NODE_MODULES ?? path.join(process.env.USERPROFILE,
     '.cache','codex-runtimes','codex-primary-runtime','dependencies','node','node_modules');
   const require = createRequire(path.join(deps,'package.json'));
   const {chromium} = require('playwright');
   const runDay = day();
-  const slot = process.env.GRAVITY_REPORT_SLOT;
+  const slot = backup ? undefined : process.env.GRAVITY_REPORT_SLOT;
   if (slot && (!/^\d{4}-\d{2}-\d{2}T(?:[01]\d|2[0-3])$/.test(slot) || slot.slice(0,10) !== runDay)) {
     throw new Error('定时任务时点与当前报表日期不符');
   }
@@ -733,11 +748,13 @@ async function main(kind) {
   }).format(new Date());
   const fullDay = Boolean(slot && hour === '00');
   const date = fullDay ? previousDay(runDay) : runDay;
-  const preview = process.argv[3] === '--preview';
+  const preview = backup || process.argv[3] === '--preview';
   const webhook = preview ? undefined : process.env.GRAVITY_WECOM_WEBHOOK;
   const rootOutput = path.join('outputs','gravity-wecom');
   const externalOutput = path.resolve(rootOutput,'external',externalWorkbookName);
-  const output = path.resolve(process.argv[2] ?? (kind === 'external' && !preview ? externalOutput
+  const output = path.resolve(backup
+    ? process.argv[4] ?? path.join(rootOutput,'external',date+'_'+Date.now()+'_备用小时报.xlsx')
+    : process.argv[2] ?? (kind === 'external' && !preview ? externalOutput
     : path.join(rootOutput,date+'_'+Date.now()+'.xlsx')));
   if (path.extname(output).toLowerCase() !== '.xlsx') throw new Error('输出路径需以 .xlsx 结尾');
   if (kind === 'external' && preview && path.basename(output).toLowerCase() === externalWorkbookName.toLowerCase()) {
@@ -781,14 +798,20 @@ async function main(kind) {
     }
     if (kind === 'external') {
       console.log('正在读取数数每日累计指标');
-      const previewCsv = preview ? process.argv[4] : undefined;
+      const previewCsv = preview && !backup ? process.argv[4] : undefined;
       const ta = previewCsv ? parseTaHourly(await fs.readFile(previewCsv,'utf8'),date)
         : await readTaHourly(chromium,report.taUrl,date,report.timeoutSeconds*1000,report.retries);
+      let paidTa;
+      if (backup) {
+        console.log('正在读取数数分媒体买量指标');
+        paidTa = await readTaHourly(chromium,mediaUrl,date,report.timeoutSeconds*1000,report.retries,parseTaPaidHourly);
+        if (!paidTa) console.warn('数数分媒体当日没有非自然量记录，买量注册和付费相关字段留空');
+      }
       if (day() !== runDay) throw new Error('取数期间跨过北京时间日期');
       const cutoffHour = fullDay ? '24' : hour;
       const time = cutoffHour+':00';
       const period = previewCsv ? '数数导出快照' : externalPeriod(cutoffHour);
-      const snapshot = {date,time,period,ta,gravity:data,projectName:project.name};
+      const snapshot = {date,time,period,ta,gravity:data,projectName:project.name,...(backup ? {paidTa} : {})};
       const png = preview ? await writeExternalHourly(snapshot,output,deps)
         : await updateExternalHourly(snapshot,output,deps,path.join(path.dirname(file),'hourly-snapshots.sqlite'),config.schedule.startAt);
       console.log(output);
