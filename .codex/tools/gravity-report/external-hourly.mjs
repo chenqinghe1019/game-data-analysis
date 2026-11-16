@@ -66,7 +66,7 @@ export async function readTaHourly(chromium, url, date, timeout, retries) {
         else await page.goto(url,{waitUntil:'commit',timeout});
         const calculate = page.getByRole('button',{name:'计算',exact:true});
         const result = page.getByRole('tabpanel',{name:'查询结果'});
-        const queryId = result.getByText(/^SQL_ID[：:]/).filter({visible:true});
+        const queryId = result.getByText(/^SQL_ID[：:]\s*\d{8}_\d{6}_[\w-]+$/).filter({visible:true});
         const queryError = result.getByText(/SQLException|查询失败|计算失败/).filter({visible:true});
         const download = result.getByRole('button',{name:'全量下载',exact:true});
         await calculate.waitFor({timeout:Math.min(timeout,30_000)});
