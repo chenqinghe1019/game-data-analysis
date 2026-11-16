@@ -817,7 +817,7 @@ async function main(kind) {
       if (day() !== runDay) throw new Error('取数期间跨过北京时间日期');
       const period = previewCsv ? '数数导出快照' : externalPeriod(cutoffHour);
       const snapshot = {date,time,period,ta,gravity:data,projectName:project.name,
-        ...(mediaUrl ? {paidTa,backupPreview:preview} : {})};
+        ...(mediaUrl ? {paidTa} : {})};
       const png = preview ? await writeExternalHourly(snapshot,output,deps)
         : await updateExternalHourly(snapshot,output,deps,archive,config.schedule.startAt);
       console.log(output);
