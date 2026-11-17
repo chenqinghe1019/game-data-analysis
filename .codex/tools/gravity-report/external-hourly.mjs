@@ -276,7 +276,7 @@ export async function writeExternalHourly(snapshot, output, deps, snapshots = [s
   const totals=externalTotals(visible,baseline);
   const all = buildExternalWorkbook(Workbook,visible,snapshot,totals);
   const preview = daily.length === visible.length ? all : buildExternalWorkbook(Workbook,daily,snapshot,totals);
-  const png = Buffer.from(await (await preview.render({sheetName:'外部小时报',range:'A1:V'+(daily.length+6),headers:false,scale:1})).arrayBuffer());
+  const png = Buffer.from(await (await preview.render({sheetName:'外部小时报',range:'A1:V'+(daily.length+4),headers:false,scale:1})).arrayBuffer());
   await fs.mkdir(path.dirname(output),{recursive:true});
   const pending = output.slice(0,-5)+'.'+randomUUID()+'.xlsx';
   try {
@@ -334,7 +334,6 @@ function buildExternalWorkbook(Workbook, snapshots, {projectName}, totals) {
       '消耗 ÷ 买量注册','消耗 ÷ 首日付费人数\n（仅媒体）','自 16 日累计',null,null,null,null],
   ];
   const last = snapshots.length+4;
-  const footer = last+2;
   if (snapshots.length) sheet.getRange('A5:V'+last).values = snapshots.map(row=>{
       const {date,period,ta,paidTa,gravity:{paid,total}}=row;
       const [newUsers,active,payers,revenue,arpu,payRate,payerRetention,registrationRetention,frequency,firstDayAmount]=ta;
@@ -358,8 +357,7 @@ function buildExternalWorkbook(Workbook, snapshots, {projectName}, totals) {
     if (end>start+1) merged('A'+(start+5)+':A'+(end+4),snapshots[start].date);
     start=end;
   }
-  merged('A'+footer+':V'+footer,'底档的人均付费成本沿用原值。留存取数数总表，次日每次取数更新前一天 24 点行。跨日后仅展示历史日期的 24 点汇总。');
-  const all = sheet.getRange('A1:V'+footer);
+  const all = sheet.getRange('A1:V'+last);
   all.format.font = {name:'Microsoft YaHei',size:11,color:'#223046'};
   all.format.rowHeight = 26;
   all.format.verticalAlignment = 'center';
