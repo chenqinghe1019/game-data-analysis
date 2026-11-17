@@ -8,6 +8,7 @@ import {clearLogin,loginStatus,saveLogin} from './login.mjs';
 import {readWebhook,saveWebhook,webhookStatus} from './webhook.mjs';
 import {gameProjects,gravityProject,projectScript} from './game-projects.mjs';
 import {externalWorkbookName} from './external-hourly.mjs';
+import {claimExternalAttempt,externalAttemptTimeout} from './external-retry.mjs';
 
 const host = '127.0.0.1';
 const port = Number(process.env.GRAVITY_PANEL_PORT ?? 8731);
@@ -33,9 +34,10 @@ async function logEvent(event, details = {}) {
   }
 }
 
-function startJob(project, webhook, slot = null) {
+function startJob(project, webhook, slot = null, retry = null) {
   const push = Boolean(webhook);
   const job = {state:'running',log:'',startedAt:new Date().toISOString(),push,slot};
+  if (retry) job.attempt=retry.attempt;
   jobs.set(project.id,job);
   const env = {...process.env,GRAVITY_REPORT_CONFIG:project.config,GRAVITY_LOGIN_CONFIG:configPath};
   env.GRAVITY_REPORT_KIND = project.id;
@@ -45,12 +47,17 @@ function startJob(project, webhook, slot = null) {
   else delete env.GRAVITY_REPORT_SLOT;
   const directory = project === gravityProject ? outputDirectory : path.join(outputDirectory,project.id);
   const output = path.join(directory,project.id === 'external' ? externalWorkbookName : Date.now()+'.xlsx');
-  const child = spawn(process.execPath,[projectScript(project).entry,output],{env,windowsHide:true,timeout:20*60*1000});
-  void logEvent('job-started',{project:project.id,slot,push,startedAt:job.startedAt});
+  const child = spawn(process.execPath,[projectScript(project).entry,output],{env,windowsHide:true,
+    timeout:retry ? externalAttemptTimeout : 20*60*1000});
+  void logEvent('job-started',{project:project.id,slot,push,startedAt:job.startedAt,...(retry ? {attempt:retry.attempt} : {})});
   const append = message => { job.log = (job.log+message).slice(-10000); };
   for (const stream of [child.stdout,child.stderr]) stream.setEncoding('utf8').on('data',append);
   child.once('error',error => append('无法启动脚本：'+error.message));
-  child.once('close',(code,signal) => {
+  child.once('close',async (code,signal) => {
+    if (retry) {
+      try { await retry.finish(code === 0); }
+      catch (error) { append('无法保存重试状态：'+error.message+'\n'); }
+    }
     job.state = code === 0 ? 'success' : 'failed';
     job.finishedAt = new Date().toISOString();
     if (code === 0) job.output = output;
@@ -78,8 +85,11 @@ async function checkSchedule() {
         const directory = path.join(path.dirname(project.config),'sent-slots');
         await mkdir(directory,{recursive:true});
         // Claim before launching so a restart cannot send the same project and slot twice.
-        await writeFile(path.join(directory,slot),'started\n',{flag:'wx'});
-        startJob(project,webhook,slot);
+        const retry=project.id === 'external' ? await claimExternalAttempt(directory,slot) : null;
+        if (project.id === 'external') {
+          if (!retry) continue;
+        } else await writeFile(path.join(directory,slot),'started\n',{flag:'wx'});
+        startJob(project,webhook,slot,retry);
         return;
       } catch (error) {
         if (error.code === 'EEXIST') continue;

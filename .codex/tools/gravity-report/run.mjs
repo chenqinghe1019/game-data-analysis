@@ -6,6 +6,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { configPath, defaults, externalConfigPath, iaaConfigPath, loadConfig, validateTaMediaUrl } from './config.mjs';
 import { readLogin } from './login.mjs';
 import { externalPeriod, externalWorkbookName, parseTaHourly, parseTaPaidHourly, readTaDashboard, readTaHourly, updateExternalHourly, writeExternalHourly } from './external-hourly.mjs';
+import { externalDelivery } from './external-retry.mjs';
 
 const root = '.el-table-v2__root';
 const timeout = 120_000;
@@ -653,24 +654,29 @@ export async function writeWorkbook(rows, date, output, deps, renderImage = fals
   return screenshot ? Buffer.from(await screenshot.arrayBuffer()) : null;
 }
 
-export async function sendWeComReport(webhook, screenshot, title) {
+export async function sendWeComReport(webhook, screenshot, title, delivery) {
   const target = new URL(webhook);
   if (target.origin !== 'https://qyapi.weixin.qq.com' ||
       target.pathname !== '/cgi-bin/webhook/send' || !target.searchParams.get('key')) {
     throw new Error('企微 Webhook 地址无效');
   }
-  if (!screenshot.length || screenshot.length > 2 * 1024 * 1024) {
+  const imageSent=await delivery?.status('image') === 'sent';
+  if (!imageSent && (!screenshot.length || screenshot.length > 2 * 1024 * 1024)) {
     throw new Error('企微截图为空或超过 2 MB');
   }
   const messages = [
-    {msgtype:'image',image:{
+    ...(!imageSent ? [{msgtype:'image',image:{
       base64:screenshot.toString('base64'),
       md5:createHash('md5').update(screenshot).digest('hex'),
-    }},
+    }}] : []),
     {msgtype:'text',text:{content:title}},
   ];
   for (const message of messages) {
     const label = message.msgtype === 'image' ? '截图' : '标题';
+    const status=await delivery?.status(message.msgtype);
+    if (status === 'sent') continue;
+    if (status !== undefined) throw new Error('企微'+label+'上一笔请求结果未确认，已暂停重发');
+    await delivery?.begin(message.msgtype);
     let result;
     try {
       const response = await fetch(target, {
@@ -679,10 +685,15 @@ export async function sendWeComReport(webhook, screenshot, title) {
       });
       if (!response.ok) throw new Error('HTTP ' + response.status);
       result = await response.json();
+      if (!Number.isInteger(result?.errcode)) throw new Error('企微响应缺少结果');
     } catch {
       throw new Error('企微' + label + '请求结果无法确认');
     }
-    if (result.errcode !== 0) throw new Error('企微' + label + '发送失败，错误码 ' + result.errcode);
+    if (result.errcode !== 0) {
+      await delivery?.rejected(message.msgtype);
+      throw new Error('企微' + label + '发送失败，错误码 ' + result.errcode);
+    }
+    await delivery?.sent(message.msgtype);
     console.log('企微' + label + '发送成功');
   }
 }
@@ -764,6 +775,14 @@ async function main(kind) {
     throw new Error('请为格式预览使用单独的文件名，避免覆盖累计 Excel');
   }
   const archive = path.join(path.dirname(file),'hourly-snapshots.sqlite');
+  const delivery=kind === 'external' && slot && webhook
+    ? externalDelivery(path.join(path.dirname(file),'sent-slots'),slot) : undefined;
+  const title='【外部小时报】'+date+' '+externalPeriod(cutoffHour)+' · '+project.name;
+  if (await delivery?.status('image') === 'sent') {
+    console.log('企微截图已有发送确认，本次只处理标题');
+    await sendWeComReport(webhook,Buffer.alloc(0),title,delivery);
+    return;
+  }
   if (appendBackup) {
     await fs.access(archive).catch(error => {
       throw new Error('找不到原小时报的累计存档，请检查外部小时报配置',{cause:error});
@@ -829,7 +848,7 @@ async function main(kind) {
       const png = preview ? await writeExternalHourly(snapshot,output,deps)
         : await updateExternalHourly(snapshot,output,deps,archive,config.schedule.startAt,previousRetention);
       console.log(output);
-      if (webhook) await sendWeComReport(webhook,png,'【外部小时报】'+date+' '+period+' · '+project.name);
+      if (webhook) await sendWeComReport(webhook,png,title,delivery);
       return;
     }
     const catalog = {date,reportUrl:report.url,product:report.product,

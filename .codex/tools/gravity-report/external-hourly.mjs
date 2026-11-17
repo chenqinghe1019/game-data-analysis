@@ -1,8 +1,11 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {randomUUID} from 'node:crypto';
+import {execFile} from 'node:child_process';
 import {createRequire} from 'node:module';
-import {pathToFileURL} from 'node:url';
+import {fileURLToPath,pathToFileURL} from 'node:url';
+import {promisify} from 'node:util';
+import {setTimeout as delay} from 'node:timers/promises';
 
 const taColumns = ['累计新进','累计活跃','累计付费人数','累计收入','当前 ARPU','付费率','付费次留','注册次留',
   '首日付费玩家人均付费频次','首日付费玩家数'];
@@ -111,13 +114,32 @@ export function parseTaPaidHourly(csv,date) {
     ambiguousFrequency:minRate !== maxRate};
 }
 
-export async function readTaHourly(chromium, url, date, timeout, retries, parse = parseTaHourly) {
-  let browser;
+async function connectTaBrowser(chromium,timeout) {
+  const endpoint='http://127.0.0.1:9223';
   try {
-    browser = await chromium.connectOverCDP('http://127.0.0.1:9223',{timeout:Math.min(timeout,10_000)});
+    return await chromium.connectOverCDP(endpoint,{timeout:Math.min(timeout,5000)});
   } catch {
-    throw new Error('数数 Chrome 未连接，请启动数数专用 Chrome 并登录');
+    console.warn('数数 Chrome 未连接，正在启动专用浏览器');
   }
+  try {
+    const bundled=path.resolve(path.dirname(process.execPath),'../../native/powershell/pwsh.exe');
+    const powershell=await fs.access(bundled).then(()=>bundled,()=> 'pwsh.exe');
+    await promisify(execFile)(powershell,['-NoProfile','-NonInteractive','-File',
+      fileURLToPath(new URL('./start-external-ta.ps1',import.meta.url)),'-Background'],
+    {windowsHide:true,timeout:15_000});
+  } catch (error) {
+    throw new Error('数数专用 Chrome 无法启动',{cause:error});
+  }
+  const deadline=Date.now()+20_000;
+  while (Date.now()<deadline) {
+    try { return await chromium.connectOverCDP(endpoint,{timeout:3000}); }
+    catch { await delay(1000); }
+  }
+  throw new Error('数数专用 Chrome 启动后仍未连接');
+}
+
+export async function readTaHourly(chromium, url, date, timeout, retries, parse = parseTaHourly) {
+  const browser=await connectTaBrowser(chromium,timeout);
   let page;
   try {
     const context = browser.contexts()[0];
@@ -160,13 +182,13 @@ export async function readTaHourly(chromium, url, date, timeout, retries, parse 
 }
 
 export async function readTaDashboard(chromium, report, date, timeout, retries) {
-  const browser = await chromium.connectOverCDP('http://127.0.0.1:9223',{timeout:Math.min(timeout,10_000)})
-    .catch(error=>{ throw new Error('数数 Chrome 未连接，请启动数数专用 Chrome 并登录',{cause:error}); });
+  const browser=await connectTaBrowser(chromium,timeout);
   let page;
   try {
     const context = browser.contexts()[0];
     if (!context) throw new Error('数数 Chrome 没有可用会话');
     page = await context.newPage();
+    await page.bringToFront();
     page.setDefaultTimeout(timeout);
     for (let attempt=0;attempt<=retries;attempt++) {
       try {
@@ -186,6 +208,8 @@ export async function readTaDashboard(chromium, report, date, timeout, retries) 
           await card.hover();
           const refresh=card.getByTestId(/--header--refresh-btn$/);
           await refresh.click();
+          await refresh.hover();
+          let nextHover=Date.now()+5000;
           while (true) {
             const pageText=await page.locator('body').innerText();
             const time=pageText.match(/最后更新时间[：:]\s*(\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2})/)?.[1];
@@ -193,6 +217,11 @@ export async function readTaDashboard(chromium, report, date, timeout, retries) 
             if (updatedAt>=refreshedAt-3000) break;
             if (Date.now()-refreshedAt>=timeout) {
               throw new Error('看板卡片「'+name+'」未更新到本次查询时间'+(time ? '（'+time+'）' : ''));
+            }
+            if (!time && Date.now()>=nextHover) {
+              await card.getByRole('link',{name,exact:true}).hover();
+              await refresh.hover();
+              nextHover=Date.now()+5000;
             }
             await page.waitForTimeout(1000);
           }

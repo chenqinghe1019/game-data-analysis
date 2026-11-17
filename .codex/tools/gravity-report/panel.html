@@ -317,6 +317,7 @@ async function updateJob() {
   get('status').textContent={idle:'就绪 · 首次运行时可在 Chrome 窗口登录',running:'运行中 · 请留意 Chrome 登录窗口',success:'运行完成',failed:'运行失败 · 请查看日志'}[job.state];
   if (busy && job.state!=='running') get('status').textContent += ' · 另一个项目正在取数';
   if (job.slot) get('status').textContent += ' · 定时 '+job.slot.replace('T',' ')+':00';
+  if (job.attempt>1) get('status').textContent += ' · 重试 '+(job.attempt-1)+'/2';
   get('log').textContent=job.log;
   get('log').hidden=!job.log;
   get('output').textContent=job.output??'';
