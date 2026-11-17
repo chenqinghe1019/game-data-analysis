@@ -325,7 +325,7 @@ function buildExternalWorkbook(Workbook, snapshots, {projectName}, totals) {
       '人均注册成本','人均付费成本','总累计消耗','ROI1\n（纯买量）','ROI1\n（含自然量）','实时付费次留','实时注册次留'],
     ['当日新进人数','当日活跃人数','当日付费人数','自 16 日累计','当日 IAP 收入','收入 ÷ 活跃','付费人数 ÷ 活跃',
       '新增付费次数 ÷\n新增付费人数','新增用户\n首日付费额','自 16 日累计','当日买量消耗','广告曝光次数','买量注册人数',
-      '消耗 ÷ 买量注册','消耗 ÷ 总付费人数\n含自然量','自 16 日累计',null,null,null,null],
+      '消耗 ÷ 买量注册','消耗 ÷ 总付费人数\n（仅媒体）','自 16 日累计',null,null,null,null],
   ];
   const last = snapshots.length+4;
   const footer = last+2;
@@ -335,12 +335,13 @@ function buildExternalWorkbook(Workbook, snapshots, {projectName}, totals) {
       const [totalNew,totalRevenue,totalSpend]=totals.get(row) ?? [null,null,null];
       const registrations = paidTa === undefined ? paid?.tencentRegistrations : paidTa?.registrations;
       const spend=paid?.spend ?? null;
+      const costPayers=row.baseline ? payers : paidTa?.payers;
       return [
         date,period.replace(/^截至北京时间 (\d{2}):\d{2}$/,(_,hour)=>externalPeriod(hour)),
         newUsers,active,payers,totalNew,revenue,arpu,payRate,frequency ?? null,firstDayAmount ?? null,totalRevenue,
         spend,paid?.impressions ?? null,registrations ?? null,
         spend !== null && registrations>0 ? spend/registrations : null,
-        spend !== null && payers>0 ? spend/payers : null,totalSpend,
+        spend !== null && costPayers>0 ? spend/costPayers : null,totalSpend,
         paid?.roi ?? null,total?.roi ?? null,payerRetention ?? null,registrationRetention ?? null,
       ];
     });
@@ -350,7 +351,7 @@ function buildExternalWorkbook(Workbook, snapshots, {projectName}, totals) {
     if (end>start+1) merged('A'+(start+5)+':A'+(end+4),snapshots[start].date);
     start=end;
   }
-  merged('A'+footer+':V'+footer,'留存取数数总表，次日每次取数更新前一天 24 点行。跨日后仅展示历史日期的 24 点汇总。');
+  merged('A'+footer+':V'+footer,'底档的人均付费成本沿用原值。留存取数数总表，次日每次取数更新前一天 24 点行。跨日后仅展示历史日期的 24 点汇总。');
   const all = sheet.getRange('A1:V'+footer);
   all.format.font = {name:'Microsoft YaHei',size:11,color:'#223046'};
   all.format.rowHeight = 26;
