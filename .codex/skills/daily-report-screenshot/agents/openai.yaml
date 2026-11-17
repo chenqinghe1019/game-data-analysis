@@ -1,0 +1,4 @@
+interface:
+  display_name: "日报 Excel 与截图"
+  short_description: "根据数据或现有模板生成 Excel 日报与表格截图，展示推送前预览"
+  default_prompt: "请使用 $daily-report-screenshot 根据我提供的数据生成 Excel 日报和 PNG 预览，不实际推送。"
