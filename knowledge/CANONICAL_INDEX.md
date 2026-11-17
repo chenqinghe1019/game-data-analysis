@@ -24,6 +24,7 @@ last_verified: 2026-10-08
 - [global/ta_analysis_foundations.md](global/ta_analysis_foundations.md)：数数分析主体、埋点、模型选择与新增留存
 - [global/ta_funnel_distribution.md](global/ta_funnel_distribution.md)：数数漏斗窗口、转化分母与分布区间
 - [global/ta_data_menu.md](global/ta_data_menu.md)：数数数据菜单、埋点查证与登录枚举
+- [global/ta_dashboard_migration.md](global/ta_dashboard_migration.md)：数数跨项目看板迁移、虚拟属性、用户标签与验收清理
 - global/payment_policy.md：支付金额、首日/累计付费、代币与去重
 - global/data_quality_playbook.md：异常排查手册
 - global/field_pitfalls.md：字段/事件/类型易错清单
@@ -36,6 +37,7 @@ last_verified: 2026-10-08
 - projects/baodanfeshe/FACTS.md
 - projects/jisuchongci/FACTS.md（极速冲刺：用户已确认 v39，埋点文档已整理）
 - projects/luobo4/FACTS.md
+- [projects/bietuiwodeta/FACTS.md](projects/bietuiwodeta/FACTS.md)：别推我的塔的现金与代金券口径、原生留存及首日付费分层
 
 ## 企微运营专题（2026-10-12）
 - [projects/game-community/WECOM_DASHBOARD.md](projects/game-community/WECOM_DASHBOARD.md)：项目35社区账号人数主体、分游戏数据源、好友指标忽略、比例四位小数及局部维护约束；下方了与一步两步均已实施账号主体变更；各看板布局和日期设置保持其各自范围。
