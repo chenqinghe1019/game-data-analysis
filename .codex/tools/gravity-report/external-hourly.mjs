@@ -349,7 +349,7 @@ function buildExternalWorkbook(Workbook, snapshots, {projectName}, totals) {
         displayAmount(spend),paid?.impressions ?? null,registrations ?? null,
         spend !== null && registrations>0 ? spend/registrations : null,
         spend !== null && costPayers>0 ? spend/costPayers : null,displayAmount(totalSpend),
-        paid?.roi ?? null,total?.roi ?? null,payerRetention ?? null,registrationRetention ?? null,
+        paid?.roi ?? '-',total?.roi ?? '-',payerRetention ?? '-',registrationRetention ?? '-',
       ];
     });
   for (let start=0;start<snapshots.length;) {
