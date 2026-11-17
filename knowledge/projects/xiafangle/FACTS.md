@@ -15,6 +15,10 @@ last_verified: 2026-10-13
 - 跨渠道唯一玩家：nb_open_id
 - payment：pay_log.payment，单位分，/100 转元
 
+## SLG 上线及商品配置复盘
+
+- [SLG 活跃付费与回访口径](SLG_REVIEW.md) 适用于项目 41 的 SLG 大盘、礼包和回访分析。
+
 ## 主线
 - battle_type=1
 - 开始事件：battle_star

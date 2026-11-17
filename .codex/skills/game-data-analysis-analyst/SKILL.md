@@ -149,6 +149,11 @@ description: Analyze game product and operations data for the 倍特工作室 pr
 - 跨服务器整体指标按人数/金额加权；不能直接平均每服 LTV、ARPU 或留存率。
 - 版本测试对比要保证日期、成熟样本、渠道、平台和付费层口径一致；启动、首战、引导、关卡等链路要分节点比较，不把总体转化差异直接归因于单一节点。
 
+### 下方了 SLG 上线与商品配置复盘
+
+- 优先使用 [SLG 活跃付费与回访口径](../../../knowledge/projects/xiafangle/SLG_REVIEW.md) 中的正式 TA 报表入口。复拉前核对批次、实际日期、商品配置和窗口成熟度。
+- 分析及 Excel 交付按 [分析经验](references/analysis-lessons.md) 的「看板复拉、付费权重与回访复盘」执行。
+
 ### 英雄上阵与付费分层
 - 战斗总场次按账号 + battle_uid 等稳定战斗键去重；英雄上阵场次也按同一战斗键去重，不以英雄明细行数代替战斗数。
 - 上阵率分子与分母应使用同一战斗总体。
