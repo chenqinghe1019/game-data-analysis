@@ -5,7 +5,7 @@ import { createRequire } from 'node:module';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { configPath, defaults, externalConfigPath, iaaConfigPath, loadConfig, validateTaMediaUrl } from './config.mjs';
 import { readLogin } from './login.mjs';
-import { externalPeriod, externalWorkbookName, parseTaHourly, parseTaPaidHourly, readTaHourly, updateExternalHourly, writeExternalHourly } from './external-hourly.mjs';
+import { externalPeriod, externalWorkbookName, parseTaHourly, parseTaPaidHourly, readTaDashboard, readTaHourly, updateExternalHourly, writeExternalHourly } from './external-hourly.mjs';
 
 const root = '.el-table-v2__root';
 const timeout = 120_000;
@@ -724,8 +724,10 @@ async function main(kind) {
   const config = await loadConfig(file,kind);
   if (!config.report.url) throw new Error('请先在播报后台保存报表配置');
   const {report,project} = config;
-  const mediaUrl = backupCli ? validateTaMediaUrl(process.argv[3],report.taUrl) : report.taMediaUrl;
-  if (mediaUrl) delete report.fields.registrations;
+  const dashboard = Boolean(report.taPanelUrl);
+  const mediaUrl = dashboard ? '' : backupCli ? validateTaMediaUrl(process.argv[3],report.taUrl) : report.taMediaUrl;
+  const fromMedia = dashboard || Boolean(mediaUrl);
+  if (fromMedia) delete report.fields.registrations;
   const deps = process.env.GRAVITY_NODE_MODULES ?? path.join(process.env.USERPROFILE,
     '.cache','codex-runtimes','codex-primary-runtime','dependencies','node','node_modules');
   const require = createRequire(path.join(deps,'package.json'));
@@ -738,7 +740,7 @@ async function main(kind) {
   const hour = slot?.slice(11) ?? new Intl.DateTimeFormat('en-GB', {
     timeZone:'Asia/Shanghai',hour:'2-digit',hourCycle:'h23',
   }).format(new Date());
-  const fullDay = (Boolean(slot) || appendBackup || (kind === 'external' && !backupCli && Boolean(mediaUrl))) && hour === '00';
+  const fullDay = (Boolean(slot) || appendBackup || (!backupCli && fromMedia)) && hour === '00';
   const date = fullDay ? previousDay(runDay) : runDay;
   const preview = backupCli ? !appendBackup : process.argv[3] === '--preview';
   const webhook = preview || backupCli ? undefined : process.env.GRAVITY_WECOM_WEBHOOK;
@@ -804,20 +806,26 @@ async function main(kind) {
       }
     }
     if (kind === 'external') {
-      console.log('正在读取数数每日累计指标');
-      const previewCsv = preview && !backupCli ? process.argv[4] : undefined;
-      const ta = previewCsv ? parseTaHourly(await fs.readFile(previewCsv,'utf8'),date)
-        : await readTaHourly(chromium,report.taUrl,date,report.timeoutSeconds*1000,report.retries);
-      let paidTa;
-      if (mediaUrl) {
-        console.log('正在读取数数分媒体买量指标');
-        paidTa = await readTaHourly(chromium,mediaUrl,date,report.timeoutSeconds*1000,report.retries,parseTaPaidHourly);
-        if (!paidTa) console.warn('数数分媒体当日没有非自然量记录，买量注册和付费相关字段留空');
+      const previewCsv = preview && !backupCli && !dashboard ? process.argv[4] : undefined;
+      const taTimeout = report.timeoutSeconds*1000;
+      let ta,paidTa;
+      if (dashboard) {
+        console.log('正在从数数看板导出总表和分媒体数据');
+        ({ta,paidTa} = await readTaDashboard(chromium,report,date,taTimeout,report.retries));
+      } else {
+        console.log('正在读取数数每日累计指标');
+        ta = previewCsv ? parseTaHourly(await fs.readFile(previewCsv,'utf8'),date)
+          : await readTaHourly(chromium,report.taUrl,date,taTimeout,report.retries);
+        if (mediaUrl) {
+          console.log('正在读取数数分媒体买量指标');
+          paidTa = await readTaHourly(chromium,mediaUrl,date,taTimeout,report.retries,parseTaPaidHourly);
+        }
       }
+      if (fromMedia && !paidTa) console.warn('数数分媒体当日没有非自然量记录，买量注册和付费相关字段留空');
       if (day() !== runDay) throw new Error('取数期间跨过北京时间日期');
       const period = previewCsv ? '数数导出快照' : externalPeriod(cutoffHour);
       const snapshot = {date,time,period,ta,gravity:data,projectName:project.name,
-        ...(mediaUrl ? {paidTa} : {})};
+        ...(fromMedia ? {paidTa} : {})};
       const png = preview ? await writeExternalHourly(snapshot,output,deps)
         : await updateExternalHourly(snapshot,output,deps,archive,config.schedule.startAt);
       console.log(output);

@@ -348,16 +348,22 @@ try {
     get('pageTitle').textContent='外部小时报';
     document.title='外部小时报 · 企微播报';
     get('pageDescription').textContent='合并数数经营与留存、引力买量与 ROI。当天显示各时点，历史日期仅显示 24 点汇总。';
-    input(get('taReport'),'数数 SQL 报表地址','taUrl',report.taUrl??'');
-    input(get('taReport'),'备用口径的数数分媒体报表地址','taMediaUrl',report.taMediaUrl??'');
+    input(get('taReport'),'数数看板地址','taPanelUrl',report.taPanelUrl??'');
+    input(get('taReport'),'总表卡片名称','taTotalCard',report.taTotalCard??'每日累计指标');
+    input(get('taReport'),'分媒体卡片名称','taMediaCard',report.taMediaCard??'【分媒体】每日累计指标');
+    if (!report.taPanelUrl && report.taUrl) {
+      input(get('taReport'),'数数 SQL 报表地址','taUrl',report.taUrl);
+      input(get('taReport'),'数数分媒体 SQL 报表地址','taMediaUrl',report.taMediaUrl??'');
+    }
     get('taSection').hidden=false;
     get('externalRegistrationHint').hidden=false;
-    const mediaField=get('taReport').querySelector('[data-key="taMediaUrl"]');
+    const taFields=get('taReport');
     const updateRegistrationSource=()=>{
-      get('externalRegistrationSource').textContent=mediaField.value.trim()
-        ? '数数分媒体累计新进（排除自然量）' : '引力「'+report.fields.registrations+'」';
+      const {taPanelUrl,taMediaUrl}=values(taFields);
+      get('externalRegistrationSource').textContent=taPanelUrl.trim() || taMediaUrl?.trim()
+        ? '数数看板的分媒体累计新进（排除自然量）' : '引力「'+report.fields.registrations+'」';
     };
-    mediaField.addEventListener('input',updateRegistrationSource);
+    taFields.addEventListener('input',updateRegistrationSource);
     updateRegistrationSource();
     get('scheduleStartField').hidden=false;
     get('scheduleStart').value=schedule.startAt??'';

@@ -143,6 +143,64 @@ export async function readTaHourly(chromium, url, date, timeout, retries, parse 
   }
 }
 
+export async function readTaDashboard(chromium, report, date, timeout, retries) {
+  const browser = await chromium.connectOverCDP('http://127.0.0.1:9223',{timeout:Math.min(timeout,10_000)})
+    .catch(error=>{ throw new Error('数数 Chrome 未连接，请启动数数专用 Chrome 并登录',{cause:error}); });
+  let page;
+  try {
+    const context = browser.contexts()[0];
+    if (!context) throw new Error('数数 Chrome 没有可用会话');
+    page = await context.newPage();
+    page.setDefaultTimeout(timeout);
+    for (let attempt=0;attempt<=retries;attempt++) {
+      try {
+        await page.goto(report.taPanelUrl,{waitUntil:'domcontentloaded',timeout});
+        const query=page.getByRole('button',{name:'查询',exact:true});
+        await query.waitFor({timeout:Math.min(timeout,30_000)});
+        if (page.url() !== report.taPanelUrl) throw new Error('数数未进入指定看板');
+        // Query using the dashboard's saved filters, then export each card's own current results.
+        await query.click();
+        const results=[];
+        for (const [name,parse] of [[report.taTotalCard,parseTaHourly],[report.taMediaCard,parseTaPaidHourly]]) {
+          const card=page.getByTestId(/^panel-report-card-\d+$/)
+            .filter({has:page.getByRole('link',{name,exact:true})});
+          await card.waitFor({timeout:Math.min(timeout,30_000)});
+          await card.locator('canvas').first().waitFor({timeout});
+          const refreshedAt=Date.now();
+          await card.hover();
+          const refresh=card.getByTestId(/--header--refresh-btn$/);
+          await refresh.click();
+          while (true) {
+            const pageText=await page.locator('body').innerText();
+            const time=pageText.match(/最后更新时间[：:]\s*(\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2})/)?.[1];
+            const updatedAt=Date.parse(time?.replace(/\s+/,'T')+'+08:00');
+            if (updatedAt>=refreshedAt-3000) break;
+            if (Date.now()-refreshedAt>=timeout) {
+              throw new Error('看板卡片「'+name+'」未更新到本次查询时间'+(time ? '（'+time+'）' : ''));
+            }
+            await page.waitForTimeout(1000);
+          }
+          await card.getByTestId(/--header--more-menu-btn$/).click();
+          const item=page.getByRole('menuitem',{name:'数据导出',exact:true}).filter({visible:true});
+          const [download]=await Promise.all([page.waitForEvent('download',{timeout}),item.click()]);
+          const filename=await download.path();
+          if (!filename || !download.suggestedFilename().toLowerCase().endsWith('.csv')) {
+            throw new Error('看板卡片「'+name+'」没有导出 CSV');
+          }
+          results.push(parse(await fs.readFile(filename,'utf8'),date));
+        }
+        return {ta:results[0],paidTa:results[1]};
+      } catch (error) {
+        if (attempt === retries) throw error;
+        console.warn('数数看板取数失败，重新打开看板后重试：'+error.message.split('\n')[0]);
+      }
+    }
+  } finally {
+    if (page) await page.close().catch(()=>{});
+    await browser.close();
+  }
+}
+
 export async function updateExternalHourly(snapshot, output, deps, archive, startAt = '') {
   const {date,time} = snapshot;
   if (date+'T'+time < startAt) throw new Error('该快照早于外部小时报的正式首报时点');

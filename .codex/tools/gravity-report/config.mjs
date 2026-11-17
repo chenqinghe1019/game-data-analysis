@@ -107,17 +107,30 @@ export function validateConfig(config, kind = 'gravity') {
   const productAppId = report.productAppId ?? '';
   if ((external || kind === 'tower') && !draft && !/^\d+$/.test(productAppId)) throw new Error('请填写引力产品 APPID');
   const taUrl = report.taUrl ?? '';
-  if (external && (taUrl || !draft)) {
+  const taPanelUrl = external ? report.taPanelUrl ?? '' : '';
+  if (taPanelUrl) {
+    const panel = typeof taPanelUrl === 'string' ? URL.parse(taPanelUrl) : null;
+    if (!panel || panel.origin !== 'https://ta-data.feiyu.com' || panel.username || panel.password ||
+        panel.pathname !== '/' || panel.search || !/^#\/panel\/panel\/\d+_\d+_\d+$/.test(panel.hash)) {
+      throw new Error('请填写数数看板地址');
+    }
+  } else if (external && (taUrl || !draft)) {
     const ta = URL.parse(taUrl);
     if (!ta || ta.origin !== 'https://ta-data.feiyu.com' || ta.username || ta.password ||
         !/^#\/tga\/ide\/\d+_\d+(?:\?fromPanel=\d+_\d+)?$/.test(ta.hash)) {
       throw new Error('请填写数数 SQL 报表地址');
     }
   }
-  const taMediaUrl = external && report.taMediaUrl ? validateTaMediaUrl(report.taMediaUrl,taUrl) : '';
+  const taMediaUrl = !taPanelUrl && external && report.taMediaUrl ? validateTaMediaUrl(report.taMediaUrl,taUrl) : '';
+  const taTotalCard = report.taTotalCard ?? '每日累计指标';
+  const taMediaCard = report.taMediaCard ?? '【分媒体】每日累计指标';
+  if (taPanelUrl && (![taTotalCard,taMediaCard].every(validText) || taTotalCard === taMediaCard)) {
+    throw new Error('数数总表与分媒体卡片需要填写不同的卡片名称');
+  }
   return {...config,report:{url:reportUrl,title,product,timeoutSeconds,retries,browserMode,
     fields,spendUnit,...(external || kind === 'tower' ? {productAppId} : {}),
-    ...(external ? {taUrl,taMediaUrl} : {}),...(metrics ? {metrics,layout} : {})},
+    ...(external ? (taPanelUrl ? {taPanelUrl,taTotalCard,taMediaCard} : {taUrl,taMediaUrl}) : {}),
+    ...(metrics ? {metrics,layout} : {})},
     project:{name:project.name,groups:project.groups.map(group=>({name:group.name,
       projects:group.projects.map(({name,id})=>({name,id})),
     }))},schedule:external ? {...schedule,startAt} : schedule};
