@@ -12,7 +12,7 @@ export function externalPeriod(hour) {
   return '截至北京时间 '+Number(hour)+' 点';
 }
 
-function readTaDate(csv, date, labels) {
+function readTaDate(csv, date, labels, optionalDate = false) {
   const rows = csv.replace(/^\uFEFF/,'').trimEnd().split(/\r?\n/).map(line=>
     line.split(',').map(cell=>cell.trim().replace(/^"(.*)"$/,'$1')));
   const [headers,...data] = rows;
@@ -22,7 +22,7 @@ function readTaDate(csv, date, labels) {
     return index;
   });
   const matches = data.filter(row=>row[indexes[0]] === date);
-  if (!matches.length || matches.some(row=>row.length !== headers.length)) {
+  if ((!optionalDate && !matches.length) || matches.some(row=>row.length !== headers.length)) {
     throw new Error('数数缺少完整的 '+date+' 数据');
   }
   return matches.map(row=>indexes.slice(1).map(index=>row[index]));
@@ -37,11 +37,13 @@ function taNumber(value,label) {
   return numeric;
 }
 
-export function parseTaHourly(csv, date) {
-  const matches = readTaDate(csv,date,taColumns);
+export function parseTaHourly(csv, date, {includeFirstDayAmount=false,optionalDate=false} = {}) {
+  const labels=includeFirstDayAmount ? [...taColumns,'首日付费金额'] : taColumns;
+  const matches = readTaDate(csv,date,labels,optionalDate);
+  if (!matches.length) return null;
   if (matches.length !== 1) throw new Error('数数查询结果没有唯一的 '+date+' 数据行');
-  const values = matches[0].map((value,index)=>taNumber(value,taColumns[index]));
-  const [newUsers,active,payers,revenue,arpu,payRate,payerRetention,registrationRetention,firstDayFrequency,firstDayPayers] = values;
+  const values = matches[0].map((value,index)=>taNumber(value,labels[index]));
+  const [newUsers,active,payers,revenue,arpu,payRate,payerRetention,registrationRetention,firstDayFrequency,firstDayPayers,firstDayAmount] = values;
   if (![newUsers,active,payers].every(Number.isSafeInteger) || revenue === null) {
     throw new Error('数数新进、活跃、付费人数或收入缺失，或人数不是整数');
   }
@@ -57,7 +59,15 @@ export function parseTaHourly(csv, date) {
       (firstDayPayers === 0 ? firstDayFrequency !== null : firstDayFrequency === null || firstDayFrequency < 1)) {
     throw new Error('数数首日付费玩家数与付费频次不一致');
   }
-  return values.slice(0,-1);
+  if (includeFirstDayAmount && (firstDayAmount === null || firstDayAmount > revenue+0.01 ||
+      (firstDayPayers === 0 && firstDayAmount !== 0))) {
+    throw new Error('数数首日付费金额缺失或与累计收入、首日付费人数不一致');
+  }
+  return includeFirstDayAmount ? [...values.slice(0,9),firstDayAmount] : values.slice(0,9);
+}
+
+function shiftDate(date,days) {
+  return new Date(Date.parse(date+'T00:00:00Z')+days*86_400_000).toISOString().slice(0,10);
 }
 
 export function parseTaPaidHourly(csv,date) {
@@ -161,7 +171,7 @@ export async function readTaDashboard(chromium, report, date, timeout, retries) 
         // Query using the dashboard's saved filters, then export each card's own current results.
         await query.click();
         const results=[];
-        for (const [name,parse] of [[report.taTotalCard,parseTaHourly],[report.taMediaCard,parseTaPaidHourly]]) {
+        for (const name of [report.taTotalCard,report.taMediaCard]) {
           const card=page.getByTestId(/^panel-report-card-\d+$/)
             .filter({has:page.getByRole('link',{name,exact:true})});
           await card.waitFor({timeout:Math.min(timeout,30_000)});
@@ -187,9 +197,13 @@ export async function readTaDashboard(chromium, report, date, timeout, retries) 
           if (!filename || !download.suggestedFilename().toLowerCase().endsWith('.csv')) {
             throw new Error('看板卡片「'+name+'」没有导出 CSV');
           }
-          results.push(parse(await fs.readFile(filename,'utf8'),date));
+          results.push(await fs.readFile(filename,'utf8'));
         }
-        return {ta:results[0],paidTa:results[1]};
+        const previousDate=shiftDate(date,-1);
+        const previous= parseTaHourly(results[0],previousDate,{optionalDate:true});
+        return {ta:parseTaHourly(results[0],date,{includeFirstDayAmount:true}),
+          paidTa:parseTaPaidHourly(results[1],date),
+          previousRetention:previous ? {date:previousDate,payer:previous[6],registration:previous[7]} : undefined};
       } catch (error) {
         if (attempt === retries) throw error;
         console.warn('数数看板取数失败，重新打开看板后重试：'+error.message.split('\n')[0]);
@@ -201,9 +215,9 @@ export async function readTaDashboard(chromium, report, date, timeout, retries) 
   }
 }
 
-export async function updateExternalHourly(snapshot, output, deps, archive, startAt = '') {
+export async function updateExternalHourly(snapshot, output, deps, archive, startAt = '', previousRetention) {
   const {date,time} = snapshot;
-  if (date+'T'+time < startAt) throw new Error('该快照早于外部小时报的正式首报时点');
+  if (!snapshot.baseline && date+'T'+time < startAt) throw new Error('该快照早于外部小时报的正式首报时点');
   const [firstDate,firstTime=''] = startAt.split('T');
   const {DatabaseSync} = await import('node:sqlite');
   await fs.mkdir(path.dirname(archive),{recursive:true});
@@ -211,14 +225,31 @@ export async function updateExternalHourly(snapshot, output, deps, archive, star
   try {
     db.exec(`PRAGMA busy_timeout=30000;
       CREATE TABLE IF NOT EXISTS snapshots (date TEXT, time TEXT, payload TEXT NOT NULL, PRIMARY KEY(date,time))`);
-    db.prepare(`INSERT INTO snapshots VALUES (?, ?, ?) ON CONFLICT(date,time) DO UPDATE SET payload=excluded.payload`)
-      .run(date,time,JSON.stringify(snapshot));
+    db.exec('BEGIN IMMEDIATE');
+    if (time === '24:00' && !snapshot.baseline) {
+      const prior=db.prepare("SELECT payload FROM snapshots WHERE date=? AND time='24:00'").get(date);
+      if (prior && JSON.parse(prior.payload).baseline) throw new Error('该日期的 24 点行已设为底档');
+    }
+    const save=db.prepare(`INSERT INTO snapshots VALUES (?, ?, ?) ON CONFLICT(date,time) DO UPDATE SET payload=excluded.payload`);
+    save.run(date,time,JSON.stringify(snapshot));
+    if (previousRetention) {
+      const {date:priorDate,payer,registration}=previousRetention;
+      const previous=db.prepare("SELECT payload FROM snapshots WHERE date=? AND time='24:00'").get(priorDate);
+      if (previous && (payer != null || registration != null)) {
+        const row=JSON.parse(previous.payload);
+        row.ta[6]=payer ?? row.ta[6];
+        row.ta[7]=registration ?? row.ta[7];
+        save.run(priorDate,'24:00',JSON.stringify(row));
+      }
+    }
     // Keep the saved snapshot even if Excel has the destination file open.
     // Serialize workbook replacements so an older export cannot replace a newer one.
+    db.exec('COMMIT');
     db.exec('BEGIN IMMEDIATE');
-    const rows = db.prepare('SELECT payload FROM snapshots WHERE (date,time) >= (?,?) ORDER BY date,time')
-      .all(firstDate,firstTime).map(({payload})=>JSON.parse(payload));
-    const png = await writeExternalHourly(snapshot,output,deps,rows);
+    const current = db.prepare(`SELECT payload FROM snapshots WHERE (date,time) >= (?,?)
+      OR json_extract(payload,'$.baseline')=1 ORDER BY date,time`).all(firstDate,firstTime)
+      .map(({payload})=>JSON.parse(payload));
+    const png = await writeExternalHourly(snapshot,output,deps,current);
     db.exec('COMMIT');
     return png;
   } finally {
@@ -230,15 +261,16 @@ export async function writeExternalHourly(snapshot, output, deps, snapshots = [s
   const require = createRequire(path.join(deps,'package.json'));
   const {Workbook,SpreadsheetFile} = await import(pathToFileURL(require.resolve('@oai/artifact-tool')).href);
   const latestDate = snapshots.reduce((latest,row)=>row.date > latest ? row.date : latest,snapshot.date);
-  const settledDates = new Set(snapshots.filter(row=>row.time === '24:00').map(row=>row.date));
-  const visible = snapshots.filter(row=>row.time === '24:00' ||
-    (row.date === latestDate && !settledDates.has(row.date)));
-  const previousDate = new Date(Date.parse(snapshot.date+'T00:00:00Z')-86_400_000).toISOString().slice(0,10);
-  const daily = visible.filter(row=>row.date === snapshot.date ||
-    (snapshot.time !== '24:00' && row.date === previousDate && row.time === '24:00'));
-  const all = buildExternalWorkbook(Workbook,visible,snapshot);
-  const preview = daily.length === visible.length ? all : buildExternalWorkbook(Workbook,daily,snapshot);
-  const png = Buffer.from(await (await preview.render({sheetName:'外部小时报',range:'A1:R'+(daily.length+5),headers:false,scale:1})).arrayBuffer());
+  const baseline = snapshots.find(row=>row.baseline);
+  const visible = snapshots.filter(row=>
+    (!baseline || row.date > baseline.date || (row.date === baseline.date && row.time >= baseline.time)) &&
+    (row.time === '24:00' || row.date === latestDate));
+  const previousDate=shiftDate(snapshot.date,-1);
+  const daily = visible.filter(row=>row.date === snapshot.date || (row.date === previousDate && row.time === '24:00'));
+  const totals=externalTotals(visible,baseline);
+  const all = buildExternalWorkbook(Workbook,visible,snapshot,totals);
+  const preview = daily.length === visible.length ? all : buildExternalWorkbook(Workbook,daily,snapshot,totals);
+  const png = Buffer.from(await (await preview.render({sheetName:'外部小时报',range:'A1:V'+(daily.length+6),headers:false,scale:1})).arrayBuffer());
   await fs.mkdir(path.dirname(output),{recursive:true});
   const pending = output.slice(0,-5)+'.'+randomUUID()+'.xlsx';
   try {
@@ -255,7 +287,25 @@ export async function writeExternalHourly(snapshot, output, deps, snapshots = [s
   return png;
 }
 
-function buildExternalWorkbook(Workbook, snapshots, {gravity,projectName,template=false,paidTa}) {
+function externalTotals(rows,baseline) {
+  const daily = row=>[row.ta[0],row.ta[3],row.gravity.paid?.spend ?? (row.gravity.total ? 0 : null)];
+  const closed = new Map(rows.filter(row=>row.time === '24:00').map(row=>[row.date,daily(row)]));
+  const totals = new Map();
+  if (!baseline) return totals;
+  let sum=[0,0,0];
+  let date=baseline.date;
+  for (const row of rows) {
+    while (date < row.date) {
+      const final=closed.get(date) ?? [];
+      sum=sum.map((value,i)=>Number.isFinite(value) && Number.isFinite(final[i]) ? value+final[i] : null);
+      date=shiftDate(date,1);
+    }
+    totals.set(row,sum.map((value,i)=>Number.isFinite(value) && Number.isFinite(daily(row)[i]) ? value+daily(row)[i] : null));
+  }
+  return totals;
+}
+
+function buildExternalWorkbook(Workbook, snapshots, {projectName}, totals) {
   const wb = Workbook.create();
   const sheet = wb.worksheets.add('外部小时报');
   sheet.showGridLines = false;
@@ -263,72 +313,72 @@ function buildExternalWorkbook(Workbook, snapshots, {gravity,projectName,templat
     sheet.getRange(address).merge();
     sheet.getRange(address.split(':')[0]).values = [[text]];
   };
-  merged('A1:R1',projectName+'｜外部小时报');
+  merged('A1:V1',projectName+'｜外部小时报');
   for (const [address,label] of [
-    ['A2:B2','时间'],['C2:E2','用户数'],['F2:H2','收入'],['I2:N2','买量'],['O2:P2','ROI'],['Q2:R2','留存'],
+    ['A2:B2','时间'],['C2:F2','用户'],['G2:L2','付费'],['M2:R2','买量'],['S2:T2','ROI'],['U2:V2','留存'],
   ]) merged(address,label);
-  const last = snapshots.length+3;
+  merged('A3:A4','日期');
+  merged('B3:B4','时间段');
+  sheet.getRange('C3:V4').values=[
+    ['当日累计新进','当日累计活跃','当日累计付费','总累计新进','当日累计收入','当前 ARPU','付费率',
+      '新增首日人均\n付费次数','新增首日付费\n金额','总累计收入','累计消耗','累计广告曝光','累计注册转化',
+      '人均注册成本','人均付费成本','总累计消耗','ROI1\n（纯买量）','ROI1\n（含自然量）','实时付费次留','实时注册次留'],
+    ['当日新进人数','当日活跃人数','当日付费人数','自 16 日累计','当日 IAP 收入','收入 ÷ 活跃','付费人数 ÷ 活跃',
+      '新增付费次数 ÷\n新增付费人数','新增用户\n首日付费额','自 16 日累计','当日买量消耗','广告曝光次数','买量注册人数',
+      '消耗 ÷ 买量注册','消耗 ÷ 总付费人数\n含自然量','自 16 日累计',null,null,null,null],
+  ];
+  const last = snapshots.length+4;
   const footer = last+2;
-  sheet.getRange('A3:R'+last).values = [
-    ['日期','时间段','累计新进','累计活跃','累计付费','累计收入','当前 ARPU','付费率',
-      '累计消耗','累计广告曝光','累计注册转化','人均注册成本','人均付费成本','新增首日人均付费次数',
-      'ROI1','ROI(含自然量)','实时付费次留','实时注册次留'],
-    ...snapshots.map(({date,period,ta,paidTa,gravity:{paid,total}})=>{
-      const backupRow = paidTa !== undefined;
-      const hasTaFrequency = ta.length>8;
-      const payers = backupRow ? paidTa?.payers : ta[2];
-      const payCost = backupRow || hasTaFrequency ? (paid && payers>0 ? paid.spend/payers : null) : paid?.payCost ?? null;
-      const registrations = backupRow ? paidTa?.registrations : paid?.tencentRegistrations;
-      const regCost = backupRow ? (paid && registrations>0 ? paid.spend/registrations : null)
-        : registrations === undefined ? null : paid.registrationCost;
-      const frequency = backupRow ? paidTa?.firstDayFrequency ?? null : hasTaFrequency ? ta[8] : paid?.frequency ?? null;
+  if (snapshots.length) sheet.getRange('A5:V'+last).values = snapshots.map(row=>{
+      const {date,period,ta,paidTa,gravity:{paid,total}}=row;
+      const [newUsers,active,payers,revenue,arpu,payRate,payerRetention,registrationRetention,frequency,firstDayAmount]=ta;
+      const [totalNew,totalRevenue,totalSpend]=totals.get(row) ?? [null,null,null];
+      const registrations = paidTa === undefined ? paid?.tencentRegistrations : paidTa?.registrations;
+      const spend=paid?.spend ?? null;
       return [
         date,period.replace(/^截至北京时间 (\d{2}):\d{2}$/,(_,hour)=>externalPeriod(hour)),
-        ...ta.slice(0,6),paid?.spend ?? null,paid?.impressions ?? null,registrations ?? null,
-        regCost,payCost,frequency,
-        paid?.roi ?? null,total?.roi ?? null,ta[6],ta[7],
+        newUsers,active,payers,totalNew,revenue,arpu,payRate,frequency ?? null,firstDayAmount ?? null,totalRevenue,
+        spend,paid?.impressions ?? null,registrations ?? null,
+        spend !== null && registrations>0 ? spend/registrations : null,
+        spend !== null && payers>0 ? spend/payers : null,totalSpend,
+        paid?.roi ?? null,total?.roi ?? null,payerRetention ?? null,registrationRetention ?? null,
       ];
-    }),
-  ];
+    });
   for (let start=0;start<snapshots.length;) {
     let end=start+1;
     while (end<snapshots.length && snapshots[end].date === snapshots[start].date) end++;
-    if (end>start+1) merged('A'+(start+4)+':A'+(end+3),snapshots[start].date);
+    if (end>start+1) merged('A'+(start+5)+':A'+(end+4),snapshots[start].date);
     start=end;
   }
-  const {paid,total} = gravity;
-  const sourceNote = snapshots.some(row=>row.paidTa !== undefined)
-    ? '买量注册和付费频次取数数分媒体，成本按对应买量人数计算。经营与留存取数数总表。消耗、曝光及两种 ROI 取引力。'
-    : '经营、留存与首日付费频次取数数。人均付费成本按非自然量消耗 ÷ 数数累计付费人数计算。ROI(含自然量) 取引力项目合计。历史日期仅显示 24 点汇总。';
-  const missingNote = template ? ' 格式预览，数据待取。统计窗口从当天 00:00 开始。'
-    : !total ? ' 本次取数时引力当日无记录。' : !paid ? ' 本次取数时引力当日无非自然量记录。' : '';
-  const legacyNote = snapshots.some(row=>row.paidTa === undefined && row.gravity.paid && row.gravity.paid.tencentRegistrations === undefined)
-    ? ' 旧口径的注册指标留空。' : '';
-  const oldPaymentNote = snapshots.some(row=>row.ta.length<=8 && row.gravity.paid)
-    ? ' 旧版快照的付费成本与频次保留归档值。' : '';
-  const attributionNote = paidTa === null ? ' 数数无非自然量媒体，相关指标留空。'
-    : paidTa?.ambiguousFrequency ? ' 分媒体频次精度不足，首日付费频次留空。' : '';
-  merged('A'+footer+':R'+footer,sourceNote+missingNote+legacyNote+oldPaymentNote+attributionNote);
-  const all = sheet.getRange('A1:R'+footer);
+  merged('A'+footer+':V'+footer,'留存取数数总表，次日每次取数更新前一天 24 点行。跨日后仅展示历史日期的 24 点汇总。');
+  const all = sheet.getRange('A1:V'+footer);
   all.format.font = {name:'Microsoft YaHei',size:11,color:'#223046'};
   all.format.rowHeight = 26;
   all.format.verticalAlignment = 'center';
-  const title = sheet.getRange('A1:R1');
-  title.format.fill = '#EAF2FF';
+  const title = sheet.getRange('A1:V1');
+  title.format.fill = '#EFF6FC';
   title.format.font = {name:'Microsoft YaHei',size:15,bold:true,color:'#163761'};
   title.format.rowHeight = 34;
-  const table = sheet.getRange('A2:R'+last);
+  const table = sheet.getRange('A2:V'+last);
   table.format.horizontalAlignment = 'center';
   table.format.borders = {preset:'all',style:'thin',color:'#C2CBD5'};
-  const header = sheet.getRange('A2:R3');
-  header.format.fill = '#414141';
+  const header = sheet.getRange('A2:V3');
+  sheet.getRange('A2:V2').format.fill = '#00A5E6';
+  sheet.getRange('A3:V4').format.fill = '#7DBFE7';
   header.format.font = {name:'Microsoft YaHei',size:11,bold:true,color:'#FFFFFF'};
-  header.format.rowHeight = 30;
-  sheet.getRange('A4:R'+last).format.fill = '#F3F7FC';
-  for (const column of ['F','G','I','L','M','N']) sheet.getRange(column+'4:'+column+last).setNumberFormat('#,##0.00');
-  for (const column of ['H','O','P','Q','R']) sheet.getRange(column+'4:'+column+last).setNumberFormat('0.00%');
-  for (const column of ['C','D','E','J','K']) sheet.getRange(column+'4:'+column+last).setNumberFormat('#,##0');
-  [105,150,84,84,84,90,91,72,90,110,110,112,112,181,70,120,109,109].forEach((width,index)=>{
+  sheet.getRange('A3:V4').format.wrapText = true;
+  sheet.getRange('A3:V4').format.rowHeightPx = 38;
+  sheet.getRange('A4:V4').format.font = {name:'Microsoft YaHei',size:9,color:'#173B56'};
+  if (snapshots.length) {
+    sheet.getRange('A5:V'+last).format.fill = '#FFFFFF';
+    snapshots.forEach((row,index)=>{
+      if (row.baseline) for (const column of ['O','Q']) sheet.getRange(column+(index+5)).format.fill='#90DDF5';
+    });
+    for (const column of ['G','H','J','K','L','M','P','Q','R']) sheet.getRange(column+'5:'+column+last).setNumberFormat('#,##0.00');
+    for (const column of ['I','S','T','U','V']) sheet.getRange(column+'5:'+column+last).setNumberFormat('0.00%');
+    for (const column of ['C','D','E','F','N','O']) sheet.getRange(column+'5:'+column+last).setNumberFormat('#,##0');
+  }
+  [105,150,108,108,108,103,111,94,78,112,112,105,105,112,112,115,120,105,92,98,108,108].forEach((width,index)=>{
     const column = String.fromCharCode(65+index);
     sheet.getRange(column+':'+column).format.columnWidthPx = width;
   });
