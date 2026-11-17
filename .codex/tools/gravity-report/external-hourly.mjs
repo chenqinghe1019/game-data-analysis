@@ -107,7 +107,7 @@ export function parseTaPaidHourly(csv,date) {
   if ([...seen].every(name=>name === '自然量')) return null;
   const minRate = newPayers ? Math.round(minEvents*100/newPayers)/100 : null;
   const maxRate = newPayers ? Math.round(maxEvents*100/newPayers)/100 : null;
-  return {registrations,payers,firstDayFrequency:minRate === maxRate ? minRate : null,
+  return {registrations,payers,firstDayPayers:newPayers,firstDayFrequency:minRate === maxRate ? minRate : null,
     ambiguousFrequency:minRate !== maxRate};
 }
 
@@ -331,7 +331,7 @@ function buildExternalWorkbook(Workbook, snapshots, {projectName}, totals) {
       '人均注册成本','人均付费成本','总累计消耗','ROI1\n（纯买量）','ROI1\n（含自然量）','实时付费次留','实时注册次留'],
     ['当日新进人数','当日活跃人数','当日付费人数','自 16 日累计','当日 IAP 收入','收入 ÷ 活跃','付费人数 ÷ 活跃',
       '新增付费次数 ÷\n新增付费人数','新增用户\n首日付费额','自 16 日累计','当日买量消耗','广告曝光次数','买量注册人数',
-      '消耗 ÷ 买量注册','消耗 ÷ 总付费人数\n（仅媒体）','自 16 日累计',null,null,null,null],
+      '消耗 ÷ 买量注册','消耗 ÷ 首日付费人数\n（仅媒体）','自 16 日累计',null,null,null,null],
   ];
   const last = snapshots.length+4;
   const footer = last+2;
@@ -341,7 +341,7 @@ function buildExternalWorkbook(Workbook, snapshots, {projectName}, totals) {
       const [totalNew,totalRevenue,totalSpend]=totals.get(row) ?? [null,null,null];
       const registrations = paidTa === undefined ? paid?.tencentRegistrations : paidTa?.registrations;
       const spend=paid?.spend ?? null;
-      const costPayers=row.baseline ? payers : paidTa?.payers;
+      const costPayers=row.baseline ? payers : paidTa?.firstDayPayers;
       return [
         date,period.replace(/^截至北京时间 (\d{2}):\d{2}$/,(_,hour)=>externalPeriod(hour)),
         newUsers,active,payers,totalNew,displayAmount(revenue),arpu,payRate,frequency ?? null,
