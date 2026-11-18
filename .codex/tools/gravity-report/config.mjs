@@ -124,12 +124,17 @@ export function validateConfig(config, kind = 'gravity') {
   const taMediaUrl = !taPanelUrl && external && report.taMediaUrl ? validateTaMediaUrl(report.taMediaUrl,taUrl) : '';
   const taTotalCard = report.taTotalCard ?? '每日累计指标';
   const taMediaCard = report.taMediaCard ?? '【分媒体】每日累计指标';
+  const pushTitleTemplate=report.pushTitleTemplate ?? '【{项目}】{日期} {时段}';
+  if (external && (!validText(pushTitleTemplate) ||
+      /\{[^{}]*\}/g.test(pushTitleTemplate.replace(/\{(项目|日期|时段)\}/g,'')))) {
+    throw new Error('推送文本模板最多 160 字，变量支持 {项目}、{日期}、{时段}');
+  }
   if (taPanelUrl && (![taTotalCard,taMediaCard].every(validText) || taTotalCard === taMediaCard)) {
     throw new Error('数数总表与分媒体卡片需要填写不同的卡片名称');
   }
   return {...config,report:{url:reportUrl,title,product,timeoutSeconds,retries,browserMode,
     fields,spendUnit,...(external || kind === 'tower' ? {productAppId} : {}),
-    ...(external ? (taPanelUrl ? {taPanelUrl,taTotalCard,taMediaCard} : {taUrl,taMediaUrl}) : {}),
+    ...(external ? {pushTitleTemplate,...(taPanelUrl ? {taPanelUrl,taTotalCard,taMediaCard} : {taUrl,taMediaUrl})} : {}),
     ...(metrics ? {metrics,layout} : {})},
     project:{name:project.name,groups:project.groups.map(group=>({name:group.name,
       projects:group.projects.map(({name,id})=>({name,id})),

@@ -5,7 +5,7 @@ import { createRequire } from 'node:module';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { configPath, defaults, externalConfigPath, iaaConfigPath, loadConfig, validateTaMediaUrl } from './config.mjs';
 import { readLogin } from './login.mjs';
-import { externalPeriod, externalWorkbookName, parseTaHourly, parseTaPaidHourly, readTaDashboard, readTaHourly, updateExternalHourly, writeExternalHourly } from './external-hourly.mjs';
+import { externalPeriod, externalPushTitle, externalWorkbookName, parseTaHourly, parseTaPaidHourly, readTaDashboard, readTaHourly, updateExternalHourly, writeExternalHourly } from './external-hourly.mjs';
 import { externalDelivery } from './external-retry.mjs';
 
 const root = '.el-table-v2__root';
@@ -777,7 +777,7 @@ async function main(kind) {
   const archive = path.join(path.dirname(file),'hourly-snapshots.sqlite');
   const delivery=kind === 'external' && slot && webhook
     ? externalDelivery(path.join(path.dirname(file),'sent-slots'),slot) : undefined;
-  const title='【外部小时报】'+date+' '+externalPeriod(cutoffHour)+' · '+project.name;
+  const title=kind === 'external' ? externalPushTitle(report.pushTitleTemplate,project.name,date,cutoffHour) : '';
   if (await delivery?.status('image') === 'sent') {
     console.log('企微截图已有发送确认，本次只处理标题');
     await sendWeComReport(webhook,Buffer.alloc(0),title,delivery);

@@ -408,6 +408,8 @@ try {
     }
   });
   for(const [key,label] of Object.entries(reportLabels)) input(get('report'),label,key,report[key]??'',{wide:key==='url'});
+  if (isExternal) input(get('report'),'推送文本模板（支持 {项目}、{日期}、{时段}）',
+    'pushTitleTemplate',report.pushTitleTemplate??'【{项目}】{日期} {时段}',{wide:true});
   const browserMode=get('browserMode');
   browserMode.value=report.browserMode;
   const updateBrowserHint=()=>{get('browserHint').hidden=browserMode.value!=='existing';};

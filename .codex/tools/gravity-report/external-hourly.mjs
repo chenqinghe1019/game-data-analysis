@@ -21,6 +21,11 @@ export function externalPeriod(hour) {
   return '截至北京时间 '+Number(hour)+' 点';
 }
 
+export function externalPushTitle(template,project,date,hour) {
+  const values={项目:project,日期:date,时段:externalPeriod(hour)};
+  return template.replace(/\{(项目|日期|时段)\}/g,(_,key)=>values[key]);
+}
+
 function readTaDate(csv, date, labels, optionalDate = false) {
   const rows = csv.replace(/^\uFEFF/,'').trimEnd().split(/\r?\n/).map(line=>
     line.split(',').map(cell=>cell.trim().replace(/^"(.*)"$/,'$1')));
@@ -300,12 +305,9 @@ export async function writeExternalHourly(snapshot, output, deps, snapshots = [s
   const visible = snapshots.filter(row=>
     (!baseline || row.date > baseline.date || (row.date === baseline.date && row.time >= baseline.time)) &&
     (row.time === '24:00' || row.date === latestDate));
-  const previousDate=shiftDate(snapshot.date,-1);
-  const daily = visible.filter(row=>row.date === snapshot.date || (row.date === previousDate && row.time === '24:00'));
   const totals=externalTotals(visible,baseline);
   const all = buildExternalWorkbook(Workbook,visible,snapshot,totals);
-  const preview = daily.length === visible.length ? all : buildExternalWorkbook(Workbook,daily,snapshot,totals);
-  const png = Buffer.from(await (await preview.render({sheetName:'外部小时报',range:'A1:V'+(daily.length+4),headers:false,scale:1})).arrayBuffer());
+  const png = Buffer.from(await (await all.render({sheetName:'外部小时报',range:'A1:V'+(visible.length+4),headers:false,scale:1})).arrayBuffer());
   await fs.mkdir(path.dirname(output),{recursive:true});
   const pending = output.slice(0,-5)+'.'+randomUUID()+'.xlsx';
   try {
