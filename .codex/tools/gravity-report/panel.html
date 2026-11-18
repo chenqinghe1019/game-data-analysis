@@ -285,13 +285,15 @@ function formConfig() {
   });
   const report={...values(get('report')),fields:values(get('fields')),browserMode:get('browserMode').value,
     spendUnit:get('spendUnit')?.value};
+  const projectName=isExternal ? report.broadcastProjectName : values(get('project')).name;
+  delete report.broadcastProjectName;
   if (isExternal) Object.assign(report,values(get('taReport')));
   if (isIaa) {
     report.metrics=Array.from(get('metrics').children,values);
     report.layout=get('reportLayout').value;
   }
   return {report,
-    project:{...values(get('project')),groups},
+    project:{...values(get('project')),name:projectName,groups},
     schedule:{enabled:get('hourlyEnabled').checked,
       ...(isExternal ? {startAt:get('scheduleStart').value} : {}),
       hours:[...get('hours').querySelectorAll('input:checked')].map(input=>Number(input.value))}};
@@ -408,8 +410,10 @@ try {
     }
   });
   for(const [key,label] of Object.entries(reportLabels)) input(get('report'),label,key,report[key]??'',{wide:key==='url'});
-  if (isExternal) input(get('report'),'推送文本模板（支持 {项目}、{日期}、{时段}）',
-    'pushTitleTemplate',report.pushTitleTemplate??'【{项目}】{日期} {时段}',{wide:true});
+  if (isExternal) {
+    input(get('report'),'播报项目名称','broadcastProjectName',project.name);
+    get('project').closest('section').hidden=true;
+  }
   const browserMode=get('browserMode');
   browserMode.value=report.browserMode;
   const updateBrowserHint=()=>{get('browserHint').hidden=browserMode.value!=='existing';};
@@ -435,7 +439,7 @@ try {
       get('fields').append(wrapper);
     }
   }
-  input(get('project'),'项目名称','name',project.name);
+  if (!isExternal) input(get('project'),'项目名称','name',project.name);
   for(const group of project.groups) groupCard(group);
   get('addGroup').onclick=()=>{groupCard({name:'',projects:[]});renderDiscovery();};
   get('groups').addEventListener('change',renderDiscovery);
