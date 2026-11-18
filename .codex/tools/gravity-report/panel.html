@@ -409,11 +409,11 @@ try {
       get('hourSummary').focus();
     }
   });
-  for(const [key,label] of Object.entries(reportLabels)) input(get('report'),label,key,report[key]??'',{wide:key==='url'});
   if (isExternal) {
     input(get('report'),'播报项目名称','broadcastProjectName',project.name);
     get('project').closest('section').hidden=true;
   }
+  for(const [key,label] of Object.entries(reportLabels)) input(get('report'),label,key,report[key]??'',{wide:key==='url'});
   const browserMode=get('browserMode');
   browserMode.value=report.browserMode;
   const updateBrowserHint=()=>{get('browserHint').hidden=browserMode.value!=='existing';};
