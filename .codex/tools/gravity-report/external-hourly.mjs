@@ -85,20 +85,26 @@ function shiftDate(date,days) {
 }
 
 export function parseTaPaidHourly(csv,date) {
-  const labels = ['媒体','累计新进','累计付费人数','首日付费玩家数','首日付费玩家人均付费频次'];
+  const labels = ['媒体','累计新进','累计付费人数','首日付费玩家数','首日付费玩家人均付费频次',
+    '首日付费金额','首日付费ARPPU'];
   const seen = new Set();
-  let registrations=0, payers=0, newPayers=0, minEvents=0, maxEvents=0;
+  let registrations=0, payers=0, newPayers=0, minEvents=0, maxEvents=0, firstDayAmount=0;
   for (const [media,...values] of readTaDate(csv,date,labels)) {
     const name = media.trim();
     if (!name || seen.has(name)) throw new Error('数数分媒体结果存在空白或重复媒体');
     seen.add(name);
     if (name === '自然量') continue;
-    const [newUsers,paid,firstDayPayers,frequency] = values.map((value,index)=>taNumber(value,labels[index+1]));
+    const [newUsers,paid,firstDayPayers,frequency,amount,arppu] = values.map((value,index)=>taNumber(value,labels[index+1]));
     if (![newUsers,paid,firstDayPayers].every(Number.isSafeInteger) ||
         firstDayPayers > Math.min(newUsers,paid) ||
         (firstDayPayers === 0 ? frequency !== null : frequency === null || frequency < 1)) {
       throw new Error('数数分媒体人数或首日付费频次校验失败：'+name);
     }
+    if (amount === null || (firstDayPayers === 0 ? amount !== 0 || arppu !== null
+      : arppu === null || Math.abs(arppu-amount/firstDayPayers)>0.00501)) {
+      throw new Error('数数分媒体首日付费金额、人数与 ARPPU 不一致：'+name);
+    }
+    firstDayAmount += amount;
     registrations += newUsers;
     payers += paid;
     newPayers += firstDayPayers;
@@ -115,8 +121,23 @@ export function parseTaPaidHourly(csv,date) {
   if ([...seen].every(name=>name === '自然量')) return null;
   const minRate = newPayers ? Math.round(minEvents*100/newPayers)/100 : null;
   const maxRate = newPayers ? Math.round(maxEvents*100/newPayers)/100 : null;
-  return {registrations,payers,firstDayPayers:newPayers,firstDayFrequency:minRate === maxRate ? minRate : null,
+  return {registrations,payers,firstDayPayers:newPayers,firstDayAmount,
+    firstDayArppu:newPayers>0 ? firstDayAmount/newPayers : null,
+    firstDayFrequency:minRate === maxRate ? minRate : null,
     ambiguousFrequency:minRate !== maxRate};
+}
+
+export function parseTaRetentions(csv) {
+  const dates=[...new Set(csv.replace(/^\uFEFF/,'').trimEnd().split(/\r?\n/).slice(1)
+    .map(line=>line.split(',')[0].trim().replace(/^"(.*)"$/,'$1')))];
+  return dates.map(date=>{
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) throw new Error('数数总表包含无效的留存日期');
+    const rows=readTaDate(csv,date,['付费次留','注册次留']);
+    if (rows.length!==1) throw new Error('数数总表留存日期重复');
+    const [payer,registration]=rows[0].map(value=>taNumber(value,'次留'));
+    if ([payer,registration].some(value=>value!==null && value>1)) throw new Error('数数次留超出 0 至 1');
+    return {date,payer,registration};
+  });
 }
 
 async function connectTaBrowser(chromium,timeout) {
@@ -243,6 +264,7 @@ export async function readTaDashboard(chromium, report, date, timeout, retries) 
         const previous= parseTaHourly(results[0],previousDate,{optionalDate:true});
         return {ta:parseTaHourly(results[0],date,{includeFirstDayAmount:true}),
           paidTa:parseTaPaidHourly(results[1],date),
+          retentions:parseTaRetentions(results[0]),
           previousRetention:previous ? {date:previousDate,payer:previous[6],registration:previous[7]} : undefined};
       } catch (error) {
         if (attempt === retries) throw error;
@@ -272,8 +294,9 @@ export async function updateExternalHourly(snapshot, output, deps, archive, star
     }
     const save=db.prepare(`INSERT INTO snapshots VALUES (?, ?, ?) ON CONFLICT(date,time) DO UPDATE SET payload=excluded.payload`);
     save.run(date,time,JSON.stringify(snapshot));
-    if (previousRetention) {
-      const {date:priorDate,payer,registration}=previousRetention;
+    const retentions=Array.isArray(previousRetention) ? previousRetention : previousRetention ? [previousRetention] : [];
+    for (const {date:priorDate,payer,registration} of retentions) {
+      if (priorDate>=date) continue;
       const previous=db.prepare("SELECT payload FROM snapshots WHERE date=? AND time='24:00'").get(priorDate);
       if (previous && (payer != null || registration != null)) {
         const row=JSON.parse(previous.payload);
@@ -307,7 +330,7 @@ export async function writeExternalHourly(snapshot, output, deps, snapshots = [s
     (row.time === '24:00' || row.date === latestDate));
   const totals=externalTotals(visible,baseline);
   const all = buildExternalWorkbook(Workbook,visible,snapshot,totals);
-  const png = Buffer.from(await (await all.render({sheetName:'外部小时报',range:'A1:V'+(visible.length+4),headers:false,scale:1})).arrayBuffer());
+  const png = Buffer.from(await (await all.render({sheetName:'外部小时报',range:'A1:X'+(visible.length+4),headers:false,scale:1})).arrayBuffer());
   await fs.mkdir(path.dirname(output),{recursive:true});
   const pending = output.slice(0,-5)+'.'+randomUUID()+'.xlsx';
   try {
@@ -350,22 +373,22 @@ function buildExternalWorkbook(Workbook, snapshots, {projectName}, totals) {
     sheet.getRange(address).merge();
     sheet.getRange(address.split(':')[0]).values = [[text]];
   };
-  merged('A1:V1',projectName+'｜外部小时报');
+  merged('A1:X1',projectName+'｜外部小时报');
   for (const [address,label] of [
-    ['A2:B2','时间'],['C2:F2','用户'],['G2:L2','付费'],['M2:R2','买量'],['S2:T2','ROI'],['U2:V2','留存'],
+    ['A2:B2','时间'],['C2:F2','用户'],['G2:L2','付费'],['M2:T2','买量'],['U2:V2','ROI'],['W2:X2','留存'],
   ]) merged(address,label);
   merged('A3:A4','日期');
   merged('B3:B4','时间段');
-  sheet.getRange('C3:V4').values=[
+  sheet.getRange('C3:X4').values=[
     ['当日累计新进','当日累计活跃','当日累计付费','总累计新进','当日累计收入','当前 ARPU','付费率',
       '新增首日人均\n付费次数','新增首日付费\n金额','总累计收入','累计消耗','累计广告曝光','累计注册转化',
-      '人均注册成本','人均付费成本','总累计消耗','ROI1\n（纯买量）','ROI1\n（含自然量）','实时付费次留','实时注册次留'],
+      '人均注册成本','人均付费成本','新增首日付费率','新增首日 ARPPU','总累计消耗','ROI1\n（纯买量）','ROI1\n（含自然量）','实时付费次留','实时注册次留'],
     ['当日新进人数','当日活跃人数','当日付费人数','自 16 日累计','当日 IAP 收入','收入 ÷ 活跃','付费人数 ÷ 活跃',
       '新增付费次数 ÷\n新增付费人数','新增用户\n首日付费额','自 16 日累计','当日买量消耗','广告曝光次数','买量注册人数',
-      '消耗 ÷ 买量注册','消耗 ÷ 首日付费人数\n（仅媒体）','自 16 日累计',null,null,null,null],
+      '消耗 ÷ 买量注册','消耗 ÷ 首日付费人数\n（仅媒体）','买量首日付费人数 ÷\n买量注册人数','买量首日付费金额 ÷\n买量首日付费人数','自 16 日累计',null,null,null,null],
   ];
   const last = snapshots.length+4;
-  if (snapshots.length) sheet.getRange('A5:V'+last).values = snapshots.map(row=>{
+  if (snapshots.length) sheet.getRange('A5:X'+last).values = snapshots.map(row=>{
       const {date,period,ta,paidTa,gravity:{paid,total}}=row;
       const [newUsers,active,payers,revenue,arpu,payRate,payerRetention,registrationRetention,frequency,firstDayAmount]=ta;
       const [totalNew,totalRevenue,totalSpend]=totals.get(row) ?? [null,null,null];
@@ -378,7 +401,11 @@ function buildExternalWorkbook(Workbook, snapshots, {projectName}, totals) {
         displayAmount(firstDayAmount),displayAmount(totalRevenue),
         displayAmount(spend),paid?.impressions ?? null,registrations ?? null,
         spend !== null && registrations>0 ? spend/registrations : null,
-        spend !== null && costPayers>0 ? spend/costPayers : null,displayAmount(totalSpend),
+        spend !== null && costPayers>0 ? spend/costPayers : null,
+        paidTa?.registrations>0 && Number.isSafeInteger(paidTa.firstDayPayers) ? paidTa.firstDayPayers/paidTa.registrations : '-',
+        paidTa?.firstDayArppu ?? (paidTa?.firstDayPayers>0 && Number.isFinite(paidTa.firstDayAmount)
+          ? paidTa.firstDayAmount/paidTa.firstDayPayers : '-'),
+        displayAmount(totalSpend),
         paid?.roi ?? '-',total?.roi ?? '-',payerRetention ?? '-',registrationRetention ?? '-',
       ];
     });
@@ -388,34 +415,34 @@ function buildExternalWorkbook(Workbook, snapshots, {projectName}, totals) {
     if (end>start+1) merged('A'+(start+5)+':A'+(end+4),snapshots[start].date);
     start=end;
   }
-  const all = sheet.getRange('A1:V'+last);
+  const all = sheet.getRange('A1:X'+last);
   all.format.font = {name:'Microsoft YaHei',size:11,color:'#223046'};
   all.format.rowHeight = 26;
   all.format.verticalAlignment = 'center';
-  const title = sheet.getRange('A1:V1');
+  const title = sheet.getRange('A1:X1');
   title.format.fill = '#EFF6FC';
   title.format.font = {name:'Microsoft YaHei',size:15,bold:true,color:'#163761'};
   title.format.rowHeight = 34;
-  const table = sheet.getRange('A2:V'+last);
+  const table = sheet.getRange('A2:X'+last);
   table.format.horizontalAlignment = 'center';
   table.format.borders = {preset:'all',style:'thin',color:'#C2CBD5'};
-  const header = sheet.getRange('A2:V3');
-  sheet.getRange('A2:V2').format.fill = '#00A5E6';
-  sheet.getRange('A3:V4').format.fill = '#7DBFE7';
+  const header = sheet.getRange('A2:X3');
+  sheet.getRange('A2:X2').format.fill = '#00A5E6';
+  sheet.getRange('A3:X4').format.fill = '#7DBFE7';
   header.format.font = {name:'Microsoft YaHei',size:11,bold:true,color:'#FFFFFF'};
-  sheet.getRange('A3:V4').format.wrapText = true;
-  sheet.getRange('A3:V4').format.rowHeightPx = 38;
-  sheet.getRange('A4:V4').format.font = {name:'Microsoft YaHei',size:9,color:'#173B56'};
+  sheet.getRange('A3:X4').format.wrapText = true;
+  sheet.getRange('A3:X4').format.rowHeightPx = 38;
+  sheet.getRange('A4:X4').format.font = {name:'Microsoft YaHei',size:9,color:'#173B56'};
   if (snapshots.length) {
-    sheet.getRange('A5:V'+last).format.fill = '#FFFFFF';
+    sheet.getRange('A5:X'+last).format.fill = '#FFFFFF';
     snapshots.forEach((row,index)=>{
       if (row.baseline) for (const column of ['O','Q']) sheet.getRange(column+(index+5)).format.fill='#90DDF5';
     });
-    for (const column of ['H','J','P','Q']) sheet.getRange(column+'5:'+column+last).setNumberFormat('#,##0.00');
-    for (const column of ['I','S','T','U','V']) sheet.getRange(column+'5:'+column+last).setNumberFormat('0.00%');
-    for (const column of ['C','D','E','F','G','K','L','M','N','O','R']) sheet.getRange(column+'5:'+column+last).setNumberFormat('#,##0');
+    for (const column of ['H','J','P','Q','S']) sheet.getRange(column+'5:'+column+last).setNumberFormat('#,##0.00');
+    for (const column of ['I','R','U','V','W','X']) sheet.getRange(column+'5:'+column+last).setNumberFormat('0.00%');
+    for (const column of ['C','D','E','F','G','K','L','M','N','O','T']) sheet.getRange(column+'5:'+column+last).setNumberFormat('#,##0');
   }
-  [105,150,108,108,108,103,111,94,78,112,112,105,105,112,112,115,120,105,92,98,108,108].forEach((width,index)=>{
+  [105,150,108,108,108,103,111,94,78,112,112,105,105,112,112,115,120,125,125,105,92,98,108,108].forEach((width,index)=>{
     const column = String.fromCharCode(65+index);
     sheet.getRange(column+':'+column).format.columnWidthPx = width;
   });

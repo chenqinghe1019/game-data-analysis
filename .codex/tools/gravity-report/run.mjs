@@ -827,10 +827,10 @@ async function main(kind) {
     if (kind === 'external') {
       const previewCsv = preview && !backupCli && !dashboard ? process.argv[4] : undefined;
       const taTimeout = report.timeoutSeconds*1000;
-      let ta,paidTa,previousRetention;
+      let ta,paidTa,previousRetention,retentions;
       if (dashboard) {
         console.log('正在从数数看板导出总表和分媒体数据');
-        ({ta,paidTa,previousRetention} = await readTaDashboard(chromium,report,date,taTimeout,report.retries));
+        ({ta,paidTa,previousRetention,retentions} = await readTaDashboard(chromium,report,date,taTimeout,report.retries));
       } else {
         console.log('正在读取数数每日累计指标');
         ta = previewCsv ? parseTaHourly(await fs.readFile(previewCsv,'utf8'),date)
@@ -846,7 +846,7 @@ async function main(kind) {
       const snapshot = {date,time,period,ta,gravity:data,projectName:project.name,
         ...(fromMedia ? {paidTa} : {})};
       const png = preview ? await writeExternalHourly(snapshot,output,deps)
-        : await updateExternalHourly(snapshot,output,deps,archive,config.schedule.startAt,previousRetention);
+        : await updateExternalHourly(snapshot,output,deps,archive,config.schedule.startAt,retentions ?? previousRetention);
       console.log(output);
       if (webhook) await sendWeComReport(webhook,png,title,delivery);
       return;
