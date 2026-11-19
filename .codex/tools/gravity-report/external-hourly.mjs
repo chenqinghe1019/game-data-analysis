@@ -10,12 +10,6 @@ import {setTimeout as delay} from 'node:timers/promises';
 const taColumns = ['累计新进','累计活跃','累计付费人数','累计收入','当前 ARPU','付费率','付费次留','注册次留',
   '首日付费玩家人均付费频次','首日付费玩家数'];
 export const externalWorkbookName = '外部小时报_累计.xlsx';
-const tenThousands = new Intl.NumberFormat('zh-CN',{useGrouping:false,minimumFractionDigits:1,maximumFractionDigits:1});
-
-function displayAmount(value) {
-  if (value == null) return null;
-  return value >= 10_000 ? tenThousands.format(value/10_000)+'万' : value;
-}
 
 export function externalPeriod(hour) {
   return '截至北京时间 '+Number(hour)+' 点';
@@ -397,15 +391,15 @@ function buildExternalWorkbook(Workbook, snapshots, {projectName}, totals) {
       const costPayers=row.baseline ? payers : paidTa?.firstDayPayers;
       return [
         date,period.replace(/^截至北京时间 (\d{2}):\d{2}$/,(_,hour)=>externalPeriod(hour)),
-        newUsers,active,payers,totalNew,displayAmount(revenue),arpu,payRate,frequency ?? null,
-        displayAmount(firstDayAmount),displayAmount(totalRevenue),
-        displayAmount(spend),paid?.impressions ?? null,registrations ?? null,
+        newUsers,active,payers,totalNew,revenue,arpu,payRate,frequency ?? null,
+        firstDayAmount ?? null,totalRevenue,
+        spend,paid?.impressions ?? null,registrations ?? null,
         spend !== null && registrations>0 ? spend/registrations : null,
         spend !== null && costPayers>0 ? spend/costPayers : null,
         paidTa?.registrations>0 && Number.isSafeInteger(paidTa.firstDayPayers) ? paidTa.firstDayPayers/paidTa.registrations : '-',
         paidTa?.firstDayArppu ?? (paidTa?.firstDayPayers>0 && Number.isFinite(paidTa.firstDayAmount)
           ? paidTa.firstDayAmount/paidTa.firstDayPayers : '-'),
-        displayAmount(totalSpend),
+        totalSpend,
         paid?.roi ?? '-',total?.roi ?? '-',payerRetention ?? '-',registrationRetention ?? '-',
       ];
     });
@@ -438,9 +432,9 @@ function buildExternalWorkbook(Workbook, snapshots, {projectName}, totals) {
     snapshots.forEach((row,index)=>{
       if (row.baseline) for (const column of ['O','Q']) sheet.getRange(column+(index+5)).format.fill='#90DDF5';
     });
-    for (const column of ['H','J','P','Q','S']) sheet.getRange(column+'5:'+column+last).setNumberFormat('#,##0.00');
+    for (const column of ['G','H','J','K','L','M','P','Q','S','T']) sheet.getRange(column+'5:'+column+last).setNumberFormat('#,##0.00');
     for (const column of ['I','R','U','V','W','X']) sheet.getRange(column+'5:'+column+last).setNumberFormat('0.00%');
-    for (const column of ['C','D','E','F','G','K','L','M','N','O','T']) sheet.getRange(column+'5:'+column+last).setNumberFormat('#,##0');
+    for (const column of ['C','D','E','F','N','O']) sheet.getRange(column+'5:'+column+last).setNumberFormat('#,##0');
   }
   [105,150,108,108,108,103,111,94,78,112,112,105,105,112,112,115,120,125,125,105,92,98,108,108].forEach((width,index)=>{
     const column = String.fromCharCode(65+index);
