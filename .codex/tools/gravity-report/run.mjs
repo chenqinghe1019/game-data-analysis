@@ -7,6 +7,7 @@ import { configPath, defaults, externalConfigPath, iaaConfigPath, loadConfig, va
 import { readLogin } from './login.mjs';
 import { externalPeriod, externalPushTitle, externalWorkbookName, parseTaHourly, parseTaPaidHourly, readTaDashboard, readTaHourly, updateExternalHourly, writeExternalHourly } from './external-hourly.mjs';
 import { externalDelivery } from './external-retry.mjs';
+import {applyVerifiedGravityMetrics,canValidateProjectRollups,parseProjectRollups,validateGravityRollup} from './gravity-validation.mjs';
 
 const root = '.el-table-v2__root';
 const timeout = 120_000;
@@ -44,7 +45,7 @@ async function waitForReportTotals(page, trigger, timeout, endpoint = rollupEndp
   return response;
 }
 
-async function readMediaRollup(page, expand, app, id, expectedDay, timeout) {
+async function readMediaRollup(page, expand, app, id, expectedDay, timeout, validate = false) {
   let groups;
   const response = await waitForReportTotals(page, () => expand.click(), timeout, rollupEndpoint, request => {
     let query;
@@ -75,6 +76,7 @@ async function readMediaRollup(page, expand, app, id, expectedDay, timeout) {
         Math.abs(result.ap_cost-spend) > 0.01+0.005*group.length) {
       throw new Error('APPID '+id+' 的媒体汇总响应与请求明细不一致');
     }
+    if (validate) validateGravityRollup(group,result,'APPID '+id+' 媒体 '+parentId);
     rollup.set(parentId,result);
   }
   return rollup;
@@ -214,7 +216,10 @@ export async function refreshReport(page, expectedDay, wait = timeout, product =
     const pagination = count === 0 ? /^共\s*0\s*条$/ : /^共\s*[1-9]\d*\s*条$/;
     await page.getByText(pagination).waitFor({timeout:remaining()});
     if (count > 0 && !Number.isFinite(data.total?.ap_cost)) throw new Error('引力原始项目汇总缺少消耗');
-    source = {count,spend:data.total?.ap_cost};
+    source = {kind:'external',count,spend:data.total?.ap_cost};
+  } else if (layout !== 'daily' && layout !== 'flat') {
+    const query=response.request().postDataJSON();
+    if (canValidateProjectRollups(query)) source=parseProjectRollups(query,await response.json(),expectedDay);
   }
   if (day() !== today || !await dateFilter.isVisible() || !await productFilter.isVisible()) {
     throw new Error('查询完成后的日期或产品范围与预期不符');
@@ -271,7 +276,10 @@ async function readGrid(page, {fields,metrics:configuredMetrics,layout}, expecte
   if (!count || !raw.total) throw new Error('主表未返回可核验的合计与项目数据');
   if (await page.getByRole('button', {name:'下一页'}).isEnabled()) throw new Error('主表有多页，当前配置无法完整核对');
   const indexes = Object.fromEntries(Object.entries(fields).map(([name,label]) => [name, raw.headers.indexOf(label)]));
-  if (Object.values(indexes).includes(-1)) throw new Error('主表指标列已变化');
+  if (Object.values(indexes).includes(-1) ||
+      Object.values(fields).some(label=>raw.headers.indexOf(label)!==raw.headers.lastIndexOf(label))) {
+    throw new Error('主表指标列已变化或出现重复列');
+  }
   const percentFields = new Set(configuredMetrics
     ? configuredMetrics.flatMap(({format},index)=>format === 'percent' ? ['metric'+index] : []) : ['roi']);
   function parse(cells) {
@@ -348,15 +356,23 @@ async function applyTableFilter(page, dimension, values, timeout, matches) {
     await picker.getByText(value,{exact:true}).click({timeout});
   }
   await dialog.getByRole('heading').click({timeout});
-  await waitForReportTotals(page, () => dialog.getByRole('button', {name:'应用筛选'}).click({timeout}),
+  return waitForReportTotals(page, () => dialog.getByRole('button', {name:'应用筛选'}).click({timeout}),
     timeout, rollupEndpoint, matches);
 }
 
 async function readAppGroupTotal(page, ids, report, timeout, expectedDay) {
-  await applyTableFilter(page,'产品',ids.map(id=>new RegExp('\\b'+id+'\\b')),timeout);
+  const response=await applyTableFilter(page,'产品',ids.map(id=>new RegExp('\\b'+id+'\\b')),timeout);
   const filtered = await readGrid(page,report,expectedDay);
   if (filtered.apps.size !== ids.length || ids.some(id=>!filtered.apps.has(id))) {
     throw new Error('引力项目合计的筛选范围与配置不一致');
+  }
+  const query=response.request().postDataJSON();
+  if (report.layout !== 'flat' && canValidateProjectRollups(query)) {
+    const verified=parseProjectRollups(query,await response.json(),expectedDay);
+    if (verified.apps.size!==ids.length || ids.some(id=>!verified.apps.has(id))) {
+      throw new Error('APP 分组合计的原始汇总范围与配置不一致');
+    }
+    applyVerifiedGravityMetrics(filtered.total,verified.total,report,standardMetrics,defaults.report.fields,'APP 分组合计');
   }
   if (report.layout === 'flat') {
     const dialog = page.getByRole('dialog',{name:'表内筛选'});
@@ -371,7 +387,7 @@ async function readAppGroupTotal(page, ids, report, timeout, expectedDay) {
 
 export async function collect(page, {report,project} = defaults, expectedDay = day(), source) {
   const timeout = report.timeoutSeconds * 1000;
-  const external = Boolean(source);
+  const external = source?.kind === 'external';
   const grid = page.locator(root);
   await grid.waitFor({timeout});
   if (external) {
@@ -403,6 +419,15 @@ export async function collect(page, {report,project} = defaults, expectedDay = d
   for (let i=0; i<20 && await collapse.count(); i++) await collapse.first().click();
   if (await collapse.count()) throw new Error('主表存在未收起的行');
   const base = await readGrid(page,report,expectedDay);
+  if (source?.kind === 'hierarchy') {
+    if (source.apps.size!==base.apps.size) throw new Error('项目列表与本次 APPID 汇总不一致');
+    applyVerifiedGravityMetrics(base.total,source.total,report,standardMetrics,defaults.report.fields,'全盘');
+    for (const [id,app] of base.apps) {
+      const verified=source.apps.get(id);
+      if (!verified || verified.key!==app.key) throw new Error('项目行与本次 APPID '+id+' 汇总不一致');
+      applyVerifiedGravityMetrics(app.data,verified.metrics,report,standardMetrics,defaults.report.fields,'APPID '+id);
+    }
+  }
   if (report.productAppId && (base.apps.size !== 1 || !base.apps.has(report.productAppId))) {
     throw new Error('报表项目与配置的引力 APPID 不一致');
   }
@@ -419,7 +444,7 @@ export async function collect(page, {report,project} = defaults, expectedDay = d
     const expand = row.getByRole('button', {name:'展开当前行',exact:true});
     if (!await expand.count()) throw new Error('APPID '+id+' 有消耗但无法展开媒体明细');
     // The provisional row may have the right spend but different costs and ROI.
-    const rollup = await readMediaRollup(page,expand,app,id,expectedDay,timeout);
+    const rollup = await readMediaRollup(page,expand,app,id,expectedDay,timeout,source?.kind === 'hierarchy');
     await row.getByRole('button', {name:'收起当前行',exact:true}).waitFor();
     await row.locator('xpath=following-sibling::*[1][contains(@class,"el-table-v2__row-depth-1")]').waitFor({state:'visible',timeout});
     const expanded = (await readGrid(page,report,expectedDay)).apps.get(id);
@@ -436,6 +461,9 @@ export async function collect(page, {report,project} = defaults, expectedDay = d
       }
     }
     app.media = expanded.media;
+    if (source?.kind === 'hierarchy') {
+      validateGravityRollup([...rollup.values()],source.apps.get(id).metrics,'APPID '+id+' 全部媒体');
+    }
     const mediaSpend = [...app.media.values()].reduce((sum,item)=>sum+item.spend,0);
     if (Math.abs(mediaSpend-app.data.spend) > 0.01+0.005*app.media.size) {
       throw new Error('APPID '+id+' 媒体消耗合计 '+mediaSpend.toFixed(4)+
