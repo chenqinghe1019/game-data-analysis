@@ -119,6 +119,9 @@ async function bodyOf(request) {
 const server = createServer(async (request,response) => {
   try {
     if (request.headers.host !== host+':'+port) return json(response,403,{error:'请使用本机后台地址'});
+    if (request.url === '/tower' || request.url.startsWith('/tower/')) {
+      return json(response,404,{error:'该播报配置已移除，请使用联合小时报'});
+    }
     const project = gameProjects.find(item=>item !== gravityProject &&
       (request.url === item.settings || request.url.startsWith(item.settings+'/'))) ?? gravityProject;
     const routePath = project === gravityProject ? request.url : request.url.slice(project.settings.length) || '/';
