@@ -17,9 +17,6 @@ jobs:
   offline-checks:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
-    env:
-      LOCALAPPDATA: ${{ runner.temp }}
-      USERPROFILE: ${{ runner.temp }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -35,6 +32,9 @@ jobs:
       - name: Maintenance failure-path and reproducibility tests
         run: python scripts/test_repo_maintenance.py
       - name: Hourly report offline business invariants
+        env:
+          LOCALAPPDATA: ${{ runner.temp }}
+          USERPROFILE: ${{ runner.temp }}
         run: node projects/beite-hourly-report/scripts/verify-project.mjs
       - name: Result scope
         run: echo 'Offline checks only. No logins, business queries, rendering, pushes to WeCom or production changes.' >> "$GITHUB_STEP_SUMMARY"
