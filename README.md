@@ -6,6 +6,8 @@
 
 换账号 / 新会话接手：[《自动项目》交接入口](projects/auto-project/START_HERE.md)。涵盖项目索引、当前进度、资料缺口、技能清单、验收样例与可下载交接包；读取范围同时区分本机Codex和ChatGPT的同名项目。
 
+ChatGPT 私有插件的版本镜像和五个分析技能见 [游戏数据分析之旅](plugins/game-data-analysis-journey/README.md)。
+
 ## 内容
 
 ### Skill 定义（`.codex/skills/`）

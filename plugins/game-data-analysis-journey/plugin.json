@@ -1,0 +1,37 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "author": {
+    "name": "ni ziyi"
+  },
+  "description": "沉淀游戏运营的取数口径、专项分析、埋点看板、活动复盘与 Excel 交付习惯。",
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "capabilities": [
+          "Interactive"
+        ],
+        "category": "Productivity",
+        "defaultPrompt": [
+          "按我的习惯复盘这次活动，先给结论，再给前后对比、分层和 Excel 明细。",
+          "复用 TA 原看板，拆解 SLG 第二批区服的活跃、流水和次日回访。",
+          "参考现有看板，根据埋点文档整理 IAA 广告和玩法指标。"
+        ],
+        "developerName": "ni ziyi",
+        "displayName": "游戏数据分析之旅",
+        "longDescription": "复用个人游戏运营数据分析习惯，覆盖数数 TA、AppLogger、SLG 区服与商品分析、保卫萝卜 4 三端对比、IAA 与企微埋点看板、活动复盘和 Excel 交付。",
+        "shortDescription": "游戏取数、指标口径、看板与活动复盘"
+      }
+    }
+  },
+  "keywords": [
+    "游戏运营",
+    "数数 TA",
+    "AppLogger",
+    "SLG",
+    "IAA",
+    "埋点",
+    "复盘"
+  ],
+  "name": "game-data-analysis-journey",
+  "version": "1.1.0"
+}

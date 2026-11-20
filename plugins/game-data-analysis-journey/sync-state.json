@@ -1,0 +1,21 @@
+{
+  "plugin_id": "plugins_6b002af67c9881918c265648acae73b2",
+  "release_id": "pluginrel_6b002c34d16c8191adba5bbf8b360058",
+  "version": "1.1.0",
+  "files": {
+    ".codex-plugin/plugin.json": "de59bed82bfcba64642344f401bbdb3e6396b4ad",
+    "plugin.json": "c27af97aced0eda2ad866b0d12fbbcf691edeb98",
+    "skills/carrot4-analysis/SKILL.md": "9727e1f3fb091900a3afec85c94ed16bc398c537",
+    "skills/carrot4-analysis/references/carrot4.md": "b9c2ddf46196b05c5d4a96580026c2bec1590148",
+    "skills/game-data-analysis/SKILL.md": "0cdaa01f699a480e20f3ed5748640dd0c15dfbb4",
+    "skills/game-data-analysis/references/knowledge-sync.md": "7d94e42486d3be45d9ea3730b8f292af4b46a5a3",
+    "skills/game-data-analysis/references/metrics-and-delivery.md": "b609195c92ddc36ef71d103c4db6f06d5e866799",
+    "skills/game-data-analysis/references/sources.md": "fbcf8f4f6a357c9e92717d33a0cafae939715a71",
+    "skills/game-event-review/SKILL.md": "33a0b4bad2232ad784d2c427022dbba8b1c583ef",
+    "skills/game-event-review/references/event-cases.md": "67af26036d6bd9d6a14761ec5efac6e079cb008f",
+    "skills/game-tracking-dashboards/SKILL.md": "c7fba5941b99b75002f296a1be60ff7ee4d29450",
+    "skills/game-tracking-dashboards/references/tracking.md": "014a00aad6fd1d5ba9b156adf12edd7f6bf331b6",
+    "skills/slg-analysis/SKILL.md": "904b2acb83217f76cb6a4959c161cb6eb321df56",
+    "skills/slg-analysis/references/slg.md": "e0da61695794bb355d39b046bcd0fad91c1914ac"
+  }
+}
