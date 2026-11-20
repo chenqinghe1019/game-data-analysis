@@ -154,7 +154,7 @@ def generated_files(registry):
         handoff.append((path,path))
     package('projects/auto-project/packages/auto-project-chatgpt-knowledge.zip',handoff)
     generated[STATE] = dump({'schemaVersion':1,'textEncoding':'UTF-8/LF; BOM removed',
-        'sourceFingerprint':sha(dump(inputs)), 'inputs':dict(sorted(inputs.items())), 'references':copies, 'packages':packages})
+        'sourceFingerprint':sha(dump(dict(sorted(inputs.items())))), 'inputs':dict(sorted(inputs.items())), 'references':copies, 'packages':packages})
     return generated
 
 def tracked_files():
