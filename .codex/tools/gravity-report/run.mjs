@@ -3,7 +3,7 @@ import { createHash } from 'node:crypto';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { configPath, defaults, externalConfigPath, iaaConfigPath, loadConfig, validateTaMediaUrl } from './config.mjs';
+import { configPath, defaults, externalConfigPath, heroConfigPath, iaaConfigPath, loadConfig, validateTaMediaUrl } from './config.mjs';
 import { readLogin } from './login.mjs';
 import { externalPeriod, externalPushTitle, externalWorkbookName, parseTaHourly, parseTaPaidHourly, readTaDashboard, readTaHourly, updateExternalHourly, writeExternalHourly } from './external-hourly.mjs';
 import { externalDelivery } from './external-retry.mjs';
@@ -82,7 +82,7 @@ async function readMediaRollup(page, expand, app, id, expectedDay, timeout, vali
   return rollup;
 }
 
-async function openReport(page, {url:reportUrl,title,timeoutSeconds}, kind, retry) {
+export async function openReport(page, {url:reportUrl,title,timeoutSeconds}, kind, retry) {
   const target = new URL(reportUrl);
   const current = new URL(page.url());
   // The report/login locator below checks readiness without waiting on unrelated page resources.
@@ -227,7 +227,7 @@ export async function refreshReport(page, expectedDay, wait = timeout, product =
   return source;
 }
 
-async function selectReportProduct(page, {product,productAppId,timeoutSeconds}) {
+export async function selectReportProduct(page, {product,productAppId,timeoutSeconds}) {
   const timeout = timeoutSeconds*1000;
   const selected = page.locator('.el-select__selected-item .label-text').filter({visible:true});
   await selected.waitFor({timeout});
@@ -758,7 +758,7 @@ async function main(kind) {
   const appendBackup = backupCli && process.argv[4] === '--append-to-history';
   if (backupCli && kind !== 'external') throw new Error('该备用入口仅用于外部小时报');
   if (appendBackup && process.argv.length > 5) throw new Error('写入累计小时报时不能另指定输出路径');
-  const projectFiles = {iaa:iaaConfigPath,external:externalConfigPath};
+  const projectFiles = {iaa:iaaConfigPath,external:externalConfigPath,hero:heroConfigPath};
   const file = appendBackup ? externalConfigPath : process.env.GRAVITY_REPORT_CONFIG ?? projectFiles[kind] ?? configPath;
   const config = await loadConfig(file,kind);
   if (!config.report.url) throw new Error('请先在播报后台保存报表配置');
@@ -891,7 +891,21 @@ async function main(kind) {
     const rows = report.layout === 'daily'
       ? [[date,data.total.spend,...report.metrics.map((_,index)=>data.total['metric'+index])]]
       : outputRows(data,project,kind,report.metrics);
-    const screenshot = await writeWorkbook(rows,date,output,deps,
+    let screenshot;
+    if (kind==='hero' && report.conversion) {
+      const {readConversionDashboard}=await import('./hero-conversion-source.mjs');
+      const {writeCombinedHero}=await import('./hero-conversion.mjs');
+      await fs.mkdir(path.dirname(output),{recursive:true});
+      await fs.writeFile(output.replace(/\.xlsx$/i,'.gravity.snapshot.json'),JSON.stringify({date,hour,project:project.name,rows},null,2));
+      console.log('正在读取数数看板的前期转化');
+      const conversion=await readConversionDashboard(chromium,report.conversion,date,
+        (csv,attempt)=>fs.writeFile(output.replace(/\.xlsx$/i,'.conversion.attempt-'+attempt+'.raw.csv'),csv));
+      if(day()!==runDay) throw new Error('组合取数期间跨过北京时间日期');
+      await fs.writeFile(output.replace(/\.xlsx$/i,'.conversion.raw.csv'),conversion.csv);
+      await fs.writeFile(output.replace(/\.xlsx$/i,'.conversion.snapshot.json'),JSON.stringify({...conversion.data,source:conversion.source,hour},null,2));
+      screenshot=await writeCombinedHero(conversion.data,output,deps,{projectName:project.name,hour,
+        gravityRows:rows,spendUnit:report.spendUnit,fullDay});
+    } else screenshot = await writeWorkbook(rows,date,output,deps,
       preview||Boolean(webhook),project.name,hour,kind,report.metrics,report.layout,report.spendUnit,fullDay);
     console.log(output);
     if (preview) await fs.writeFile(output.slice(0,-5)+'.png',screenshot);

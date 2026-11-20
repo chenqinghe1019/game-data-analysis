@@ -1,0 +1,70 @@
+{
+  "report": {
+    "url": "https://web.gravity-engine.com/#/pivotReport/mine?id=1795155162413133&category=adreport",
+    "title": "英雄就是我-每日_拉取分时数",
+    "product": "英雄就是我",
+    "timeoutSeconds": 120,
+    "retries": 1,
+    "browserMode": "dedicated",
+    "fields": {
+      "spend": "平台_消耗",
+      "activations": "标准_激活数",
+      "activationCost": "标准激活成本",
+      "payers": "标准_首日付费人数",
+      "payCost": "标准_首日付费成本",
+      "revenue": "标准_首日付费金额",
+      "roi": "标准_首日付费ROI"
+    },
+    "spendUnit": "wan-decimal",
+    "productAppId": "13204597",
+    "conversion": {
+      "url": "https://ta-data.feiyu.com/#/panel/panel/44_1752_0",
+      "title": "激活登录（排除剧情）",
+      "timeoutSeconds": 120,
+      "retries": 1
+    }
+  },
+  "project": {
+    "name": "英雄就是我",
+    "groups": [
+      {
+        "name": "微小",
+        "projects": [
+          {
+            "name": "英雄就是我",
+            "id": "13204597"
+          }
+        ]
+      }
+    ]
+  },
+  "schedule": {
+    "enabled": true,
+    "hours": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23
+    ]
+  }
+}

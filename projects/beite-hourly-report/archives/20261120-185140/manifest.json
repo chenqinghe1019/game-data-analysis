@@ -1,0 +1,2749 @@
+{
+  "createdAt": "2026-11-20T10:51:40.590720+00:00",
+  "files": [
+    {
+      "path": "reports/1794202484713.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794202484713.xlsx",
+      "kind": "report-copy",
+      "bytes": 5567,
+      "sha256": "91777324d34ed2776e33cc9ecef7acd0eee2323b2a5552b1b27f7ed58f07b98f"
+    },
+    {
+      "path": "reports/1794202963023.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794202963023.xlsx",
+      "kind": "report-copy",
+      "bytes": 5908,
+      "sha256": "36fd68d37505030a303a00bd8d08f03214ce75ad1e46cfeb25e79fdb8bc9b55f"
+    },
+    {
+      "path": "reports/1794203628295.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794203628295.xlsx",
+      "kind": "report-copy",
+      "bytes": 5426,
+      "sha256": "4cf5425434ac05cc9242fc5f885e6262b9cfec61bc6c88ab4ac384d9f6658e2b"
+    },
+    {
+      "path": "reports/1794204248721.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794204248721.xlsx",
+      "kind": "report-copy",
+      "bytes": 5419,
+      "sha256": "4378e775856f04ad891d12817cc37717fb77b42751fbe91464d1a7825f3cf772"
+    },
+    {
+      "path": "reports/1794204411540.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794204411540.xlsx",
+      "kind": "report-copy",
+      "bytes": 5933,
+      "sha256": "aeefa564207ef35afd09b4fb8e3ed042cbe46719cf1d8f07834144fbedf77697"
+    },
+    {
+      "path": "reports/1794204455136.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794204455136.xlsx",
+      "kind": "report-copy",
+      "bytes": 5935,
+      "sha256": "81814d52dcedc4bc84ce44c53ee6cd066cd1d94bd3d62bbbf8271490a8dfbf3c"
+    },
+    {
+      "path": "reports/1794207604612.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794207604612.xlsx",
+      "kind": "report-copy",
+      "bytes": 6221,
+      "sha256": "dd72b5d3fdac0abc9159165ab2522cfac9f1fa9da6f5722c51b3bfd236388488"
+    },
+    {
+      "path": "reports/1794211207286.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794211207286.xlsx",
+      "kind": "report-copy",
+      "bytes": 6081,
+      "sha256": "5dafd177989b357d498bd9d6794f8378f999d3b51c7ee0608a9acbdb722b19f2"
+    },
+    {
+      "path": "reports/1794214800124.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794214800124.xlsx",
+      "kind": "report-copy",
+      "bytes": 6164,
+      "sha256": "5a0700e05550390f84bfd20c211860038ffe1d6d40b1008e81dda4dc55bfb6cd"
+    },
+    {
+      "path": "reports/1794218403078.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794218403078.xlsx",
+      "kind": "report-copy",
+      "bytes": 6154,
+      "sha256": "f6d4de86fd82dc5a7a6f516e2d6d38ee361c0ff48ec7d98e57621dd97a4b0de4"
+    },
+    {
+      "path": "reports/1794222005850.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794222005850.xlsx",
+      "kind": "report-copy",
+      "bytes": 6277,
+      "sha256": "8d46adf820502fcb02461228a35912c4ac159dd1579cc746316370c810987bb1"
+    },
+    {
+      "path": "reports/1794225608549.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794225608549.xlsx",
+      "kind": "report-copy",
+      "bytes": 6267,
+      "sha256": "a16bedef02666d2bbeb17574e25054470dd76e5fd13a93d07d586a926571d10b"
+    },
+    {
+      "path": "reports/1794229201415.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794229201415.xlsx",
+      "kind": "report-copy",
+      "bytes": 6265,
+      "sha256": "2db6dd7b7fc1e29f1d6570baa3a7cd56ac25f3dee7d43f6cf3e25da3d5648aa4"
+    },
+    {
+      "path": "reports/1794232804156.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794232804156.xlsx",
+      "kind": "report-copy",
+      "bytes": 6270,
+      "sha256": "4f986c87506ac684dd17166551aa762e8662be7eddc6d1228c5426fcbd0b72d6"
+    },
+    {
+      "path": "reports/1794236406899.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794236406899.xlsx",
+      "kind": "report-copy",
+      "bytes": 6282,
+      "sha256": "e52052cd0e43b5d5e86ac81fb6d4a965cc3052c915d1dd4efa15caefa1587ab4"
+    },
+    {
+      "path": "reports/1794243602437.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794243602437.xlsx",
+      "kind": "report-copy",
+      "bytes": 6165,
+      "sha256": "cd1a0b978baedf223ae3836732e62570deeb7d29d7d09f1ac5725148f4d5049d"
+    },
+    {
+      "path": "reports/1794247205178.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794247205178.xlsx",
+      "kind": "report-copy",
+      "bytes": 6178,
+      "sha256": "9448f68ec7a17a341ecb6324be618961c3334d2b1d196e0b3bbef016a2c1fd29"
+    },
+    {
+      "path": "reports/1794250808052.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794250808052.xlsx",
+      "kind": "report-copy",
+      "bytes": 6192,
+      "sha256": "846046722906496feb6b45791e6463ff7a7d8cb247802eed43c9cfec6364fb73"
+    },
+    {
+      "path": "reports/1794254400836.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794254400836.xlsx",
+      "kind": "report-copy",
+      "bytes": 6185,
+      "sha256": "3a46e3ae580577cf350ce24fcafcda2543dcb5ad691baaa867938d67bfd296a9"
+    },
+    {
+      "path": "reports/1794258003591.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794258003591.xlsx",
+      "kind": "report-copy",
+      "bytes": 6196,
+      "sha256": "f4396545eb5418ad4c47ce42f365ae06b89c9e6c13e6d4fb1fb120ed9cea06b4"
+    },
+    {
+      "path": "reports/1794261606298.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794261606298.xlsx",
+      "kind": "report-copy",
+      "bytes": 6196,
+      "sha256": "4a912ae1795497e2d6febde57a19cde109a7a029d1b2954ab4cc621fdd96402e"
+    },
+    {
+      "path": "reports/1794265209160.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794265209160.xlsx",
+      "kind": "report-copy",
+      "bytes": 6199,
+      "sha256": "802347035c69ab3ae49050a8aeb4fe410b224ec9b0cc75968d799ea739ecd8a2"
+    },
+    {
+      "path": "reports/1794268801939.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794268801939.xlsx",
+      "kind": "report-copy",
+      "bytes": 6197,
+      "sha256": "b98e5dcbe78d685ffecc6591f5b748e832d0d354695adf480c263c997417f872"
+    },
+    {
+      "path": "reports/1794272404882.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794272404882.xlsx",
+      "kind": "report-copy",
+      "bytes": 6192,
+      "sha256": "fe78b5af97e8f01e2ade641d40e21f035d64cc1c34657e4d096b88c51c3116e1"
+    },
+    {
+      "path": "reports/1794276007715.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794276007715.xlsx",
+      "kind": "report-copy",
+      "bytes": 6126,
+      "sha256": "5d7e848f062ffda33f59a21f0f9a820d5e2f45b4e3d63bf7ce6bcf30a31e014a"
+    },
+    {
+      "path": "reports/1794279600643.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794279600643.xlsx",
+      "kind": "report-copy",
+      "bytes": 6262,
+      "sha256": "dec27bd66f2fc8ad297e46bbffe53410a361fbabb4c0364833b8c5847d8cd0fc"
+    },
+    {
+      "path": "reports/1794283203515.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794283203515.xlsx",
+      "kind": "report-copy",
+      "bytes": 6247,
+      "sha256": "172dc9732d15512dcf6fa42d71b22a7bfc5bec2b66580ed48088e90000d39cc6"
+    },
+    {
+      "path": "reports/1794286806418.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794286806418.xlsx",
+      "kind": "report-copy",
+      "bytes": 6266,
+      "sha256": "af8e4a7613b808aeca1dfd87a27f2dfbbf14ea412d5b551723ab2492531f62da"
+    },
+    {
+      "path": "reports/1794297739365.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794297739365.xlsx",
+      "kind": "report-copy",
+      "bytes": 6262,
+      "sha256": "30d0f870874ec981beaa2f6727e383b20d5e6d8c39ad0a059ff6f29fb68a7f08"
+    },
+    {
+      "path": "reports/1794361518219.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794361518219.xlsx",
+      "kind": "report-copy",
+      "bytes": 6133,
+      "sha256": "8c53f73709eb317efc434d08ca00522387608a562378801f820d5637c66b8569"
+    },
+    {
+      "path": "reports/1794362404392.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794362404392.xlsx",
+      "kind": "report-copy",
+      "bytes": 6115,
+      "sha256": "2a183fb6db3b7ec4f23a19668e026115ef0ccf2d80c4ba05ae0a78ce62fc68af"
+    },
+    {
+      "path": "reports/1794366007234.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794366007234.xlsx",
+      "kind": "report-copy",
+      "bytes": 6252,
+      "sha256": "4eb4c87ce5d8c97ca7bbcf5b074f0309fb6471ebc8c71efade32a0d44d85284d"
+    },
+    {
+      "path": "reports/1794369610006.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794369610006.xlsx",
+      "kind": "report-copy",
+      "bytes": 6267,
+      "sha256": "4f46c0f41aeb0ce4271da3bf93b9a66f69385f94d5a82b86d725bce854076324"
+    },
+    {
+      "path": "reports/1794373202633.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794373202633.xlsx",
+      "kind": "report-copy",
+      "bytes": 6270,
+      "sha256": "cda4948b16958820a0ed95617f013fddae262e2a74f0d60673800973cd0d7275"
+    },
+    {
+      "path": "reports/1794376805729.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794376805729.xlsx",
+      "kind": "report-copy",
+      "bytes": 6266,
+      "sha256": "30808e01383ae2d3b62eda3742b9eab502702ef2df9eda665ec0950e60b74e3e"
+    },
+    {
+      "path": "reports/1794384162657.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794384162657.xlsx",
+      "kind": "report-copy",
+      "bytes": 6277,
+      "sha256": "01942d82ea19b5f3bb497b4adff5a7e6dbd0a5e11a3798093e67fb99f1c92155"
+    },
+    {
+      "path": "reports/1794387606171.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794387606171.xlsx",
+      "kind": "report-copy",
+      "bytes": 6272,
+      "sha256": "c8d57d6f2d9277000289bca2bd03b00e518110acef8f30dbf65cb5c9fcfecf93"
+    },
+    {
+      "path": "reports/1794391209453.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794391209453.xlsx",
+      "kind": "report-copy",
+      "bytes": 6269,
+      "sha256": "97262ef2413cc65704ddc7a62116748dc7446f68406eddb5036032705859ee63"
+    },
+    {
+      "path": "reports/1794394802480.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794394802480.xlsx",
+      "kind": "report-copy",
+      "bytes": 6273,
+      "sha256": "9426d6388e548618c8ad59f3aba48d84d7ca3c0acb18089bacc059b479958078"
+    },
+    {
+      "path": "reports/1794398405289.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794398405289.xlsx",
+      "kind": "report-copy",
+      "bytes": 6259,
+      "sha256": "842e5412d8274652abf0a256f9f76d1de6535e6553c6c7e540ffa740376ef343"
+    },
+    {
+      "path": "reports/1794449170661.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794449170661.xlsx",
+      "kind": "report-copy",
+      "bytes": 6134,
+      "sha256": "f5f4c4da02d8bb02fdb762eff26ffa836f5f67e3791d171730e2c4d00634caa4"
+    },
+    {
+      "path": "reports/1794450599391.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794450599391.xlsx",
+      "kind": "report-copy",
+      "bytes": 6235,
+      "sha256": "ea2ae1efa7c75d56359153cbec19c087690fe9da37c655e7f3bcbdb072c37a7f"
+    },
+    {
+      "path": "reports/1794452400973.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794452400973.xlsx",
+      "kind": "report-copy",
+      "bytes": 6247,
+      "sha256": "7d980d12865b50e9bf4915854bf6cef15709508e9d085b00a231f2933803ec12"
+    },
+    {
+      "path": "reports/1794456001099.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794456001099.xlsx",
+      "kind": "report-copy",
+      "bytes": 6247,
+      "sha256": "991a0bc1814382e86b68bdb82bc11ba086e25dffabee171ed7ae0019bc8d217e"
+    },
+    {
+      "path": "reports/1794459603945.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794459603945.xlsx",
+      "kind": "report-copy",
+      "bytes": 6263,
+      "sha256": "a72150008f0188d9911bc15b3f14aec61ce502f034a95cebe04d78572889bb56"
+    },
+    {
+      "path": "reports/1794463206954.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794463206954.xlsx",
+      "kind": "report-copy",
+      "bytes": 6277,
+      "sha256": "60672e863808151451995479008693749caf54b0ef3d95117b88645010dce749"
+    },
+    {
+      "path": "reports/1794470403761.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794470403761.xlsx",
+      "kind": "report-copy",
+      "bytes": 6264,
+      "sha256": "3b67e4543ca3ff4afa892fad09297c9760bb9ace9e1c85120ec7f1492de092fb"
+    },
+    {
+      "path": "reports/1794477607922.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794477607922.xlsx",
+      "kind": "report-copy",
+      "bytes": 6260,
+      "sha256": "9c82757eeb9db5bf6b6b8749917861e33999303d95da504460b8045bb971cab4"
+    },
+    {
+      "path": "reports/1794484803576.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794484803576.xlsx",
+      "kind": "report-copy",
+      "bytes": 6257,
+      "sha256": "8b459b41be1e7548477cb21122ddc6d42e2c6a2fe54e6ebdf06542264a0d9840"
+    },
+    {
+      "path": "reports/1794492009456.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794492009456.xlsx",
+      "kind": "report-copy",
+      "bytes": 6267,
+      "sha256": "db2a92d75bc8e400839d3d64c96239c88f2f414c95521ceabaec8615fbc1b758"
+    },
+    {
+      "path": "reports/1794506401047.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794506401047.xlsx",
+      "kind": "report-copy",
+      "bytes": 6117,
+      "sha256": "919fd54f2e72b7559db529e6ec9b8635006024284b12b4d0164a5cc399df2e4a"
+    },
+    {
+      "path": "reports/1794513607066.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794513607066.xlsx",
+      "kind": "report-copy",
+      "bytes": 6108,
+      "sha256": "417ca3f4272938ac5eea9c05184f5da71fd7bcab292207e319bb3b5b74c72dc6"
+    },
+    {
+      "path": "reports/1794520802891.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794520802891.xlsx",
+      "kind": "report-copy",
+      "bytes": 6130,
+      "sha256": "d55f8b666b59b90c8e4743d0ad3f3090f761f4de229c45f02e79e0a884c547aa"
+    },
+    {
+      "path": "reports/1794528008721.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794528008721.xlsx",
+      "kind": "report-copy",
+      "bytes": 6126,
+      "sha256": "f5fa85c8ab87243e566aa5947a3d256edd50f2e8b3ade04331a0b896bafe2503"
+    },
+    {
+      "path": "reports/1794535204794.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794535204794.xlsx",
+      "kind": "report-copy",
+      "bytes": 6134,
+      "sha256": "727c3f039b59312ea886edc8ee8eb03fb4b647485f3d11e2678d88d821a61592"
+    },
+    {
+      "path": "reports/1794542400537.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794542400537.xlsx",
+      "kind": "report-copy",
+      "bytes": 6251,
+      "sha256": "bc47108f453d79d5a1f412f88812ff772769418e906c5f0aaa2d91f47f7b9d8b"
+    },
+    {
+      "path": "reports/1794549606516.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794549606516.xlsx",
+      "kind": "report-copy",
+      "bytes": 6262,
+      "sha256": "0001a97c4f2aee964aa685351350c52e01c2a806da8a1d32f00623984243f0c8"
+    },
+    {
+      "path": "reports/1794557074793.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794557074793.xlsx",
+      "kind": "report-copy",
+      "bytes": 6258,
+      "sha256": "332005d20065ba3c51f32fb1d153d6211fb2db95c3bca5db9be61754f4b28582"
+    },
+    {
+      "path": "reports/1794564005213.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794564005213.xlsx",
+      "kind": "report-copy",
+      "bytes": 6262,
+      "sha256": "b171de9f6f3033cdf396f1ef1ae9c8bb45b49e3cfde5dbd40ecdecd19be5b742"
+    },
+    {
+      "path": "reports/1794571201180.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794571201180.xlsx",
+      "kind": "report-copy",
+      "bytes": 6260,
+      "sha256": "a82f66adc4e236d319468812a29a73d9ee6950d962f55c8b5efc10bd09f80197"
+    },
+    {
+      "path": "reports/1794578406968.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794578406968.xlsx",
+      "kind": "report-copy",
+      "bytes": 6269,
+      "sha256": "96b5f029cac8edaddf245b3c0fbd02df1f400b614aac1dee20d322e9844cf8eb"
+    },
+    {
+      "path": "reports/1794585602733.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794585602733.xlsx",
+      "kind": "report-copy",
+      "bytes": 6262,
+      "sha256": "daaeedc131b6f3d6bc8c3d834659b1414552db2c4e79e887a20d04f1f01a817d"
+    },
+    {
+      "path": "reports/1794592808460.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794592808460.xlsx",
+      "kind": "report-copy",
+      "bytes": 6113,
+      "sha256": "831d6c1d6beb0bfa6b271e7fad53c5cf9aeff75c59a855454969c5d3269290c8"
+    },
+    {
+      "path": "reports/1794600004290.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794600004290.xlsx",
+      "kind": "report-copy",
+      "bytes": 6136,
+      "sha256": "ef571795fad5096276da92fea3e1ce33fb7d9d1f3a11cd7857d98129f44a410e"
+    },
+    {
+      "path": "reports/1794607209919.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794607209919.xlsx",
+      "kind": "report-copy",
+      "bytes": 6134,
+      "sha256": "a752c7a4c751f2bde6fff773e08548e596beb1b01256a86750081230924e73ad"
+    },
+    {
+      "path": "reports/1794614405702.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794614405702.xlsx",
+      "kind": "report-copy",
+      "bytes": 6146,
+      "sha256": "f7292bb4d4acecc22054d0922c7bdb7ec47dbaae287038cb385a3d2a99f1497c"
+    },
+    {
+      "path": "reports/1794621601423.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794621601423.xlsx",
+      "kind": "report-copy",
+      "bytes": 6139,
+      "sha256": "642951a7419347c6dee05c7dcc3e26d69017ac89c7d3f95e7b1feeae2a11dcb5"
+    },
+    {
+      "path": "reports/1794628807407.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794628807407.xlsx",
+      "kind": "report-copy",
+      "bytes": 6261,
+      "sha256": "bc24330a4c863e96820ac3cd39f1815a7e1444d2a60905c4d75350894b49b40a"
+    },
+    {
+      "path": "reports/1794636003083.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794636003083.xlsx",
+      "kind": "report-copy",
+      "bytes": 6267,
+      "sha256": "11ced22fc8ed50a90aca77dc8e073e4fdd375ab0b0681bb18ad6891efc765f93"
+    },
+    {
+      "path": "reports/1794643210182.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794643210182.xlsx",
+      "kind": "report-copy",
+      "bytes": 6261,
+      "sha256": "e72c74ba325fe07354d5cbe366d0b8ee3ef13efc97eb893aef5b307f33e28cc9"
+    },
+    {
+      "path": "reports/1794650406103.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794650406103.xlsx",
+      "kind": "report-copy",
+      "bytes": 6268,
+      "sha256": "bc0429f58f2769188a2e31136a817c179b848ebcbcd775713a738e83623ac382"
+    },
+    {
+      "path": "reports/1794657601713.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794657601713.xlsx",
+      "kind": "report-copy",
+      "bytes": 6258,
+      "sha256": "752f4227d795f8294ae1430ef8713cecfbf67c581e676cf204999416872241f4"
+    },
+    {
+      "path": "reports/1794664807582.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794664807582.xlsx",
+      "kind": "report-copy",
+      "bytes": 6264,
+      "sha256": "a98e252c0523b6e206ea9c884712ca510a911189c5e60db82f45ad0665e49802"
+    },
+    {
+      "path": "reports/1794672003240.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794672003240.xlsx",
+      "kind": "report-copy",
+      "bytes": 6272,
+      "sha256": "1613631bedbd258e7d26e81d9663175372e3a01ac38ddba0fcf5bd1db2d32b33"
+    },
+    {
+      "path": "reports/1794679209038.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794679209038.xlsx",
+      "kind": "report-copy",
+      "bytes": 6109,
+      "sha256": "c89f4ac2e5eb04aa7db6e08a1a4f2eac73acf6b500af89a29adaaf668f51d873"
+    },
+    {
+      "path": "reports/1794686405060.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794686405060.xlsx",
+      "kind": "report-copy",
+      "bytes": 6120,
+      "sha256": "b0ba151a270a601bd51b3487680ac90b383877d6082ce09b34dceb83e2c51826"
+    },
+    {
+      "path": "reports/1794693600791.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794693600791.xlsx",
+      "kind": "report-copy",
+      "bytes": 6115,
+      "sha256": "2d491005c545992f665cb74f868a22b34c9be05fd57f8109c988dc0ce835d070"
+    },
+    {
+      "path": "reports/1794700806428.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794700806428.xlsx",
+      "kind": "report-copy",
+      "bytes": 6150,
+      "sha256": "f657d1698035846f0736a31e8a9b11f78463699bec7abcbaa9394bb4e35acf3c"
+    },
+    {
+      "path": "reports/1794708001972.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794708001972.xlsx",
+      "kind": "report-copy",
+      "bytes": 6127,
+      "sha256": "9c80221244bfebb07e45e6753a05979fdefbb6bac55bd1a6347dfccae88d2aa4"
+    },
+    {
+      "path": "reports/1794715207595.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794715207595.xlsx",
+      "kind": "report-copy",
+      "bytes": 6133,
+      "sha256": "3548d12fc15c50e5baa1f0d21290f5acb94721d94643215c5be07a021178c5fd"
+    },
+    {
+      "path": "reports/1794722403258.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794722403258.xlsx",
+      "kind": "report-copy",
+      "bytes": 6142,
+      "sha256": "45f23692fd3570c40bc3926d851de32bf14cfc35a460e255ac9b642a303353f5"
+    },
+    {
+      "path": "reports/1794729608909.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794729608909.xlsx",
+      "kind": "report-copy",
+      "bytes": 6271,
+      "sha256": "f7983851584c7d2d977ce1be5bc2c22f8e4e553a75163fcba9575ccbe6b38050"
+    },
+    {
+      "path": "reports/1794736804434.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794736804434.xlsx",
+      "kind": "report-copy",
+      "bytes": 6271,
+      "sha256": "eb3a5622843ea1883572da0dfc2d3a0cac74b1ad8549f5f43a6fe6a6438fb012"
+    },
+    {
+      "path": "reports/1794744010219.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794744010219.xlsx",
+      "kind": "report-copy",
+      "bytes": 6252,
+      "sha256": "fa3c1778fbac83c2baf9ed0c6cb9071be240c08db0823f5437bf03e948bc389a"
+    },
+    {
+      "path": "reports/1794751206004.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794751206004.xlsx",
+      "kind": "report-copy",
+      "bytes": 6263,
+      "sha256": "1ca04874ad584cc8e9aa9324f29289ca7aa3f00c73468abe5666016b3c57a1c0"
+    },
+    {
+      "path": "reports/1794758401371.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794758401371.xlsx",
+      "kind": "report-copy",
+      "bytes": 6215,
+      "sha256": "20e617e589f145d45e710f07e62ef5fe19265c7731f043885ca9a5575d830ac6"
+    },
+    {
+      "path": "reports/1794765607069.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794765607069.xlsx",
+      "kind": "report-copy",
+      "bytes": 6114,
+      "sha256": "4ea21b276a75ee87fc90e922aa7a9766b68d5a709e2d0e8c8e6f3b1c984d0235"
+    },
+    {
+      "path": "reports/1794772802652.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794772802652.xlsx",
+      "kind": "report-copy",
+      "bytes": 6143,
+      "sha256": "bcf5b42e45b121dea0f4dd4bb4c09ce146613087235d497fce5ae258eb958750"
+    },
+    {
+      "path": "reports/1794780008277.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794780008277.xlsx",
+      "kind": "report-copy",
+      "bytes": 6139,
+      "sha256": "b24b78c2937b6b9e7b98c8d47b748c4107672bd8339d373d4ad504b8c0a218c7"
+    },
+    {
+      "path": "reports/1794787204072.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794787204072.xlsx",
+      "kind": "report-copy",
+      "bytes": 6125,
+      "sha256": "56bd7ba599067c5b2cc0b1e592b1f816ec3fe602b6e7c0ed872b611e537a8f5b"
+    },
+    {
+      "path": "reports/1794794410173.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794794410173.xlsx",
+      "kind": "report-copy",
+      "bytes": 6131,
+      "sha256": "1b1648933e7330541de81e5dfe65572c869cc6869f7d99f558da1ca5f83b2a3d"
+    },
+    {
+      "path": "reports/1794801605033.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794801605033.xlsx",
+      "kind": "report-copy",
+      "bytes": 6251,
+      "sha256": "1cb52022538596f833b65d1090a3a3aa09fe78e013e024c2384001986828a6e8"
+    },
+    {
+      "path": "reports/1794810147135.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794810147135.xlsx",
+      "kind": "report-copy",
+      "bytes": 6245,
+      "sha256": "a5211f05762638baa42111eb7510c2c4d50a8102062c01749ac14de45dcee005"
+    },
+    {
+      "path": "reports/1794816005125.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794816005125.xlsx",
+      "kind": "report-copy",
+      "bytes": 6249,
+      "sha256": "7a62c7bb9903ed0084a1ae65c3435d0fc652603d3be2296e5cb30cfc82d8c3f8"
+    },
+    {
+      "path": "reports/1794823202721.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794823202721.xlsx",
+      "kind": "report-copy",
+      "bytes": 6261,
+      "sha256": "dba59838f257c57c06234123d0110d23022aba316d4b3bf80018a82f618d5b98"
+    },
+    {
+      "path": "reports/1794830408315.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794830408315.xlsx",
+      "kind": "report-copy",
+      "bytes": 6266,
+      "sha256": "ffd109d94029e3b33d2e4f57c9df68936252c90e577798c04d7a65098683accb"
+    },
+    {
+      "path": "reports/1794837607019.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794837607019.xlsx",
+      "kind": "report-copy",
+      "bytes": 6254,
+      "sha256": "debb8fbd81b9be72ce3430c8aa89aba810ba045b4d34dbe4db177006353fcdd5"
+    },
+    {
+      "path": "reports/1794844803059.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794844803059.xlsx",
+      "kind": "report-copy",
+      "bytes": 6249,
+      "sha256": "d010f0ddb3fc63ef0c6eb16755e852dc1bcef3f2c63a80e1951483bca1b03b6d"
+    },
+    {
+      "path": "reports/1794852008788.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794852008788.xlsx",
+      "kind": "report-copy",
+      "bytes": 6105,
+      "sha256": "ace42f73fab4b47634206cc152b32c2ec65ae263c202b6c67de86f87092b8a48"
+    },
+    {
+      "path": "reports/1794859204218.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794859204218.xlsx",
+      "kind": "report-copy",
+      "bytes": 6117,
+      "sha256": "d8216a8484b216f227cee323aafa868dc6dad78ae6a8f549e56baae7487d4883"
+    },
+    {
+      "path": "reports/1794866410007.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794866410007.xlsx",
+      "kind": "report-copy",
+      "bytes": 6123,
+      "sha256": "1b115194725ef3a1e7f2ed5a741c3381e91a75ab2e867bfd4e108cab9206d677"
+    },
+    {
+      "path": "reports/1794873605778.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794873605778.xlsx",
+      "kind": "report-copy",
+      "bytes": 6141,
+      "sha256": "6b819ffb3ff3f23a24ad05a0d7688d022957c9eea9b665046006085a3971dc2b"
+    },
+    {
+      "path": "reports/1794880801695.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794880801695.xlsx",
+      "kind": "report-copy",
+      "bytes": 6130,
+      "sha256": "ef6c10f6f256170fc556000ef14d1ef59742ae616bc2b3fe70993505d5980c39"
+    },
+    {
+      "path": "reports/1794888002581.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794888002581.xlsx",
+      "kind": "report-copy",
+      "bytes": 6256,
+      "sha256": "c44302f94231ad47c7eb3885fd1c487bb3b986d82f2eff7e7ccbadd739320dcd"
+    },
+    {
+      "path": "reports/1794895208986.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794895208986.xlsx",
+      "kind": "report-copy",
+      "bytes": 6260,
+      "sha256": "3bc92fcd6e910efc90dfa35b268c7f946c5ce7c52f6e10bf8699149372293b1f"
+    },
+    {
+      "path": "reports/1794902405551.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794902405551.xlsx",
+      "kind": "report-copy",
+      "bytes": 6254,
+      "sha256": "3dbe98b3ad63bfaba42377fda79b639381c717bf6c1497c641c6ceac63f47690"
+    },
+    {
+      "path": "reports/1794909601715.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794909601715.xlsx",
+      "kind": "report-copy",
+      "bytes": 6258,
+      "sha256": "16a0b538f8ba9d85491c72cc5ece56de23571a23bcba850f71c36a912d13dc3b"
+    },
+    {
+      "path": "reports/1794916801817.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794916801817.xlsx",
+      "kind": "report-copy",
+      "bytes": 6263,
+      "sha256": "83dd7e4aa02b79cfeaf9863245f0b956947fb3f65f44b33fefbd9707f69d3ea0"
+    },
+    {
+      "path": "reports/1794924007392.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794924007392.xlsx",
+      "kind": "report-copy",
+      "bytes": 6256,
+      "sha256": "789b092a2ff321a9e1a7b4521d66e5e06440ae6cf06000f8677901d7f92e4d51"
+    },
+    {
+      "path": "reports/1794931203020.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794931203020.xlsx",
+      "kind": "report-copy",
+      "bytes": 6308,
+      "sha256": "782201d43d84f7a815db2e7f3718b5025d449d5662acda4a2b73bfe33a0273b3"
+    },
+    {
+      "path": "reports/1794938408752.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794938408752.xlsx",
+      "kind": "report-copy",
+      "bytes": 6152,
+      "sha256": "f0b9aaffcc2a0b6fd6ce887447abb7a823e317c779b80bfd3863b3a6465a5c2a"
+    },
+    {
+      "path": "reports/1794945604471.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794945604471.xlsx",
+      "kind": "report-copy",
+      "bytes": 6162,
+      "sha256": "34ac69bd769b378aac00169e67418cb51b197c5594622c053664b5246296e8df"
+    },
+    {
+      "path": "reports/1794952810068.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794952810068.xlsx",
+      "kind": "report-copy",
+      "bytes": 6179,
+      "sha256": "d97d7637484c60edd07e7405331f92d0a750f31ff43433785c4e84718d69e9be"
+    },
+    {
+      "path": "reports/1794960006012.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794960006012.xlsx",
+      "kind": "report-copy",
+      "bytes": 6178,
+      "sha256": "53cfeab03ec98b892fd589459d21a11da1fbf3cfe556e4f1f7403d9a1fc172d8"
+    },
+    {
+      "path": "reports/1794967203036.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794967203036.xlsx",
+      "kind": "report-copy",
+      "bytes": 6182,
+      "sha256": "91276b5f449ab9c096db4b529f268d170d7188ee5f39ae10612fce38ca92c80a"
+    },
+    {
+      "path": "reports/1794974408870.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794974408870.xlsx",
+      "kind": "report-copy",
+      "bytes": 6316,
+      "sha256": "febc2bfee8e060ac81adec49dcbb97d115931e5d1f68eb667a6024a65361ba32"
+    },
+    {
+      "path": "reports/1794981604514.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794981604514.xlsx",
+      "kind": "report-copy",
+      "bytes": 6298,
+      "sha256": "4bdc127992f7795d187f151ddec33590aa25e54b5dde50fc79eacbc38965e06d"
+    },
+    {
+      "path": "reports/1794988801317.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794988801317.xlsx",
+      "kind": "report-copy",
+      "bytes": 6302,
+      "sha256": "9bfbf0ddc4cece4b5d88b57ae5334dff95e296b3dd476ecc05aff88a21bdc173"
+    },
+    {
+      "path": "reports/1794996005994.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1794996005994.xlsx",
+      "kind": "report-copy",
+      "bytes": 6320,
+      "sha256": "84031f15bc26029064434b03495212888a5d38f9ffebbd02303f3ddf007e099c"
+    },
+    {
+      "path": "reports/1795003201667.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1795003201667.xlsx",
+      "kind": "report-copy",
+      "bytes": 6313,
+      "sha256": "0db5258334ecb5da0ef37e654ff755e563d11dba2d96ed43c19f839cae21c397"
+    },
+    {
+      "path": "reports/1795010407655.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1795010407655.xlsx",
+      "kind": "report-copy",
+      "bytes": 6310,
+      "sha256": "813013efc2e6a871b76dea9a68faa30ca22f694e3a573ebe5b3ff61b89ee338c"
+    },
+    {
+      "path": "reports/1795017603478.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1795017603478.xlsx",
+      "kind": "report-copy",
+      "bytes": 6288,
+      "sha256": "b857cbc57ff7fd1f6be547873128ed016e7bbcb0cec147c053fe8aaa1a4739b3"
+    },
+    {
+      "path": "reports/1795024808972.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1795024808972.xlsx",
+      "kind": "report-copy",
+      "bytes": 6160,
+      "sha256": "85182f0820dd7869839a0abc6111347fdad1aa85f9ac10e489fb71655e777fcb"
+    },
+    {
+      "path": "reports/1795032004593.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1795032004593.xlsx",
+      "kind": "report-copy",
+      "bytes": 6183,
+      "sha256": "9f2ccba7a60bb09c3bfb25d36b06c02c7f32084d42ec68094213e3bafafeb274"
+    },
+    {
+      "path": "reports/1795039210170.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1795039210170.xlsx",
+      "kind": "report-copy",
+      "bytes": 6190,
+      "sha256": "1447236e75e83400744912cae28509039def102e20be09492364d51986754119"
+    },
+    {
+      "path": "reports/1795046405920.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1795046405920.xlsx",
+      "kind": "report-copy",
+      "bytes": 6175,
+      "sha256": "c2301cf29fdb9e45338702af81b4752bc059ef0e2f9667c325d5aaeda4fea18c"
+    },
+    {
+      "path": "reports/1795052097893.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1795052097893.xlsx",
+      "kind": "report-copy",
+      "bytes": 6171,
+      "sha256": "78649f03c0ae2fa66f09cad10a7d7a04eeda8ce0d92956f0bab1c4d4e5365a50"
+    },
+    {
+      "path": "reports/1795053601780.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1795053601780.xlsx",
+      "kind": "report-copy",
+      "bytes": 6177,
+      "sha256": "c86077c133f4bf99922b7ad94aebd14602bcd37dfe06625cc112cfc4ea369f8b"
+    },
+    {
+      "path": "reports/1795060802934.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1795060802934.xlsx",
+      "kind": "report-copy",
+      "bytes": 6315,
+      "sha256": "0b3f131545daa7e1bd12ef9ef1a26d3a809bb4735afc473951c0c45e8cb9b96e"
+    },
+    {
+      "path": "reports/1795068008610.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1795068008610.xlsx",
+      "kind": "report-copy",
+      "bytes": 6301,
+      "sha256": "e5a85c236e97629a9aa723c3ae17f9094f26799df6e0e8815addd3ad08a0bdf1"
+    },
+    {
+      "path": "reports/1795075205299.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1795075205299.xlsx",
+      "kind": "report-copy",
+      "bytes": 6302,
+      "sha256": "a284a0ea9ae4515a92efcfec71ca208e44001354bdec2068a95c9250633a68f6"
+    },
+    {
+      "path": "reports/1795082401860.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1795082401860.xlsx",
+      "kind": "report-copy",
+      "bytes": 6308,
+      "sha256": "12d7ee0721af3f5f4618a6e25b269f9fc274fe1c26efaf26e2f85469c40ea5c1"
+    },
+    {
+      "path": "reports/1795089607660.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1795089607660.xlsx",
+      "kind": "report-copy",
+      "bytes": 6315,
+      "sha256": "4e880aae1409385c7b83a607eb9d27bb5e6ea19bc35bfd80d08fc0ce69846331"
+    },
+    {
+      "path": "reports/1795096803435.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1795096803435.xlsx",
+      "kind": "report-copy",
+      "bytes": 6307,
+      "sha256": "0bf4c80de5d505b579eaedefc7338d4b53cc9cfbf6c0bd738686c9bc7dd3bdfe"
+    },
+    {
+      "path": "reports/1795104009189.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1795104009189.xlsx",
+      "kind": "report-copy",
+      "bytes": 6310,
+      "sha256": "3d091b8d1b25e20f61f47b50ca61009fbd76bd035e610d5153dd93b99dd9a6e1"
+    },
+    {
+      "path": "reports/1795111204755.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1795111204755.xlsx",
+      "kind": "report-copy",
+      "bytes": 6161,
+      "sha256": "bd07dd3b37d989d5d7af2b4d81ad9dc89c5d85f2156346ed048d34a9bab7032d"
+    },
+    {
+      "path": "reports/1795118410366.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1795118410366.xlsx",
+      "kind": "report-copy",
+      "bytes": 6168,
+      "sha256": "73a0bda258503a05ca24fcc1b9ab70dfb678dc101ecf1d44e807b0d2a3740147"
+    },
+    {
+      "path": "reports/1795125605817.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1795125605817.xlsx",
+      "kind": "report-copy",
+      "bytes": 6182,
+      "sha256": "396e68226112519b3d95332e3e509e99432d6cd3fe2c173e63cfe87348b95a7d"
+    },
+    {
+      "path": "reports/1795132801497.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1795132801497.xlsx",
+      "kind": "report-copy",
+      "bytes": 6182,
+      "sha256": "cdc4bb33245fc5f685e090a3d1d34ff0cd54ee517e8ba138c29c5ada9c4b5100"
+    },
+    {
+      "path": "reports/1795147202889.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1795147202889.xlsx",
+      "kind": "report-copy",
+      "bytes": 6293,
+      "sha256": "36cc947bca9c06a8e3ac4227342aea09c2e24acdbb676d597c6731ed86516961"
+    },
+    {
+      "path": "reports/1795154408751.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1795154408751.xlsx",
+      "kind": "report-copy",
+      "bytes": 6303,
+      "sha256": "20f50437651764f7c75877f8b4ef922562b139a3af7980d1c52a9a0b7cc3bdc3"
+    },
+    {
+      "path": "reports/1795161608333.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1795161608333.xlsx",
+      "kind": "report-copy",
+      "bytes": 6302,
+      "sha256": "08f0be0310375f993f8b50082d23df4a7d64306e9aa97056595914358af1aa18"
+    },
+    {
+      "path": "reports/1795168904287.xlsx",
+      "source": "workspace:outputs/gravity-wecom/1795168904287.xlsx",
+      "kind": "report-copy",
+      "bytes": 6303,
+      "sha256": "1ded6500589f07c91acb0d45d480a5050670fdadcfb88cfc6aeea3e20eecd5af"
+    },
+    {
+      "path": "reports/2026-11-11-16-补发.xlsx",
+      "source": "workspace:outputs/gravity-wecom/2026-11-11-16-补发.xlsx",
+      "kind": "report-copy",
+      "bytes": 6270,
+      "sha256": "9b3349198400a94cab8c4018dd2c4b359776cd671b59b25c7d0ad9ab7b10a9f5"
+    },
+    {
+      "path": "reports/external/2026-11-16_1794823785203_备用小时报.png",
+      "source": "workspace:outputs/gravity-wecom/external/2026-11-16_1794823785203_备用小时报.png",
+      "kind": "report-copy",
+      "bytes": 54229,
+      "sha256": "80a90807a7265e79918e41258f61ea50712f629dd571f98c1042d607580fd868"
+    },
+    {
+      "path": "reports/external/2026-11-16_1794823785203_备用小时报.xlsx",
+      "source": "workspace:outputs/gravity-wecom/external/2026-11-16_1794823785203_备用小时报.xlsx",
+      "kind": "report-copy",
+      "bytes": 4942,
+      "sha256": "5a808612d05c95d36d44c4f09a26dca6facccc05133884adc72e7ba056baf5d6"
+    },
+    {
+      "path": "reports/external/2026-11-16_1794833461972_备用小时报.png",
+      "source": "workspace:outputs/gravity-wecom/external/2026-11-16_1794833461972_备用小时报.png",
+      "kind": "report-copy",
+      "bytes": 52775,
+      "sha256": "e8ce57a2f68a8cec91be284bdb65afbc88d6ff4e5ffbd3027b14faa6b6cc53dd"
+    },
+    {
+      "path": "reports/external/2026-11-16_1794833461972_备用小时报.xlsx",
+      "source": "workspace:outputs/gravity-wecom/external/2026-11-16_1794833461972_备用小时报.xlsx",
+      "kind": "report-copy",
+      "bytes": 4924,
+      "sha256": "df065ead2b994b024b047399be3194b4b96b27af5d839614c1d42024aeafcf2c"
+    },
+    {
+      "path": "reports/external/别推我的塔_11点实拉预览.png",
+      "source": "workspace:outputs/gravity-wecom/external/别推我的塔_11点实拉预览.png",
+      "kind": "report-copy",
+      "bytes": 53786,
+      "sha256": "7c0f8937481c41df5ed077f10619bd5c93dac4db528c96bf2159e5e545fc7903"
+    },
+    {
+      "path": "reports/external/别推我的塔_11点实拉预览.xlsx",
+      "source": "workspace:outputs/gravity-wecom/external/别推我的塔_11点实拉预览.xlsx",
+      "kind": "report-copy",
+      "bytes": 4956,
+      "sha256": "8c211baa40d4447b62ad83d8caebd7b7ecf866b8924f52961bb5cb3ea5fd3853"
+    },
+    {
+      "path": "reports/external/别推我的塔_11点追加模拟.png",
+      "source": "workspace:outputs/gravity-wecom/external/别推我的塔_11点追加模拟.png",
+      "kind": "report-copy",
+      "bytes": 52944,
+      "sha256": "5f50d764aa7dce413de23e7a661055d6f94e2f588c56830c38ab932a5238b65c"
+    },
+    {
+      "path": "reports/external/别推我的塔_11点追加模拟.xlsx",
+      "source": "workspace:outputs/gravity-wecom/external/别推我的塔_11点追加模拟.xlsx",
+      "kind": "report-copy",
+      "bytes": 4952,
+      "sha256": "e41a332428f41e028212164a1e7dc052b894855a9ac03bb8a42193f2b7a9afb9"
+    },
+    {
+      "path": "reports/external/别推我的塔_11点追加模拟_合并日期.png",
+      "source": "workspace:outputs/gravity-wecom/external/别推我的塔_11点追加模拟_合并日期.png",
+      "kind": "report-copy",
+      "bytes": 53067,
+      "sha256": "aa9d7e0270bf83758760635db5a6e3a73b7f69f492495f71fc8fcd5b9c8da1f3"
+    },
+    {
+      "path": "reports/external/别推我的塔_11点追加模拟_合并日期.xlsx",
+      "source": "workspace:outputs/gravity-wecom/external/别推我的塔_11点追加模拟_合并日期.xlsx",
+      "kind": "report-copy",
+      "bytes": 4956,
+      "sha256": "5c56ac5237c4af3d8cbe665e117ac9e91872d7cff25105f62ac84387a3553526"
+    },
+    {
+      "path": "reports/external/别推我的塔_13点追加模拟.png",
+      "source": "workspace:outputs/gravity-wecom/external/别推我的塔_13点追加模拟.png",
+      "kind": "report-copy",
+      "bytes": 58922,
+      "sha256": "4dbf3aec6e555645270acb5a6db6b0ba7feb0504109a9c4ead087a28b5adf221"
+    },
+    {
+      "path": "reports/external/别推我的塔_临时播报_20261116_103741.png",
+      "source": "workspace:outputs/gravity-wecom/external/别推我的塔_临时播报_20261116_103741.png",
+      "kind": "report-copy",
+      "bytes": 44535,
+      "sha256": "25f2d1be2faa54c98593b7757045b5c7b88d8be5834d9b2536424f9b094a0abe"
+    },
+    {
+      "path": "reports/external/别推我的塔_临时播报_20261116_103741.xlsx",
+      "source": "workspace:outputs/gravity-wecom/external/别推我的塔_临时播报_20261116_103741.xlsx",
+      "kind": "report-copy",
+      "bytes": 4833,
+      "sha256": "a92823ddd3d28efae9a70b0f764d6022e4558d2604a82e0d4d6d9cccc45323fd"
+    },
+    {
+      "path": "reports/external/别推我的塔_外部小时报验证.png",
+      "source": "workspace:outputs/gravity-wecom/external/别推我的塔_外部小时报验证.png",
+      "kind": "report-copy",
+      "bytes": 45077,
+      "sha256": "940575cc8cda44c3c75ec085c4926f0fedb74f6fce13ee3378c4713d775e68d1"
+    },
+    {
+      "path": "reports/external/别推我的塔_外部小时报验证.xlsx",
+      "source": "workspace:outputs/gravity-wecom/external/别推我的塔_外部小时报验证.xlsx",
+      "kind": "report-copy",
+      "bytes": 4828,
+      "sha256": "d12aed99f150559ad687485b077ac6b7590173cb739ffd3cfc4aab71feef5263"
+    },
+    {
+      "path": "reports/external/别推我的塔_引力取数预览_20261116_100218.png",
+      "source": "workspace:outputs/gravity-wecom/external/别推我的塔_引力取数预览_20261116_100218.png",
+      "kind": "report-copy",
+      "bytes": 44974,
+      "sha256": "57524968ae3bb1f071c0bfbfe9dc13118bfa82950eb55ee4263b032ae94c16bd"
+    },
+    {
+      "path": "reports/external/别推我的塔_引力取数预览_20261116_100218.xlsx",
+      "source": "workspace:outputs/gravity-wecom/external/别推我的塔_引力取数预览_20261116_100218.xlsx",
+      "kind": "report-copy",
+      "bytes": 4829,
+      "sha256": "dd8450c1cbb91ce8b5080bf8f4054f9b339ce3216cc323829340ac438da10821"
+    },
+    {
+      "path": "reports/external/别推我的塔_跨天播报模拟.png",
+      "source": "workspace:outputs/gravity-wecom/external/别推我的塔_跨天播报模拟.png",
+      "kind": "report-copy",
+      "bytes": 67434,
+      "sha256": "056879b07c0c108bd9d8d01d8af8c09282e934ca483bd30b77754f163757f0c5"
+    },
+    {
+      "path": "reports/external/别推我的塔_跨天播报模拟.xlsx",
+      "source": "workspace:outputs/gravity-wecom/external/别推我的塔_跨天播报模拟.xlsx",
+      "kind": "report-copy",
+      "bytes": 5054,
+      "sha256": "de3b10f5a31b1b355b81d9bd4510344e4d6131e84f41d854369c83aa3f55cccb"
+    },
+    {
+      "path": "reports/external/外部小时报_2026-11-16_0900_格式预览.png",
+      "source": "workspace:outputs/gravity-wecom/external/外部小时报_2026-11-16_0900_格式预览.png",
+      "kind": "report-copy",
+      "bytes": 47212,
+      "sha256": "f64ec0d58c09c3cbab83b67ac6b83f71539503197bb1dc474e23d2798fbc3d0d"
+    },
+    {
+      "path": "reports/external/外部小时报_2026-11-16_0900_格式预览.xlsx",
+      "source": "workspace:outputs/gravity-wecom/external/外部小时报_2026-11-16_0900_格式预览.xlsx",
+      "kind": "report-copy",
+      "bytes": 4860,
+      "sha256": "c6d9fb4f8067e53695b8e7d7c92b2b291f3bfa3ae17d45308929b3d5166a7c5c"
+    },
+    {
+      "path": "reports/external/外部小时报_2026-11-17_1000_预览.png",
+      "source": "workspace:outputs/gravity-wecom/external/外部小时报_2026-11-17_1000_预览.png",
+      "kind": "report-copy",
+      "bytes": 50684,
+      "sha256": "50b0bc6551440e6b20f9890f123728ecac232c5c874fdb457811f56f2023b1df"
+    },
+    {
+      "path": "reports/external/外部小时报_2026-11-17_1000_预览.xlsx",
+      "source": "workspace:outputs/gravity-wecom/external/外部小时报_2026-11-17_1000_预览.xlsx",
+      "kind": "report-copy",
+      "bytes": 4918,
+      "sha256": "a8456b224048b5afd71341a22815ad646d1b83293180f0c2c469d35d35567f52"
+    },
+    {
+      "path": "reports/external/外部小时报_2026-11-17_看板取数验证.png",
+      "source": "workspace:outputs/gravity-wecom/external/外部小时报_2026-11-17_看板取数验证.png",
+      "kind": "report-copy",
+      "bytes": 50603,
+      "sha256": "16ca7c114e8ec1d546e51b815e1210972a6de2353d9387ce78a6d15b1d38fa5c"
+    },
+    {
+      "path": "reports/external/外部小时报_2026-11-17_看板取数验证.xlsx",
+      "source": "workspace:outputs/gravity-wecom/external/外部小时报_2026-11-17_看板取数验证.xlsx",
+      "kind": "report-copy",
+      "bytes": 4912,
+      "sha256": "9f353561f99afdad84b006eb168371561f8e813949d99362d62b209031f6b64a"
+    },
+    {
+      "path": "reports/external/外部小时报_21点切换前预览.png",
+      "source": "workspace:outputs/gravity-wecom/external/外部小时报_21点切换前预览.png",
+      "kind": "report-copy",
+      "bytes": 52775,
+      "sha256": "e8ce57a2f68a8cec91be284bdb65afbc88d6ff4e5ffbd3027b14faa6b6cc53dd"
+    },
+    {
+      "path": "reports/external/外部小时报_21点切换前预览.xlsx",
+      "source": "workspace:outputs/gravity-wecom/external/外部小时报_21点切换前预览.xlsx",
+      "kind": "report-copy",
+      "bytes": 4923,
+      "sha256": "c10d4c49a4571c20a13d79992f8cbeb765ec1cbe3817a17d38eb0dc20822e3ab"
+    },
+    {
+      "path": "reports/external/外部小时报_仅媒体口径预览.png",
+      "source": "workspace:outputs/gravity-wecom/external/外部小时报_仅媒体口径预览.png",
+      "kind": "report-copy",
+      "bytes": 91278,
+      "sha256": "167261f274b1b5f371cc78416c135e4b2edd3d4e210c5f0d02138f3bfa53b488"
+    },
+    {
+      "path": "reports/external/外部小时报_仅媒体口径预览.xlsx",
+      "source": "workspace:outputs/gravity-wecom/external/外部小时报_仅媒体口径预览.xlsx",
+      "kind": "report-copy",
+      "bytes": 5507,
+      "sha256": "b09c04f4de33900d624c9926a44ff82b628c3a5abb3a5ba57dfc6f3b21d1e765"
+    },
+    {
+      "path": "reports/external/外部小时报_累计.png",
+      "source": "workspace:outputs/gravity-wecom/external/外部小时报_累计.png",
+      "kind": "report-copy",
+      "bytes": 328243,
+      "sha256": "63a0c4f1c50f1960c5b6b453d8a0e699bf11616636df306d47a9005fb8a474f4"
+    },
+    {
+      "path": "reports/external/外部小时报_累计.xlsx",
+      "source": "workspace:outputs/gravity-wecom/external/外部小时报_累计.xlsx",
+      "kind": "report-copy",
+      "bytes": 8760,
+      "sha256": "633b16e2f137bad74251a0755674bf002af87ba5ea42bc3315e55e8d94755570"
+    },
+    {
+      "path": "reports/external-history/联合小时报_历史分时副本_20261119152405_c3c9a1ec.xlsx",
+      "source": "workspace:outputs/gravity-wecom/external-history/联合小时报_历史分时副本_20261119152405_c3c9a1ec.xlsx",
+      "kind": "report-copy",
+      "bytes": 13852,
+      "sha256": "58ebf0e6f779e455b822c3e2958f15b049d83ba7d3e4f94e9df5848d5b755272"
+    },
+    {
+      "path": "reports/external-history/联合小时报_历史分时副本_20261119152500_937b8c4f.xlsx",
+      "source": "workspace:outputs/gravity-wecom/external-history/联合小时报_历史分时副本_20261119152500_937b8c4f.xlsx",
+      "kind": "report-copy",
+      "bytes": 13853,
+      "sha256": "7b97c1276c3a19f5b1420a53a9399b2e3265c36cf12fad62416d8058cfb070b5"
+    },
+    {
+      "path": "reports/external-history/联合小时报_历史分时副本_20261119181209_4d7069f4.xlsx",
+      "source": "workspace:outputs/gravity-wecom/external-history/联合小时报_历史分时副本_20261119181209_4d7069f4.xlsx",
+      "kind": "report-copy",
+      "bytes": 14370,
+      "sha256": "c234655ba27efcc66ba10616047da86905d7e53fd65f1a4f87d238163242d690"
+    },
+    {
+      "path": "reports/external-history/联合小时报_历史分时副本_20261120094419_2f55735e.xlsx",
+      "source": "workspace:outputs/gravity-wecom/external-history/联合小时报_历史分时副本_20261120094419_2f55735e.xlsx",
+      "kind": "report-copy",
+      "bytes": 16773,
+      "sha256": "e9d2a6da5bab88762d0a6bcf40c5e3076a9213e7aae726f2684dc18908a25a83"
+    },
+    {
+      "path": "reports/external-history/联合小时报_历史分时副本_20261120113135_aa4fda7c.xlsx",
+      "source": "workspace:outputs/gravity-wecom/external-history/联合小时报_历史分时副本_20261120113135_aa4fda7c.xlsx",
+      "kind": "report-copy",
+      "bytes": 17099,
+      "sha256": "424e8446404618227ebc19a1d984382a24d170ba85dc2a67b8033d6df6b66499"
+    },
+    {
+      "path": "reports/external-history/联合小时报_历史分时副本_20261120141445_db95ad62.xlsx",
+      "source": "workspace:outputs/gravity-wecom/external-history/联合小时报_历史分时副本_20261120141445_db95ad62.xlsx",
+      "kind": "report-copy",
+      "bytes": 17614,
+      "sha256": "1ce36d0808b3d4e28efb306206c7a23c8b8af7a2da492fa651affd2a0090a0c1"
+    },
+    {
+      "path": "reports/external-history/联合小时报_历史分时副本_20261120164644_760c043e.xlsx",
+      "source": "workspace:outputs/gravity-wecom/external-history/联合小时报_历史分时副本_20261120164644_760c043e.xlsx",
+      "kind": "report-copy",
+      "bytes": 17925,
+      "sha256": "2acad11b70c881bc3a35f9347554fb87a9ec308a039026fe06590bd53a724476"
+    },
+    {
+      "path": "reports/external-history/联合小时报_历史分时副本_20261120183234_2937bda2.xlsx",
+      "source": "workspace:outputs/gravity-wecom/external-history/联合小时报_历史分时副本_20261120183234_2937bda2.xlsx",
+      "kind": "report-copy",
+      "bytes": 18278,
+      "sha256": "c2647b483a43d0a0f7ca04185b4ca0ec9fc377bd36385184b0b318de60e97c11"
+    },
+    {
+      "path": "reports/hero/1795165206376.conversion.attempt-1.raw.csv",
+      "source": "workspace:outputs/gravity-wecom/hero/1795165206376.conversion.attempt-1.raw.csv",
+      "kind": "text-sanitized",
+      "bytes": 72868,
+      "sha256": "87923b3b966f469b1b03b50d82e81c932205ae973856f7758dc005199d34b0d0"
+    },
+    {
+      "path": "reports/hero/1795165206376.conversion.raw.csv",
+      "source": "workspace:outputs/gravity-wecom/hero/1795165206376.conversion.raw.csv",
+      "kind": "text-sanitized",
+      "bytes": 72868,
+      "sha256": "87923b3b966f469b1b03b50d82e81c932205ae973856f7758dc005199d34b0d0"
+    },
+    {
+      "path": "reports/hero/1795165206376.conversion.snapshot.json",
+      "source": "workspace:outputs/gravity-wecom/hero/1795165206376.conversion.snapshot.json",
+      "kind": "text-sanitized",
+      "bytes": 2349,
+      "sha256": "f1c4d115166e05c1ad7e1c341dd193e54ff508700e4ab42cd442e6c97050983f"
+    },
+    {
+      "path": "reports/hero/1795165206376.gravity.snapshot.json",
+      "source": "workspace:outputs/gravity-wecom/hero/1795165206376.gravity.snapshot.json",
+      "kind": "text-sanitized",
+      "bytes": 498,
+      "sha256": "a428441928755e0d02c5c30421b0bace6cf1e540c99ef5bc1dd66763d77c77ad"
+    },
+    {
+      "path": "reports/hero/1795165206376.png",
+      "source": "workspace:outputs/gravity-wecom/hero/1795165206376.png",
+      "kind": "report-copy",
+      "bytes": 93635,
+      "sha256": "dd67cb924a5d6a423105bf72b5f94a66054ed4a925d550060a8e7ae3b1eb5fb4"
+    },
+    {
+      "path": "reports/hero/1795165206376.xlsx",
+      "source": "workspace:outputs/gravity-wecom/hero/1795165206376.xlsx",
+      "kind": "report-copy",
+      "bytes": 6332,
+      "sha256": "807e78dd3d9d0f466b02db4fec84707d1ddd56fc5f39ab49c8de76486c026047"
+    },
+    {
+      "path": "reports/hero/conversion-snapshots.snapshots.json",
+      "source": "workspace:outputs/gravity-wecom/hero/conversion-snapshots.sqlite",
+      "kind": "readable-snapshots",
+      "bytes": 7713,
+      "sha256": "78760fe2fa6cd600e4b7ada3929203942e0b0d7bdc5190bbd95c7f7c4709dda2"
+    },
+    {
+      "path": "reports/hero/conversion-snapshots.sqlite",
+      "source": "workspace:outputs/gravity-wecom/hero/conversion-snapshots.sqlite",
+      "kind": "consistent-sqlite-backup",
+      "bytes": 20480,
+      "sha256": "6969158c6bf2b73dcaa1521786af1b246e90808e895219be4e4ec5e10f699881"
+    },
+    {
+      "path": "reports/hero/hourly-snapshots.snapshots.json",
+      "source": "workspace:outputs/gravity-wecom/hero/hourly-snapshots.sqlite",
+      "kind": "readable-snapshots",
+      "bytes": 2703,
+      "sha256": "e561375da1f9bc94fb15ef3b60ec9004008d43443b79ffff8d5c027c2809bbeb"
+    },
+    {
+      "path": "reports/hero/hourly-snapshots.sqlite",
+      "source": "workspace:outputs/gravity-wecom/hero/hourly-snapshots.sqlite",
+      "kind": "consistent-sqlite-backup",
+      "bytes": 12288,
+      "sha256": "a9fb4b34c5594f3f051e473605306cfbb415d961af7ff2d00fda41c14dfa698e"
+    },
+    {
+      "path": "reports/hero/latest-bundle.json",
+      "source": "workspace:outputs/gravity-wecom/hero/latest-bundle.json",
+      "kind": "text-sanitized",
+      "bytes": 763,
+      "sha256": "75c0ceea814af83909e8a5fbf3589872278d3b5d1bf7c012b5d2077355d85130"
+    },
+    {
+      "path": "reports/hero/report-settings.json",
+      "source": "workspace:outputs/gravity-wecom/hero/report-settings.json",
+      "kind": "text-sanitized",
+      "bytes": 58,
+      "sha256": "bfbea85241bfc7b577ebae0a92e4adef5f263a0153a8f7d8bbe5721840c6e806"
+    },
+    {
+      "path": "reports/hero/sources/1795167354071/conversion.attempt-1.csv",
+      "source": "workspace:outputs/gravity-wecom/hero/sources/1795167354071/conversion.attempt-1.csv",
+      "kind": "text-sanitized",
+      "bytes": 72870,
+      "sha256": "0f9e84f3cab552ec54a55192e7e2189448277af0c2e583f5bef994d5d20faaca"
+    },
+    {
+      "path": "reports/hero/sources/1795167354071/conversion.snapshot.json",
+      "source": "workspace:outputs/gravity-wecom/hero/sources/1795167354071/conversion.snapshot.json",
+      "kind": "text-sanitized",
+      "bytes": 2351,
+      "sha256": "a2e7331a0ffa39cf5b2a4dc9d8127732c155a6caea574f218dadbac6cea6ce27"
+    },
+    {
+      "path": "reports/hero/sources/1795167354071/gravity.json",
+      "source": "workspace:outputs/gravity-wecom/hero/sources/1795167354071/gravity.json",
+      "kind": "text-sanitized",
+      "bytes": 526,
+      "sha256": "c4352402f9760599552daece6608899166416c5afa009077ff7bb08b2dc70973"
+    },
+    {
+      "path": "reports/hero/sources/1795167354071/media.attempt-1.csv",
+      "source": "workspace:outputs/gravity-wecom/hero/sources/1795167354071/media.attempt-1.csv",
+      "kind": "text-sanitized",
+      "bytes": 8628,
+      "sha256": "4a0c35272ba1c1a68e560b04a7c09aad1c7ba1c966d01077b86ab7172d195522"
+    },
+    {
+      "path": "reports/hero/sources/1795167354071/snapshot.json",
+      "source": "workspace:outputs/gravity-wecom/hero/sources/1795167354071/snapshot.json",
+      "kind": "text-sanitized",
+      "bytes": 815,
+      "sha256": "510bdee3f6423f5299fcb36b4b7844913ca4795d30467402d6d80af94fad5bbe"
+    },
+    {
+      "path": "reports/hero/sources/1795167354071/total.attempt-1.csv",
+      "source": "workspace:outputs/gravity-wecom/hero/sources/1795167354071/total.attempt-1.csv",
+      "kind": "text-sanitized",
+      "bytes": 13854,
+      "sha256": "1055a255e4de994f8cb6654eb0e7cd00dadc15695548cf1589903a37bc014593"
+    },
+    {
+      "path": "reports/hero/sources/1795168854733/conversion.attempt-1.csv",
+      "source": "workspace:outputs/gravity-wecom/hero/sources/1795168854733/conversion.attempt-1.csv",
+      "kind": "text-sanitized",
+      "bytes": 72868,
+      "sha256": "2a09b65c6cf6a37b0c9176f20e766441f8f4eb8e77a79b27b39134876011d0f8"
+    },
+    {
+      "path": "reports/hero/sources/1795168854733/conversion.snapshot.json",
+      "source": "workspace:outputs/gravity-wecom/hero/sources/1795168854733/conversion.snapshot.json",
+      "kind": "text-sanitized",
+      "bytes": 2351,
+      "sha256": "e9d1445472415298a09c5eb240d330ab0393e011d29e9bfcf579bc75c071c408"
+    },
+    {
+      "path": "reports/hero/sources/1795168854733/gravity.json",
+      "source": "workspace:outputs/gravity-wecom/hero/sources/1795168854733/gravity.json",
+      "kind": "text-sanitized",
+      "bytes": 526,
+      "sha256": "ef3d7f42bacee4966807744fd4f4205fe9bfcc880061d77485f2ebc9f0c79303"
+    },
+    {
+      "path": "reports/hero/sources/1795168854733/media.attempt-1.csv",
+      "source": "workspace:outputs/gravity-wecom/hero/sources/1795168854733/media.attempt-1.csv",
+      "kind": "text-sanitized",
+      "bytes": 8628,
+      "sha256": "1193b911e03e13fdabc184e33b06a63a14f6f691e04b9727b7b35b63ea904c17"
+    },
+    {
+      "path": "reports/hero/sources/1795168854733/snapshot.json",
+      "source": "workspace:outputs/gravity-wecom/hero/sources/1795168854733/snapshot.json",
+      "kind": "text-sanitized",
+      "bytes": 815,
+      "sha256": "ab288a4cf7cd0e95923b9a004add6c7950d905b01bb2373cfe8d73b6f1e77f01"
+    },
+    {
+      "path": "reports/hero/sources/1795168854733/total.attempt-1.csv",
+      "source": "workspace:outputs/gravity-wecom/hero/sources/1795168854733/total.attempt-1.csv",
+      "kind": "text-sanitized",
+      "bytes": 13854,
+      "sha256": "c24b32a6f6d64ad705ee9a988f0eb9d9514db79c1467548460d0f374e2965e45"
+    },
+    {
+      "path": "reports/hero/sources/imported-baseline/1795165243345/gravity.json",
+      "source": "workspace:outputs/gravity-wecom/hero/sources/imported-baseline/1795165243345/gravity.json",
+      "kind": "text-sanitized",
+      "bytes": 498,
+      "sha256": "a428441928755e0d02c5c30421b0bace6cf1e540c99ef5bc1dd66763d77c77ad"
+    },
+    {
+      "path": "reports/hero/sources/imported-baseline/1795165243345/media.attempt-1.csv",
+      "source": "workspace:outputs/gravity-wecom/hero/sources/imported-baseline/1795165243345/media.attempt-1.csv",
+      "kind": "text-sanitized",
+      "bytes": 8628,
+      "sha256": "ebf34890f8b3538dead05eab39d875b5afc37df89284abce1a5762037a1d19cc"
+    },
+    {
+      "path": "reports/hero/sources/imported-baseline/1795165243345/snapshot.json",
+      "source": "workspace:outputs/gravity-wecom/hero/sources/imported-baseline/1795165243345/snapshot.json",
+      "kind": "text-sanitized",
+      "bytes": 815,
+      "sha256": "276667626c5f7e1f09fdd1dd8c688cf0e82f0566265214d42f22b6c6d65d6988"
+    },
+    {
+      "path": "reports/hero/sources/imported-baseline/1795165243345/total.attempt-1.csv",
+      "source": "workspace:outputs/gravity-wecom/hero/sources/imported-baseline/1795165243345/total.attempt-1.csv",
+      "kind": "text-sanitized",
+      "bytes": 13854,
+      "sha256": "f5abbcaf1ea639fe881c96f48d1383e65f103f808379c7a49ed0c4a95b2184ab"
+    },
+    {
+      "path": "reports/hero/sources/imported-baseline/1795165373324/gravity.json",
+      "source": "workspace:outputs/gravity-wecom/hero/sources/imported-baseline/1795165373324/gravity.json",
+      "kind": "text-sanitized",
+      "bytes": 541,
+      "sha256": "7a2da804ea5b20f469a460a30aa50481d2dd5ecb375d40f4120b5f3b8af1f87d"
+    },
+    {
+      "path": "reports/hero/sources/imported-baseline/1795165373324/media.attempt-1.csv",
+      "source": "workspace:outputs/gravity-wecom/hero/sources/imported-baseline/1795165373324/media.attempt-1.csv",
+      "kind": "text-sanitized",
+      "bytes": 8628,
+      "sha256": "ebf34890f8b3538dead05eab39d875b5afc37df89284abce1a5762037a1d19cc"
+    },
+    {
+      "path": "reports/hero/sources/imported-baseline/1795165373324/snapshot.json",
+      "source": "workspace:outputs/gravity-wecom/hero/sources/imported-baseline/1795165373324/snapshot.json",
+      "kind": "text-sanitized",
+      "bytes": 830,
+      "sha256": "3b6a4eb33813789c3b0a81c44f95ab9fd2e0f1809f7096318de2803d6922d6fe"
+    },
+    {
+      "path": "reports/hero/sources/imported-baseline/1795165373324/total.attempt-1.csv",
+      "source": "workspace:outputs/gravity-wecom/hero/sources/imported-baseline/1795165373324/total.attempt-1.csv",
+      "kind": "text-sanitized",
+      "bytes": 13854,
+      "sha256": "f5abbcaf1ea639fe881c96f48d1383e65f103f808379c7a49ed0c4a95b2184ab"
+    },
+    {
+      "path": "reports/hero/sources/imported-baseline/1795166259676/conversion.attempt-1.csv",
+      "source": "workspace:outputs/gravity-wecom/hero/sources/imported-baseline/1795166259676/conversion.attempt-1.csv",
+      "kind": "text-sanitized",
+      "bytes": 72870,
+      "sha256": "717ef85c941fae529fe45742bd1b4c480282c2dadc6508f1da88382e9c5ee686"
+    },
+    {
+      "path": "reports/hero/sources/imported-baseline/1795166259676/conversion.snapshot.json",
+      "source": "workspace:outputs/gravity-wecom/hero/sources/imported-baseline/1795166259676/conversion.snapshot.json",
+      "kind": "text-sanitized",
+      "bytes": 2351,
+      "sha256": "9129001fc3dfd4ba6c0db7a28872bee440d87dfa2aa3eae179ab4364c20b4906"
+    },
+    {
+      "path": "reports/hero/sources/imported-baseline/1795166259676/gravity.json",
+      "source": "workspace:outputs/gravity-wecom/hero/sources/imported-baseline/1795166259676/gravity.json",
+      "kind": "text-sanitized",
+      "bytes": 525,
+      "sha256": "c8b6f25b2f716c019d3511c2423f6f5f148e3a8ec384534af880e43dea09b196"
+    },
+    {
+      "path": "reports/hero/sources/imported-baseline/1795166259676/media.attempt-1.csv",
+      "source": "workspace:outputs/gravity-wecom/hero/sources/imported-baseline/1795166259676/media.attempt-1.csv",
+      "kind": "text-sanitized",
+      "bytes": 8628,
+      "sha256": "5b99624ffc388c099947d2279c68362915351202d94a389b0e3154bdf5e0084c"
+    },
+    {
+      "path": "reports/hero/sources/imported-baseline/1795166259676/snapshot.json",
+      "source": "workspace:outputs/gravity-wecom/hero/sources/imported-baseline/1795166259676/snapshot.json",
+      "kind": "text-sanitized",
+      "bytes": 815,
+      "sha256": "5eaedb684039546bbffb0e64f54a502c2322bbdcb089d79ab564ef0ba2b7699b"
+    },
+    {
+      "path": "reports/hero/sources/imported-baseline/1795166259676/total.attempt-1.csv",
+      "source": "workspace:outputs/gravity-wecom/hero/sources/imported-baseline/1795166259676/total.attempt-1.csv",
+      "kind": "text-sanitized",
+      "bytes": 13854,
+      "sha256": "339e916f6487bbe5ec9baed202556ceb10b71205f9d064bb96b000d3a16f237c"
+    },
+    {
+      "path": "reports/hero/sources/imported-baseline-16/media.attempt-1.csv",
+      "source": "workspace:outputs/gravity-wecom/hero/sources/imported-baseline-16/media.attempt-1.csv",
+      "kind": "text-sanitized",
+      "bytes": 8628,
+      "sha256": "ebf34890f8b3538dead05eab39d875b5afc37df89284abce1a5762037a1d19cc"
+    },
+    {
+      "path": "reports/hero/sources/imported-baseline-16/source.json",
+      "source": "workspace:outputs/gravity-wecom/hero/sources/imported-baseline-16/source.json",
+      "kind": "text-sanitized",
+      "bytes": 186,
+      "sha256": "53130e3b8d17f020ee68be1e4d8d6d56b8f568c04c942a82b61c5eac26dd97ed"
+    },
+    {
+      "path": "reports/hero/sources/imported-baseline-16/total.attempt-1.csv",
+      "source": "workspace:outputs/gravity-wecom/hero/sources/imported-baseline-16/total.attempt-1.csv",
+      "kind": "text-sanitized",
+      "bytes": 13854,
+      "sha256": "749cde46a6fd6ecf9165a954142d6577f535fa9541dbe9f4c77d4c1ab485d26c"
+    },
+    {
+      "path": "reports/hero/英雄就是我_买量小时报.png",
+      "source": "workspace:outputs/gravity-wecom/hero/英雄就是我_买量小时报.png",
+      "kind": "report-copy",
+      "bytes": 59555,
+      "sha256": "0ef7b334675893f3d74986d5b9857d500ff011b0b4173afcda49092507d1106f"
+    },
+    {
+      "path": "reports/hero/英雄就是我_前期转化.png",
+      "source": "workspace:outputs/gravity-wecom/hero/英雄就是我_前期转化.png",
+      "kind": "report-copy",
+      "bytes": 67221,
+      "sha256": "29d6f0c942d0bead83d9f36bea8f54cf3dc6d0faed316c91f7da1a336965f1cc"
+    },
+    {
+      "path": "reports/hero/英雄就是我_小时报_累计.xlsx",
+      "source": "workspace:outputs/gravity-wecom/hero/英雄就是我_小时报_累计.xlsx",
+      "kind": "report-copy",
+      "bytes": 6793,
+      "sha256": "d0fcc879a6605b56fd476d18c9ee7a1236b275b6dd48f272e67fa9ac865109a5"
+    },
+    {
+      "path": "reports/hero/英雄就是我_投放与转化预览_20261120.conversion.attempt-1.raw.csv",
+      "source": "workspace:outputs/gravity-wecom/hero/英雄就是我_投放与转化预览_20261120.conversion.attempt-1.raw.csv",
+      "kind": "text-sanitized",
+      "bytes": 72869,
+      "sha256": "332683384b1b566e64c53d0eb5d84c8d662a83e3f6dfab8ef5113427d991a210"
+    },
+    {
+      "path": "reports/hero/英雄就是我_投放与转化预览_20261120.conversion.raw.csv",
+      "source": "workspace:outputs/gravity-wecom/hero/英雄就是我_投放与转化预览_20261120.conversion.raw.csv",
+      "kind": "text-sanitized",
+      "bytes": 72869,
+      "sha256": "332683384b1b566e64c53d0eb5d84c8d662a83e3f6dfab8ef5113427d991a210"
+    },
+    {
+      "path": "reports/hero/英雄就是我_投放与转化预览_20261120.conversion.snapshot.json",
+      "source": "workspace:outputs/gravity-wecom/hero/英雄就是我_投放与转化预览_20261120.conversion.snapshot.json",
+      "kind": "text-sanitized",
+      "bytes": 2347,
+      "sha256": "014bffa8312f06dfa71177ba5895c53cc03c9c402b0d556e33de0ad9ed148995"
+    },
+    {
+      "path": "reports/hero/英雄就是我_投放与转化预览_20261120.gravity.snapshot.json",
+      "source": "workspace:outputs/gravity-wecom/hero/英雄就是我_投放与转化预览_20261120.gravity.snapshot.json",
+      "kind": "text-sanitized",
+      "bytes": 494,
+      "sha256": "2aedfb6be1d7b840af1272521341c3ced2259643531747aebdb72e3b19506ed9"
+    },
+    {
+      "path": "reports/hero/英雄就是我_投放与转化预览_20261120.png",
+      "source": "workspace:outputs/gravity-wecom/hero/英雄就是我_投放与转化预览_20261120.png",
+      "kind": "report-copy",
+      "bytes": 93529,
+      "sha256": "e140394dd2b526be7f3f838287b01c1eb7ca8bd3429b2cf231fd225a432fa51e"
+    },
+    {
+      "path": "reports/hero/英雄就是我_投放与转化预览_20261120.xlsx",
+      "source": "workspace:outputs/gravity-wecom/hero/英雄就是我_投放与转化预览_20261120.xlsx",
+      "kind": "report-copy",
+      "bytes": 6350,
+      "sha256": "5fb688d2ded92da2b71e08e87eaebe24027c8652cdc9595983694b8ea0a1fe2b"
+    },
+    {
+      "path": "reports/hero/英雄就是我_预览_20261120.png",
+      "source": "workspace:outputs/gravity-wecom/hero/英雄就是我_预览_20261120.png",
+      "kind": "report-copy",
+      "bytes": 39117,
+      "sha256": "2494df8ca72383fd93b64ed4dd979ac7459b411d96bbfb9e2a8423d5859d0f0e"
+    },
+    {
+      "path": "reports/hero/英雄就是我_预览_20261120.xlsx",
+      "source": "workspace:outputs/gravity-wecom/hero/英雄就是我_预览_20261120.xlsx",
+      "kind": "report-copy",
+      "bytes": 5278,
+      "sha256": "84c39dd966123faec31dc001fb99fa689b733c5b704a2a81f4742d1aa1bbcd3e"
+    },
+    {
+      "path": "reports/hero-acquisition-test/conversion-snapshots.snapshots.json",
+      "source": "workspace:outputs/gravity-wecom/hero-acquisition-test/conversion-snapshots.sqlite",
+      "kind": "readable-snapshots",
+      "bytes": 5149,
+      "sha256": "bbc7ccc2d7f7497a19e6bd4cd0452083ea27591214547f8b2853714d2b78153e"
+    },
+    {
+      "path": "reports/hero-acquisition-test/conversion-snapshots.sqlite",
+      "source": "workspace:outputs/gravity-wecom/hero-acquisition-test/conversion-snapshots.sqlite",
+      "kind": "consistent-sqlite-backup",
+      "bytes": 12288,
+      "sha256": "4ca37b9fe148ac4a43249fa45ec5e9bfb7ce4d22d636affffc63625a6fd22a98"
+    },
+    {
+      "path": "reports/hero-acquisition-test/hourly-snapshots.snapshots.json",
+      "source": "workspace:outputs/gravity-wecom/hero-acquisition-test/hourly-snapshots.sqlite",
+      "kind": "readable-snapshots",
+      "bytes": 1803,
+      "sha256": "c32d2a2de46f8e32f5726810008b503313c2308a74dfd805915ebd56fdcf712d"
+    },
+    {
+      "path": "reports/hero-acquisition-test/hourly-snapshots.sqlite",
+      "source": "workspace:outputs/gravity-wecom/hero-acquisition-test/hourly-snapshots.sqlite",
+      "kind": "consistent-sqlite-backup",
+      "bytes": 12288,
+      "sha256": "6bef7a11c5818a740122b0614919bad30a1bb09cddc848f939b2eeabe23dca4b"
+    },
+    {
+      "path": "reports/hero-acquisition-test/latest-bundle.json",
+      "source": "workspace:outputs/gravity-wecom/hero-acquisition-test/latest-bundle.json",
+      "kind": "text-sanitized",
+      "bytes": 1023,
+      "sha256": "2f1fbaf426469128401b7308a19462f1cfa04e018d9e9e580de113d269861efc"
+    },
+    {
+      "path": "reports/hero-acquisition-test/report-settings.json",
+      "source": "workspace:outputs/gravity-wecom/hero-acquisition-test/report-settings.json",
+      "kind": "text-sanitized",
+      "bytes": 87,
+      "sha256": "7368ff71f188d1338e1016c3c090960e3269093fb007ad60ddbb3f934a7525e6"
+    },
+    {
+      "path": "reports/hero-acquisition-test/source-1795164930005/media.attempt-1.csv",
+      "source": "workspace:outputs/gravity-wecom/hero-acquisition-test/source-1795164930005/media.attempt-1.csv",
+      "kind": "text-sanitized",
+      "bytes": 8628,
+      "sha256": "ebf34890f8b3538dead05eab39d875b5afc37df89284abce1a5762037a1d19cc"
+    },
+    {
+      "path": "reports/hero-acquisition-test/source-1795164930005/source.json",
+      "source": "workspace:outputs/gravity-wecom/hero-acquisition-test/source-1795164930005/source.json",
+      "kind": "text-sanitized",
+      "bytes": 186,
+      "sha256": "53130e3b8d17f020ee68be1e4d8d6d56b8f568c04c942a82b61c5eac26dd97ed"
+    },
+    {
+      "path": "reports/hero-acquisition-test/source-1795164930005/total.attempt-1.csv",
+      "source": "workspace:outputs/gravity-wecom/hero-acquisition-test/source-1795164930005/total.attempt-1.csv",
+      "kind": "text-sanitized",
+      "bytes": 13854,
+      "sha256": "749cde46a6fd6ecf9165a954142d6577f535fa9541dbe9f4c77d4c1ab485d26c"
+    },
+    {
+      "path": "reports/hero-acquisition-test/sources/1795165243345/gravity.json",
+      "source": "workspace:outputs/gravity-wecom/hero-acquisition-test/sources/1795165243345/gravity.json",
+      "kind": "text-sanitized",
+      "bytes": 498,
+      "sha256": "a428441928755e0d02c5c30421b0bace6cf1e540c99ef5bc1dd66763d77c77ad"
+    },
+    {
+      "path": "reports/hero-acquisition-test/sources/1795165243345/media.attempt-1.csv",
+      "source": "workspace:outputs/gravity-wecom/hero-acquisition-test/sources/1795165243345/media.attempt-1.csv",
+      "kind": "text-sanitized",
+      "bytes": 8628,
+      "sha256": "ebf34890f8b3538dead05eab39d875b5afc37df89284abce1a5762037a1d19cc"
+    },
+    {
+      "path": "reports/hero-acquisition-test/sources/1795165243345/snapshot.json",
+      "source": "workspace:outputs/gravity-wecom/hero-acquisition-test/sources/1795165243345/snapshot.json",
+      "kind": "text-sanitized",
+      "bytes": 815,
+      "sha256": "276667626c5f7e1f09fdd1dd8c688cf0e82f0566265214d42f22b6c6d65d6988"
+    },
+    {
+      "path": "reports/hero-acquisition-test/sources/1795165243345/total.attempt-1.csv",
+      "source": "workspace:outputs/gravity-wecom/hero-acquisition-test/sources/1795165243345/total.attempt-1.csv",
+      "kind": "text-sanitized",
+      "bytes": 13854,
+      "sha256": "f5abbcaf1ea639fe881c96f48d1383e65f103f808379c7a49ed0c4a95b2184ab"
+    },
+    {
+      "path": "reports/hero-acquisition-test/sources/1795165373324/gravity.json",
+      "source": "workspace:outputs/gravity-wecom/hero-acquisition-test/sources/1795165373324/gravity.json",
+      "kind": "text-sanitized",
+      "bytes": 541,
+      "sha256": "7a2da804ea5b20f469a460a30aa50481d2dd5ecb375d40f4120b5f3b8af1f87d"
+    },
+    {
+      "path": "reports/hero-acquisition-test/sources/1795165373324/media.attempt-1.csv",
+      "source": "workspace:outputs/gravity-wecom/hero-acquisition-test/sources/1795165373324/media.attempt-1.csv",
+      "kind": "text-sanitized",
+      "bytes": 8628,
+      "sha256": "ebf34890f8b3538dead05eab39d875b5afc37df89284abce1a5762037a1d19cc"
+    },
+    {
+      "path": "reports/hero-acquisition-test/sources/1795165373324/snapshot.json",
+      "source": "workspace:outputs/gravity-wecom/hero-acquisition-test/sources/1795165373324/snapshot.json",
+      "kind": "text-sanitized",
+      "bytes": 830,
+      "sha256": "3b6a4eb33813789c3b0a81c44f95ab9fd2e0f1809f7096318de2803d6922d6fe"
+    },
+    {
+      "path": "reports/hero-acquisition-test/sources/1795165373324/total.attempt-1.csv",
+      "source": "workspace:outputs/gravity-wecom/hero-acquisition-test/sources/1795165373324/total.attempt-1.csv",
+      "kind": "text-sanitized",
+      "bytes": 13854,
+      "sha256": "f5abbcaf1ea639fe881c96f48d1383e65f103f808379c7a49ed0c4a95b2184ab"
+    },
+    {
+      "path": "reports/hero-acquisition-test/sources/1795166259676/conversion.attempt-1.csv",
+      "source": "workspace:outputs/gravity-wecom/hero-acquisition-test/sources/1795166259676/conversion.attempt-1.csv",
+      "kind": "text-sanitized",
+      "bytes": 72870,
+      "sha256": "717ef85c941fae529fe45742bd1b4c480282c2dadc6508f1da88382e9c5ee686"
+    },
+    {
+      "path": "reports/hero-acquisition-test/sources/1795166259676/conversion.snapshot.json",
+      "source": "workspace:outputs/gravity-wecom/hero-acquisition-test/sources/1795166259676/conversion.snapshot.json",
+      "kind": "text-sanitized",
+      "bytes": 2351,
+      "sha256": "9129001fc3dfd4ba6c0db7a28872bee440d87dfa2aa3eae179ab4364c20b4906"
+    },
+    {
+      "path": "reports/hero-acquisition-test/sources/1795166259676/gravity.json",
+      "source": "workspace:outputs/gravity-wecom/hero-acquisition-test/sources/1795166259676/gravity.json",
+      "kind": "text-sanitized",
+      "bytes": 525,
+      "sha256": "c8b6f25b2f716c019d3511c2423f6f5f148e3a8ec384534af880e43dea09b196"
+    },
+    {
+      "path": "reports/hero-acquisition-test/sources/1795166259676/media.attempt-1.csv",
+      "source": "workspace:outputs/gravity-wecom/hero-acquisition-test/sources/1795166259676/media.attempt-1.csv",
+      "kind": "text-sanitized",
+      "bytes": 8628,
+      "sha256": "5b99624ffc388c099947d2279c68362915351202d94a389b0e3154bdf5e0084c"
+    },
+    {
+      "path": "reports/hero-acquisition-test/sources/1795166259676/snapshot.json",
+      "source": "workspace:outputs/gravity-wecom/hero-acquisition-test/sources/1795166259676/snapshot.json",
+      "kind": "text-sanitized",
+      "bytes": 815,
+      "sha256": "5eaedb684039546bbffb0e64f54a502c2322bbdcb089d79ab564ef0ba2b7699b"
+    },
+    {
+      "path": "reports/hero-acquisition-test/sources/1795166259676/total.attempt-1.csv",
+      "source": "workspace:outputs/gravity-wecom/hero-acquisition-test/sources/1795166259676/total.attempt-1.csv",
+      "kind": "text-sanitized",
+      "bytes": 13854,
+      "sha256": "339e916f6487bbe5ec9baed202556ceb10b71205f9d064bb96b000d3a16f237c"
+    },
+    {
+      "path": "reports/hero-acquisition-test/引力取数校验.conversion.attempt-1.raw.csv",
+      "source": "workspace:outputs/gravity-wecom/hero-acquisition-test/引力取数校验.conversion.attempt-1.raw.csv",
+      "kind": "text-sanitized",
+      "bytes": 72870,
+      "sha256": "0abc7b49b32da273dfbd19ab540e9b6c5dbe199238340324c021aa91883684c8"
+    },
+    {
+      "path": "reports/hero-acquisition-test/引力取数校验.conversion.raw.csv",
+      "source": "workspace:outputs/gravity-wecom/hero-acquisition-test/引力取数校验.conversion.raw.csv",
+      "kind": "text-sanitized",
+      "bytes": 72870,
+      "sha256": "0abc7b49b32da273dfbd19ab540e9b6c5dbe199238340324c021aa91883684c8"
+    },
+    {
+      "path": "reports/hero-acquisition-test/引力取数校验.conversion.snapshot.json",
+      "source": "workspace:outputs/gravity-wecom/hero-acquisition-test/引力取数校验.conversion.snapshot.json",
+      "kind": "text-sanitized",
+      "bytes": 2350,
+      "sha256": "b4c9a81a3b4211f448a76590f74e2a6156da31fc3fdf258fc8e140e204266cf9"
+    },
+    {
+      "path": "reports/hero-acquisition-test/引力取数校验.gravity.snapshot.json",
+      "source": "workspace:outputs/gravity-wecom/hero-acquisition-test/引力取数校验.gravity.snapshot.json",
+      "kind": "text-sanitized",
+      "bytes": 498,
+      "sha256": "c4dd216edeadeb0f9ba234648056e03556902818da523e5cec0bb42ce02df14e"
+    },
+    {
+      "path": "reports/hero-acquisition-test/引力取数校验.png",
+      "source": "workspace:outputs/gravity-wecom/hero-acquisition-test/引力取数校验.png",
+      "kind": "report-copy",
+      "bytes": 93473,
+      "sha256": "326762259e5cf054e691a571de39e474d2e2be1116a5f758bab99358f017dc43"
+    },
+    {
+      "path": "reports/hero-acquisition-test/引力取数校验.xlsx",
+      "source": "workspace:outputs/gravity-wecom/hero-acquisition-test/引力取数校验.xlsx",
+      "kind": "report-copy",
+      "bytes": 6324,
+      "sha256": "a2154c2e1e47dafecf36ffd986059b35e26532c553322f567bb06b5439e0a7c0"
+    },
+    {
+      "path": "reports/hero-acquisition-test/英雄就是我_买量小时报_累计.png",
+      "source": "workspace:outputs/gravity-wecom/hero-acquisition-test/英雄就是我_买量小时报_累计.png",
+      "kind": "report-copy",
+      "bytes": 52551,
+      "sha256": "a87ec11f0e9c0f0df771c65019026283b60f97e3d4dbd44eadb257d51882b32a"
+    },
+    {
+      "path": "reports/hero-acquisition-test/英雄就是我_买量小时报_累计.xlsx",
+      "source": "workspace:outputs/gravity-wecom/hero-acquisition-test/英雄就是我_买量小时报_累计.xlsx",
+      "kind": "report-copy",
+      "bytes": 4704,
+      "sha256": "6e04193a9afad63eaa15bcbe73af89b5013b59c69cdb24cf7407121b12fea7f9"
+    },
+    {
+      "path": "reports/hero-acquisition-test/英雄就是我_前期转化_单行预览.png",
+      "source": "workspace:outputs/gravity-wecom/hero-acquisition-test/英雄就是我_前期转化_单行预览.png",
+      "kind": "report-copy",
+      "bytes": 55718,
+      "sha256": "c6b01a7a58f226550a445628804e3583689790b26f1c774042a1728a291fbddc"
+    },
+    {
+      "path": "reports/hero-acquisition-test/英雄就是我_前期转化_单行预览.xlsx",
+      "source": "workspace:outputs/gravity-wecom/hero-acquisition-test/英雄就是我_前期转化_单行预览.xlsx",
+      "kind": "report-copy",
+      "bytes": 5112,
+      "sha256": "69a6cc58d99b67013ee6f13d405b369c70c9d96346dcfd53903fc872f4cff242"
+    },
+    {
+      "path": "reports/hero-acquisition-test/英雄就是我_前期转化_累计.png",
+      "source": "workspace:outputs/gravity-wecom/hero-acquisition-test/英雄就是我_前期转化_累计.png",
+      "kind": "report-copy",
+      "bytes": 68827,
+      "sha256": "d6dc2492e1a00e07767d177595327cc98f88c3eb25dc20d7f7fabedcda7bbfa0"
+    },
+    {
+      "path": "reports/hero-acquisition-test/英雄就是我_前期转化_累计.xlsx",
+      "source": "workspace:outputs/gravity-wecom/hero-acquisition-test/英雄就是我_前期转化_累计.xlsx",
+      "kind": "report-copy",
+      "bytes": 5322,
+      "sha256": "2e772bd48baaf01e3fd40f2b38e0c207f0567586602bcfb44ad7498640013baf"
+    },
+    {
+      "path": "reports/hero-conversion/英雄就是我_前期转化预览_20261120.attempt-1.raw.csv",
+      "source": "workspace:outputs/gravity-wecom/hero-conversion/英雄就是我_前期转化预览_20261120.attempt-1.raw.csv",
+      "kind": "text-sanitized",
+      "bytes": 72867,
+      "sha256": "497a0a35bd871dfbf5a37b11e0bdd5369ddfe15821f58e8429638750a2ccb9cf"
+    },
+    {
+      "path": "reports/hero-conversion/英雄就是我_前期转化预览_20261120.attempt-2.raw.csv",
+      "source": "workspace:outputs/gravity-wecom/hero-conversion/英雄就是我_前期转化预览_20261120.attempt-2.raw.csv",
+      "kind": "text-sanitized",
+      "bytes": 72867,
+      "sha256": "497a0a35bd871dfbf5a37b11e0bdd5369ddfe15821f58e8429638750a2ccb9cf"
+    },
+    {
+      "path": "reports/hero-conversion/英雄就是我_前期转化预览_20261120.png",
+      "source": "workspace:outputs/gravity-wecom/hero-conversion/英雄就是我_前期转化预览_20261120.png",
+      "kind": "report-copy",
+      "bytes": 114836,
+      "sha256": "336bbd82decd841668fdcb52325fb7b9c8950ed37658010a2407b769b0c90d56"
+    },
+    {
+      "path": "reports/hero-conversion/英雄就是我_前期转化预览_20261120.raw.csv",
+      "source": "workspace:outputs/gravity-wecom/hero-conversion/英雄就是我_前期转化预览_20261120.raw.csv",
+      "kind": "text-sanitized",
+      "bytes": 72867,
+      "sha256": "497a0a35bd871dfbf5a37b11e0bdd5369ddfe15821f58e8429638750a2ccb9cf"
+    },
+    {
+      "path": "reports/hero-conversion/英雄就是我_前期转化预览_20261120.snapshot.json",
+      "source": "workspace:outputs/gravity-wecom/hero-conversion/英雄就是我_前期转化预览_20261120.snapshot.json",
+      "kind": "text-sanitized",
+      "bytes": 2335,
+      "sha256": "3614d45a33f37a6cd787e891d4496fb15a9058cae7e14a0b7ed3d4567de5f196"
+    },
+    {
+      "path": "reports/hero-conversion/英雄就是我_前期转化预览_20261120.xlsx",
+      "source": "workspace:outputs/gravity-wecom/hero-conversion/英雄就是我_前期转化预览_20261120.xlsx",
+      "kind": "report-copy",
+      "bytes": 5373,
+      "sha256": "0bfa7523549b19d02018416d142611ce4df2ab5790a593a265a875611d829b39"
+    },
+    {
+      "path": "reports/hero-history/英雄就是我_历史分时副本_20261120173841_5a508202.xlsx",
+      "source": "workspace:outputs/gravity-wecom/hero-history/英雄就是我_历史分时副本_20261120173841_5a508202.xlsx",
+      "kind": "report-copy",
+      "bytes": 6631,
+      "sha256": "32c249df27a4287e9515232dbecab15d3d301a7013aa4e1416d2a9fc5eeeb2e3"
+    },
+    {
+      "path": "reports/hero-history/英雄就是我_历史分时副本_20261120174209_2b89cabd.xlsx",
+      "source": "workspace:outputs/gravity-wecom/hero-history/英雄就是我_历史分时副本_20261120174209_2b89cabd.xlsx",
+      "kind": "report-copy",
+      "bytes": 6631,
+      "sha256": "56bb1330886d06b133a2044984ae6c3f170e97f45bea6a9dc6cdf8bdeb94f11d"
+    },
+    {
+      "path": "reports/iaa/1794455091055.xlsx",
+      "source": "workspace:outputs/gravity-wecom/iaa/1794455091055.xlsx",
+      "kind": "report-copy",
+      "bytes": 5229,
+      "sha256": "378aa3d6af9c5a62cb42c2b6b4029e6831053ebb051275e314289bf7114815b9"
+    },
+    {
+      "path": "reports/iaa/1794455333741.xlsx",
+      "source": "workspace:outputs/gravity-wecom/iaa/1794455333741.xlsx",
+      "kind": "report-copy",
+      "bytes": 5207,
+      "sha256": "dd503e4c1663e31f32c98d88837a7e82f3bee460e399764313883929410c4003"
+    },
+    {
+      "path": "reports/iaa/1794455394378.xlsx",
+      "source": "workspace:outputs/gravity-wecom/iaa/1794455394378.xlsx",
+      "kind": "report-copy",
+      "bytes": 5182,
+      "sha256": "39a34d041da7f77c2788fc49122974c819f530077df5121456788bcaa4be7c55"
+    },
+    {
+      "path": "reports/iaa/1794461552365.xlsx",
+      "source": "workspace:outputs/gravity-wecom/iaa/1794461552365.xlsx",
+      "kind": "report-copy",
+      "bytes": 5177,
+      "sha256": "ec3f665d18d0da4fe48ee6a1b246b548dd266599c1e051a307d3995f191acb96"
+    },
+    {
+      "path": "reports/iaa/1794477648327.xlsx",
+      "source": "workspace:outputs/gravity-wecom/iaa/1794477648327.xlsx",
+      "kind": "report-copy",
+      "bytes": 5358,
+      "sha256": "56d08adca82207a41c344ee488896755dea4c7323c1d083fb990907fa7dba2f6"
+    },
+    {
+      "path": "reports/iaa/1794484844002.xlsx",
+      "source": "workspace:outputs/gravity-wecom/iaa/1794484844002.xlsx",
+      "kind": "report-copy",
+      "bytes": 5358,
+      "sha256": "0dbc9fc0df2448967cda694e4e477f753f6aa483d9458717dc0c0dec28495bf2"
+    },
+    {
+      "path": "reports/iaa/1794492049968.xlsx",
+      "source": "workspace:outputs/gravity-wecom/iaa/1794492049968.xlsx",
+      "kind": "report-copy",
+      "bytes": 5353,
+      "sha256": "a13a556bc7414f7b5e8cf5092dea15616007f030a64c0143af769c74f33fd0be"
+    },
+    {
+      "path": "reports/iaa/1794535245258.xlsx",
+      "source": "workspace:outputs/gravity-wecom/iaa/1794535245258.xlsx",
+      "kind": "report-copy",
+      "bytes": 5362,
+      "sha256": "bee6c6f94b934ddda6867cd10741841ba35be22e1f434c0606c8f16633ad8fad"
+    },
+    {
+      "path": "reports/iaa/1794542431143.xlsx",
+      "source": "workspace:outputs/gravity-wecom/iaa/1794542431143.xlsx",
+      "kind": "report-copy",
+      "bytes": 5353,
+      "sha256": "48cf85a67e38e7ef345d11c33221338cb5496c1b96d8920f71ed273a5a37956a"
+    },
+    {
+      "path": "reports/iaa/1794549647022.xlsx",
+      "source": "workspace:outputs/gravity-wecom/iaa/1794549647022.xlsx",
+      "kind": "report-copy",
+      "bytes": 5359,
+      "sha256": "e73bae257c46da7f4e21711562ef6be92e0414482498e19b4711c89ff3a029c4"
+    },
+    {
+      "path": "reports/iaa/1794550437361.xlsx",
+      "source": "workspace:outputs/gravity-wecom/iaa/1794550437361.xlsx",
+      "kind": "report-copy",
+      "bytes": 5360,
+      "sha256": "bf9e59b4a368a7d3fa8adaf8534966e097be5029c3410a999a5020c7a4f00224"
+    },
+    {
+      "path": "reports/iaa/1794557053174.xlsx",
+      "source": "workspace:outputs/gravity-wecom/iaa/1794557053174.xlsx",
+      "kind": "report-copy",
+      "bytes": 5355,
+      "sha256": "abd24283fa06adca1e3f08eee1b13d177c799712a2ef3b5509cd50cc103bae2f"
+    },
+    {
+      "path": "reports/iaa/1794564035560.xlsx",
+      "source": "workspace:outputs/gravity-wecom/iaa/1794564035560.xlsx",
+      "kind": "report-copy",
+      "bytes": 5355,
+      "sha256": "c6dc10d00c929b56ceae7900eb9f1ed98deac9d78fa8a6a6b865562ce6946600"
+    },
+    {
+      "path": "reports/iaa/1794571231435.xlsx",
+      "source": "workspace:outputs/gravity-wecom/iaa/1794571231435.xlsx",
+      "kind": "report-copy",
+      "bytes": 5355,
+      "sha256": "f7bc9175cacd50c1a9991195ba7272dfbf14ee0ed84e685ffffa83c45ac3a7ea"
+    },
+    {
+      "path": "reports/iaa/1794578437448.xlsx",
+      "source": "workspace:outputs/gravity-wecom/iaa/1794578437448.xlsx",
+      "kind": "report-copy",
+      "bytes": 5360,
+      "sha256": "0f2f95b9ec9ea982400cdef0a99450ffe861e795909c795eac58d141cfb40ca8"
+    },
+    {
+      "path": "reports/iaa/1794585633184.xlsx",
+      "source": "workspace:outputs/gravity-wecom/iaa/1794585633184.xlsx",
+      "kind": "report-copy",
+      "bytes": 5360,
+      "sha256": "1f773c4b915680349f3a2d3d75817c85101bb5212631b519cc66a0031f2cbf95"
+    },
+    {
+      "path": "reports/iaa/1794592838865.xlsx",
+      "source": "workspace:outputs/gravity-wecom/iaa/1794592838865.xlsx",
+      "kind": "report-copy",
+      "bytes": 5330,
+      "sha256": "5ebbca5bac0fdccbb3ae209c067f660a999f09a82d3a33332448fe54b20c3af6"
+    },
+    {
+      "path": "reports/iaa/1794600064569.xlsx",
+      "source": "workspace:outputs/gravity-wecom/iaa/1794600064569.xlsx",
+      "kind": "report-copy",
+      "bytes": 5336,
+      "sha256": "83402b7dd9a98385eb15d0acd06ade68d69ba32bc58aa4f38f828e9bfbd0a3d8"
+    },
+    {
+      "path": "reports/iaa/1794607250785.xlsx",
+      "source": "workspace:outputs/gravity-wecom/iaa/1794607250785.xlsx",
+      "kind": "report-copy",
+      "bytes": 5341,
+      "sha256": "1fd755e3e88b0e69cd67beae689d17f21bd3463b9b24f5c21b5769ae57c953ca"
+    },
+    {
+      "path": "reports/iaa/1794614445996.xlsx",
+      "source": "workspace:outputs/gravity-wecom/iaa/1794614445996.xlsx",
+      "kind": "report-copy",
+      "bytes": 5347,
+      "sha256": "1d027c37dbf9af4fdb182730bbd1e1267dc898116bb9f9e61f3902a71cd5064c"
+    },
+    {
+      "path": "reports/iaa/1794621632091.xlsx",
+      "source": "workspace:outputs/gravity-wecom/iaa/1794621632091.xlsx",
+      "kind": "report-copy",
+      "bytes": 5349,
+      "sha256": "ec59006cba1dacd0188923de972ccc818d27f389ec73050b9f8ef7d194a7a7b2"
+    },
+    {
+      "path": "reports/iaa/1794628837863.xlsx",
+      "source": "workspace:outputs/gravity-wecom/iaa/1794628837863.xlsx",
+      "kind": "report-copy",
+      "bytes": 5355,
+      "sha256": "5b69e0b110405f82ba4e00af4103277bf89e9d020aba3b656d5cad0919c94637"
+    },
+    {
+      "path": "reports/iaa/1794636033539.xlsx",
+      "source": "workspace:outputs/gravity-wecom/iaa/1794636033539.xlsx",
+      "kind": "report-copy",
+      "bytes": 5357,
+      "sha256": "ca8193469d1c347546ca85d463d3d5ac1c48bc1ab50c1dd84b63b44011b3e1d1"
+    },
+    {
+      "path": "reports/iaa/1794643240748.xlsx",
+      "source": "workspace:outputs/gravity-wecom/iaa/1794643240748.xlsx",
+      "kind": "report-copy",
+      "bytes": 5357,
+      "sha256": "892ecc1a1758d104b11d60ce1d61440843db735ff7579039856aae004735f77a"
+    },
+    {
+      "path": "reports/iaa/1794650436500.xlsx",
+      "source": "workspace:outputs/gravity-wecom/iaa/1794650436500.xlsx",
+      "kind": "report-copy",
+      "bytes": 5361,
+      "sha256": "6eefc38129fbf2a12e47c6a9856ee9b31a735b24598ae099844930fc34392cf6"
+    },
+    {
+      "path": "reports/iaa/1794657632249.xlsx",
+      "source": "workspace:outputs/gravity-wecom/iaa/1794657632249.xlsx",
+      "kind": "report-copy",
+      "bytes": 5361,
+      "sha256": "03e0a3c274f2e20b03c70bf9c3e5c8980fc5240db9ded94b3bfa25e44fb5e712"
+    },
+    {
+      "path": "reports/iaa/1794664837850.xlsx",
+      "source": "workspace:outputs/gravity-wecom/iaa/1794664837850.xlsx",
+      "kind": "report-copy",
+      "bytes": 5357,
+      "sha256": "fa540e6d2cdd6fbc16e21e59932abfaae38f792b9481c33a13690f856913738b"
+    },
+    {
+      "path": "reports/iaa/1794672033924.xlsx",
+      "source": "workspace:outputs/gravity-wecom/iaa/1794672033924.xlsx",
+      "kind": "report-copy",
+      "bytes": 5363,
+      "sha256": "20117de5256e0f29c34237a3883f7635d6150cbb506b3c181a708bde40ed6a8e"
+    },
+    {
+      "path": "reports/iaa/1794708032432.xlsx",
+      "source": "workspace:outputs/gravity-wecom/iaa/1794708032432.xlsx",
+      "kind": "report-copy",
+      "bytes": 5335,
+      "sha256": "c3d91c6009dfd27b2a4276c1be3c5a93db924733604223f00267176ac6d0f535"
+    },
+    {
+      "path": "reports/iaa/1794715238466.xlsx",
+      "source": "workspace:outputs/gravity-wecom/iaa/1794715238466.xlsx",
+      "kind": "report-copy",
+      "bytes": 5363,
+      "sha256": "20edec395a382bd0b93af3506fb6835376a5ea42d62288ecbfe4235d28bc231a"
+    },
+    {
+      "path": "reports/iaa/1794722433755.xlsx",
+      "source": "workspace:outputs/gravity-wecom/iaa/1794722433755.xlsx",
+      "kind": "report-copy",
+      "bytes": 5365,
+      "sha256": "227dbe0a71d4e83816e3e52b4b814035c43fc1520ff22d8a7745361b15024224"
+    },
+    {
+      "path": "reports/iaa/1794729639348.xlsx",
+      "source": "workspace:outputs/gravity-wecom/iaa/1794729639348.xlsx",
+      "kind": "report-copy",
+      "bytes": 5360,
+      "sha256": "0949213e3946edaac66d3ac96856b8c6323ccc1b62290c5310e3ad27d701f0f9"
+    },
+    {
+      "path": "reports/iaa/1794736835348.xlsx",
+      "source": "workspace:outputs/gravity-wecom/iaa/1794736835348.xlsx",
+      "kind": "report-copy",
+      "bytes": 5363,
+      "sha256": "2066b8be4c02454375cdc97949f5b33ac2bd4aee771dac73e86d441f9606127e"
+    },
+    {
+      "path": "reports/iaa/1794744040644.xlsx",
+      "source": "workspace:outputs/gravity-wecom/iaa/1794744040644.xlsx",
+      "kind": "report-copy",
+      "bytes": 5358,
+      "sha256": "c0e126f61a56172c2ec0df77130cc32f06b52c59e334ab8377c1aef01b040023"
+    },
+    {
+      "path": "reports/iaa/1794751236433.xlsx",
+      "source": "workspace:outputs/gravity-wecom/iaa/1794751236433.xlsx",
+      "kind": "report-copy",
+      "bytes": 5351,
+      "sha256": "9a50b25928394f6b64a123a2775e93a6510d47aff951f765cad9cc9bbec15b86"
+    },
+    {
+      "path": "reports/iaa/1794758431688.xlsx",
+      "source": "workspace:outputs/gravity-wecom/iaa/1794758431688.xlsx",
+      "kind": "report-copy",
+      "bytes": 5365,
+      "sha256": "c23449ab1c85eeb2945fa6fe7b5c43a685614f410f606abd90b5d080db1b1652"
+    },
+    {
+      "path": "reports/iaa/1794765637397.xlsx",
+      "source": "workspace:outputs/gravity-wecom/iaa/1794765637397.xlsx",
+      "kind": "report-copy",
+      "bytes": 5356,
+      "sha256": "78bb04a199ca9b9eb601949d51d456a5bddccdb77beb883283c6539158aed396"
+    },
+    {
+      "path": "reports/iaa/1794772833534.xlsx",
+      "source": "workspace:outputs/gravity-wecom/iaa/1794772833534.xlsx",
+      "kind": "report-copy",
+      "bytes": 5356,
+      "sha256": "d078a93f6c4741086f5d15d62700c32679d66aef151269698432c3dd553c4e3c"
+    },
+    {
+      "path": "reports/iaa/1794780058760.xlsx",
+      "source": "workspace:outputs/gravity-wecom/iaa/1794780058760.xlsx",
+      "kind": "report-copy",
+      "bytes": 5352,
+      "sha256": "ac067cf2fadc45bde86031715d98e1ecc290e9791e8b3d55a97ad7422a03d422"
+    },
+    {
+      "path": "reports/iaa/1794787234443.xlsx",
+      "source": "workspace:outputs/gravity-wecom/iaa/1794787234443.xlsx",
+      "kind": "report-copy",
+      "bytes": 5352,
+      "sha256": "40d21d29a103b95000883f4e296d8a595b3fcde92a68727fea2171f19780c195"
+    },
+    {
+      "path": "reports/iaa/1794792836808.xlsx",
+      "source": "workspace:outputs/gravity-wecom/iaa/1794792836808.xlsx",
+      "kind": "report-copy",
+      "bytes": 5354,
+      "sha256": "6437ba73d33b49da69428b221c7228b4cc1ccbf7ccf4f738099e198b5a76faab"
+    },
+    {
+      "path": "reports/iaa/IAA_日期播报预览.png",
+      "source": "workspace:outputs/gravity-wecom/iaa/IAA_日期播报预览.png",
+      "kind": "report-copy",
+      "bytes": 24961,
+      "sha256": "68280a4ff09b033d5338dc1a1a267c7115ec405f49a816e5c4d290e4929948ed"
+    },
+    {
+      "path": "reports/iaa/IAA_日期播报预览.xlsx",
+      "source": "workspace:outputs/gravity-wecom/iaa/IAA_日期播报预览.xlsx",
+      "kind": "report-copy",
+      "bytes": 4986,
+      "sha256": "bd39433b37e38b9506f86e9598940dd73aaa53712ddc36020785599c6425ef41"
+    },
+    {
+      "path": "reports/iaa/IAA_消耗整数预览.png",
+      "source": "workspace:outputs/gravity-wecom/iaa/IAA_消耗整数预览.png",
+      "kind": "report-copy",
+      "bytes": 43683,
+      "sha256": "c45e5f19d207fb443e60a3eb09a73b9d5e201248c7d96e0b09976e42be0fc330"
+    },
+    {
+      "path": "reports/iaa/IAA_消耗整数预览.xlsx",
+      "source": "workspace:outputs/gravity-wecom/iaa/IAA_消耗整数预览.xlsx",
+      "kind": "report-copy",
+      "bytes": 5349,
+      "sha256": "82aaee7bca92ec6f0a9c979cbff0877d2a44283baadec6cdb770ed62b1234c16"
+    },
+    {
+      "path": "reports/iaa/IAA_项目媒体播报预览.png",
+      "source": "workspace:outputs/gravity-wecom/iaa/IAA_项目媒体播报预览.png",
+      "kind": "report-copy",
+      "bytes": 44621,
+      "sha256": "30674404e0b0a4e40b3bba6ab6d7edf45c2a2df4bb468dd8dd41b4a41b517e5a"
+    },
+    {
+      "path": "reports/iaa/IAA_项目媒体播报预览.xlsx",
+      "source": "workspace:outputs/gravity-wecom/iaa/IAA_项目媒体播报预览.xlsx",
+      "kind": "report-copy",
+      "bytes": 5393,
+      "sha256": "2b40a4a76804b5f64b88cf7ffff589a2f2059c8f291785e46ef05cb68c893465"
+    },
+    {
+      "path": "reports/tower/别推我的塔_2026-11-15_小时报预览.png",
+      "source": "workspace:outputs/gravity-wecom/tower/别推我的塔_2026-11-15_小时报预览.png",
+      "kind": "report-copy",
+      "bytes": 56887,
+      "sha256": "212847a905ee93b8cf9a0f3e3dbc606c868e7a0c962ffced826ec85dc6875639"
+    },
+    {
+      "path": "reports/tower/别推我的塔_2026-11-15_小时报预览.xlsx",
+      "source": "workspace:outputs/gravity-wecom/tower/别推我的塔_2026-11-15_小时报预览.xlsx",
+      "kind": "report-copy",
+      "bytes": 5061,
+      "sha256": "181d75d127f797ae64417274b62caca8e2299941eb0230493af8272fb04aeeff"
+    },
+    {
+      "path": "reports/下方了_加强校验验证_20261119.png",
+      "source": "workspace:outputs/gravity-wecom/下方了_加强校验验证_20261119.png",
+      "kind": "report-copy",
+      "bytes": 81295,
+      "sha256": "b80458d283e5a8ab785b3710979b8a93db84ae9659dee21f143043f6cc075db2"
+    },
+    {
+      "path": "reports/下方了_加强校验验证_20261119.xlsx",
+      "source": "workspace:outputs/gravity-wecom/下方了_加强校验验证_20261119.xlsx",
+      "kind": "report-copy",
+      "bytes": 6173,
+      "sha256": "9441bc43724badcdac91a1ac0ad3c2bafa252aca66dcc2fc77c326dc9de3d3f9"
+    },
+    {
+      "path": "reports/下方了_推送预览_20261116_093535.png",
+      "source": "workspace:outputs/gravity-wecom/下方了_推送预览_20261116_093535.png",
+      "kind": "report-copy",
+      "bytes": 76632,
+      "sha256": "8dbd26f22779330d8f3ec916e39bfccf4a6bae4f659c5421f1e85dd051ab15d9"
+    },
+    {
+      "path": "reports/下方了_推送预览_20261116_093535.xlsx",
+      "source": "workspace:outputs/gravity-wecom/下方了_推送预览_20261116_093535.xlsx",
+      "kind": "report-copy",
+      "bytes": 6136,
+      "sha256": "86f96f67761f7addffa408c0b3dd06a47868c54dba4a96cd38b65ea171fcbfb4"
+    },
+    {
+      "path": "reports/下方了投放播报_APP分组合计.xlsx",
+      "source": "workspace:outputs/gravity-wecom/下方了投放播报_APP分组合计.xlsx",
+      "kind": "report-copy",
+      "bytes": 6138,
+      "sha256": "971703681e44e1c4ce1bb023c6c171da9f540087c7463319b317b8f0bdea9967"
+    },
+    {
+      "path": "reports/下方了投放播报_分组合计.xlsx",
+      "source": "workspace:outputs/gravity-wecom/下方了投放播报_分组合计.xlsx",
+      "kind": "report-copy",
+      "bytes": 6110,
+      "sha256": "f3fe4a7b40433e0e22bbe9803821ba1d4d5fe68e32785b911e2f811ad89b5fa1"
+    },
+    {
+      "path": "reports/下方了投放播报_分组配色.xlsx",
+      "source": "workspace:outputs/gravity-wecom/下方了投放播报_分组配色.xlsx",
+      "kind": "report-copy",
+      "bytes": 6218,
+      "sha256": "ff678f20ad250a489ef8cf127c02c7316ae224ea1e5b4c7ea2b55dea7827c97f"
+    },
+    {
+      "path": "reports/下方了投放播报_引力校准_1794208629038.xlsx",
+      "source": "workspace:outputs/gravity-wecom/下方了投放播报_引力校准_1794208629038.xlsx",
+      "kind": "report-copy",
+      "bytes": 6085,
+      "sha256": "63a9fc1e9c4d2263f4dcc1a0cbccdbc48e2cf660fba897ba0a036a75602485b1"
+    },
+    {
+      "path": "reports/下方了投放播报_样式优化.xlsx",
+      "source": "workspace:outputs/gravity-wecom/下方了投放播报_样式优化.xlsx",
+      "kind": "report-copy",
+      "bytes": 6109,
+      "sha256": "4dba76497fff078dd64ac1e3ee811fee10d2804e629344d884cc6689ba6fd896"
+    },
+    {
+      "path": "reports/下方了投放播报_浅杏配色.xlsx",
+      "source": "workspace:outputs/gravity-wecom/下方了投放播报_浅杏配色.xlsx",
+      "kind": "report-copy",
+      "bytes": 6221,
+      "sha256": "82aa2af654e151a1e80fb759acced293dad06de5929bc67cf8fa66b849821612"
+    },
+    {
+      "path": "reports/下方了投放播报_消耗万元.xlsx",
+      "source": "workspace:outputs/gravity-wecom/下方了投放播报_消耗万元.xlsx",
+      "kind": "report-copy",
+      "bytes": 6151,
+      "sha256": "9fbfde44f15ff8ae2b857a21acf11c6c993ea6ca620d2012fcab13492d2bf3e8"
+    },
+    {
+      "path": "reports/投放小时报_新版预览.png",
+      "source": "workspace:outputs/gravity-wecom/投放小时报_新版预览.png",
+      "kind": "report-copy",
+      "bytes": 88769,
+      "sha256": "5151e313640de2356a09d4c0aa80722d6d26ebb5f2dae6b918ddbd8dc9429565"
+    },
+    {
+      "path": "reports/投放小时报_新版预览.xlsx",
+      "source": "workspace:outputs/gravity-wecom/投放小时报_新版预览.xlsx",
+      "kind": "report-copy",
+      "bytes": 6248,
+      "sha256": "46cd13823febc57335f0dac1c93f02da431eef006542aaf0cdbe8c60dede9a32"
+    },
+    {
+      "path": "runtime/config.json",
+      "source": "LOCALAPPDATA:GravityWeComReport/config.json",
+      "kind": "text-sanitized",
+      "bytes": 1642,
+      "sha256": "bc10978c9be69899c882d66eaf04059df916927131df5e598b25e75fd9d026b1"
+    },
+    {
+      "path": "runtime/config.json.projects.json",
+      "source": "LOCALAPPDATA:GravityWeComReport/config.json.projects.json",
+      "kind": "text-sanitized",
+      "bytes": 876,
+      "sha256": "32245176526cad9554e30a76c0a25215ddb599d6d0ee3f4b4e0b26178a5a4dfd"
+    },
+    {
+      "path": "runtime/external/config.json",
+      "source": "LOCALAPPDATA:GravityWeComReport/external/config.json",
+      "kind": "text-sanitized",
+      "bytes": 1230,
+      "sha256": "714794a29ed66679f5951075e7728eaf6730c3c8747a4daf4e0d556b72f93fed"
+    },
+    {
+      "path": "runtime/external/hourly-snapshots.snapshots.json",
+      "source": "LOCALAPPDATA:GravityWeComReport/external/hourly-snapshots.sqlite",
+      "kind": "readable-snapshots",
+      "bytes": 62326,
+      "sha256": "ecebeaa53f567fffe0a8ed6ee089c6e24ec1ef16d7fc10a83e90ebbaad755286"
+    },
+    {
+      "path": "runtime/external/hourly-snapshots.sqlite",
+      "source": "LOCALAPPDATA:GravityWeComReport/external/hourly-snapshots.sqlite",
+      "kind": "consistent-sqlite-backup",
+      "bytes": 61440,
+      "sha256": "852cb621003dc3cf6e13938aa6dc016cdf0edda22ab72b093cea1162eba62988"
+    },
+    {
+      "path": "runtime/external/manual-backups/20261120-15-1795164297571/before.json",
+      "source": "LOCALAPPDATA:GravityWeComReport/external/manual-backups/20261120-15-1795164297571/before.json",
+      "kind": "text-sanitized",
+      "bytes": 45025,
+      "sha256": "911d7a0dca27be7a3c654892c443543bddb8eb194b8dc458eec89b798046feb0"
+    },
+    {
+      "path": "runtime/external/manual-backups/20261120-15-1795164297571/hourly-snapshots.snapshots.json",
+      "source": "LOCALAPPDATA:GravityWeComReport/external/manual-backups/20261120-15-1795164297571/hourly-snapshots.sqlite",
+      "kind": "readable-snapshots",
+      "bytes": 59606,
+      "sha256": "b109dae2944d5c34f734a0dfba46e50192e507a5858a5379147bf7cde3fe800e"
+    },
+    {
+      "path": "runtime/external/manual-backups/20261120-15-1795164297571/hourly-snapshots.sqlite",
+      "source": "LOCALAPPDATA:GravityWeComReport/external/manual-backups/20261120-15-1795164297571/hourly-snapshots.sqlite",
+      "kind": "consistent-sqlite-backup",
+      "bytes": 61440,
+      "sha256": "d1f240eaaabcabec936cc275abc067018501400fa34e4a613de0d04bfc9df476"
+    },
+    {
+      "path": "runtime/external/manual-backups/20261120-15-1795164297571/supplement.json",
+      "source": "LOCALAPPDATA:GravityWeComReport/external/manual-backups/20261120-15-1795164297571/supplement.json",
+      "kind": "text-sanitized",
+      "bytes": 1478,
+      "sha256": "3b95e2e4944d455115aa912e2ff2759902b3f25b83f1b803f8d423d60cd51018"
+    },
+    {
+      "path": "runtime/external/manual-backups/20261120-15-1795164297571/外部小时报_累计.png",
+      "source": "LOCALAPPDATA:GravityWeComReport/external/manual-backups/20261120-15-1795164297571/外部小时报_累计.png",
+      "kind": "report-copy",
+      "bytes": 290395,
+      "sha256": "2a0449a4cd506c9236c2a9413133bad37079a4184d8ce20d69219daf234f12bc"
+    },
+    {
+      "path": "runtime/external/manual-backups/20261120-15-1795164297571/外部小时报_累计.xlsx",
+      "source": "LOCALAPPDATA:GravityWeComReport/external/manual-backups/20261120-15-1795164297571/外部小时报_累计.xlsx",
+      "kind": "report-copy",
+      "bytes": 8234,
+      "sha256": "e0fe858e943dea98ac8e9c0a743ed35cd70c74dc68193b790a5f9d85e5f0e7d6"
+    },
+    {
+      "path": "runtime/external/manual-backups/20261120-15-1795164297571/用户提供_15点底档.png",
+      "source": "LOCALAPPDATA:GravityWeComReport/external/manual-backups/20261120-15-1795164297571/用户提供_15点底档.png",
+      "kind": "report-copy",
+      "bytes": 552847,
+      "sha256": "653c57aca49c1fdb7163ae7046d2db2aaa77725b7b1067ad07ceb37f56480fc8"
+    },
+    {
+      "path": "runtime/external/migration-backups/paid-metrics-1794990099110/hourly-snapshots.snapshots.json",
+      "source": "LOCALAPPDATA:GravityWeComReport/external/migration-backups/paid-metrics-1794990099110/hourly-snapshots.sqlite",
+      "kind": "readable-snapshots",
+      "bytes": 21747,
+      "sha256": "6c87673c3d0f29d8862471261d37d9fee76fbd81311e7751f2469dd71d351006"
+    },
+    {
+      "path": "runtime/external/migration-backups/paid-metrics-1794990099110/hourly-snapshots.sqlite",
+      "source": "LOCALAPPDATA:GravityWeComReport/external/migration-backups/paid-metrics-1794990099110/hourly-snapshots.sqlite",
+      "kind": "consistent-sqlite-backup",
+      "bytes": 32768,
+      "sha256": "b854af060ea75614f0fb3d3cc283c19bd730869309cc18283453ba55b4457b1b"
+    },
+    {
+      "path": "runtime/external/migration-backups/paid-metrics-1794990099110/外部小时报_累计.xlsx",
+      "source": "LOCALAPPDATA:GravityWeComReport/external/migration-backups/paid-metrics-1794990099110/外部小时报_累计.xlsx",
+      "kind": "report-copy",
+      "bytes": 7296,
+      "sha256": "3e7ad705e19503ad095440dade797ccce799267b42a0a2b517b73722a49c4ff2"
+    },
+    {
+      "path": "runtime/external/reset-backups/pre-11-cutover-20261117-105645/hourly-snapshots.snapshots.json",
+      "source": "LOCALAPPDATA:GravityWeComReport/external/reset-backups/pre-11-cutover-20261117-105645/hourly-snapshots.sqlite",
+      "kind": "readable-snapshots",
+      "bytes": 1931,
+      "sha256": "be32c3b862cd90555ce0f9f06d0d3bbfa01fc6607456c886082ba17dd3e16ad7"
+    },
+    {
+      "path": "runtime/external/reset-backups/pre-11-cutover-20261117-105645/hourly-snapshots.sqlite",
+      "source": "LOCALAPPDATA:GravityWeComReport/external/reset-backups/pre-11-cutover-20261117-105645/hourly-snapshots.sqlite",
+      "kind": "consistent-sqlite-backup",
+      "bytes": 12288,
+      "sha256": "38b301bcb84baf8df5f8ccdccf4c2f65fbf36e98c10a0db8b7ed90792fc0866a"
+    },
+    {
+      "path": "runtime/external/reset-backups/pre-11-cutover-20261117-105645/外部小时报_累计.xlsx",
+      "source": "LOCALAPPDATA:GravityWeComReport/external/reset-backups/pre-11-cutover-20261117-105645/外部小时报_累计.xlsx",
+      "kind": "report-copy",
+      "bytes": 5502,
+      "sha256": "162259ea65dc87be60e3532507b830170369c1a4f21ef62feaab97223bc9ff2a"
+    },
+    {
+      "path": "runtime/external/reset-backups/pre-21-cutover-20261116-205256/hourly-snapshots.snapshots.json",
+      "source": "LOCALAPPDATA:GravityWeComReport/external/reset-backups/pre-21-cutover-20261116-205256/hourly-snapshots.sqlite",
+      "kind": "readable-snapshots",
+      "bytes": 1798,
+      "sha256": "3b3c8b0ed9b9056997ddd4b3f0c3824f88415cc4ffce3a15225941912fe86194"
+    },
+    {
+      "path": "runtime/external/reset-backups/pre-21-cutover-20261116-205256/hourly-snapshots.sqlite",
+      "source": "LOCALAPPDATA:GravityWeComReport/external/reset-backups/pre-21-cutover-20261116-205256/hourly-snapshots.sqlite",
+      "kind": "consistent-sqlite-backup",
+      "bytes": 12288,
+      "sha256": "32222e82273952b27f18a3245da9096016234c4a7a12dfbc636472311e8b8109"
+    },
+    {
+      "path": "runtime/external/reset-backups/pre-21-cutover-20261116-205256/外部小时报_累计.png",
+      "source": "LOCALAPPDATA:GravityWeComReport/external/reset-backups/pre-21-cutover-20261116-205256/外部小时报_累计.png",
+      "kind": "report-copy",
+      "bytes": 59168,
+      "sha256": "92ff0e1e0af3889b9012be853b0c2387059a8b54906a8a072f48d15530098138"
+    },
+    {
+      "path": "runtime/external/reset-backups/pre-21-cutover-20261116-205256/外部小时报_累计.xlsx",
+      "source": "LOCALAPPDATA:GravityWeComReport/external/reset-backups/pre-21-cutover-20261116-205256/外部小时报_累计.xlsx",
+      "kind": "report-copy",
+      "bytes": 5026,
+      "sha256": "c6f13c1ae6729c60442448f6e21f8f94e2a81c6e7c60ff78746c41e6d99e9de9"
+    },
+    {
+      "path": "runtime/hero/config.json",
+      "source": "LOCALAPPDATA:GravityWeComReport/hero/config.json",
+      "kind": "text-sanitized",
+      "bytes": 1702,
+      "sha256": "29cfdc913771ab617d256d34e03a0e29bf874ea56caaf42bb278f2e063b13659"
+    },
+    {
+      "path": "runtime/hero/config.json.projects.json",
+      "source": "LOCALAPPDATA:GravityWeComReport/hero/config.json.projects.json",
+      "kind": "text-sanitized",
+      "bytes": 315,
+      "sha256": "55586e4c88df46a3fec7834567b27f793149e8e6a5f2788547b89dc9da9c8d80"
+    },
+    {
+      "path": "runtime/hero/migration-backups/dual-sheet-1795167326474/config.json",
+      "source": "LOCALAPPDATA:GravityWeComReport/hero/migration-backups/dual-sheet-1795167326474/config.json",
+      "kind": "text-sanitized",
+      "bytes": 1459,
+      "sha256": "2f359364d0e21c137bae4f2d82c51d76a2c535be47adeb75fc22a0940552a16a"
+    },
+    {
+      "path": "runtime/hero/migration-backups/dual-sheet-1795167326474/migration.json",
+      "source": "LOCALAPPDATA:GravityWeComReport/hero/migration-backups/dual-sheet-1795167326474/migration.json",
+      "kind": "text-sanitized",
+      "bytes": 420,
+      "sha256": "e40251388a0e0f730e4c3d794d1dcd53924a95f66e19accfed1fd3c7b8919c11"
+    },
+    {
+      "path": "runtime/hero-conversion/config.json",
+      "source": "LOCALAPPDATA:GravityWeComReport/hero-conversion/config.json",
+      "kind": "text-sanitized",
+      "bytes": 450,
+      "sha256": "f928f618ccab5e105b1876762443241d2dbbc3106346cc82eb2cf0ef5f9b5458"
+    },
+    {
+      "path": "runtime/iaa/config.json",
+      "source": "LOCALAPPDATA:GravityWeComReport/iaa/config.json",
+      "kind": "text-sanitized",
+      "bytes": 1915,
+      "sha256": "584477ec380f266638401e388b8b6e8302c8a2f4fcf0bbef11529c4b4d053ebb"
+    },
+    {
+      "path": "runtime/iaa/config.json.projects.json",
+      "source": "LOCALAPPDATA:GravityWeComReport/iaa/config.json.projects.json",
+      "kind": "text-sanitized",
+      "bytes": 489,
+      "sha256": "72b83f9a47a9c1d146af88c4041b5f16099b4a4a57979b025fcd9aef7157e918"
+    },
+    {
+      "path": "runtime/logs/2026-11-12.jsonl",
+      "source": "LOCALAPPDATA:GravityWeComReport/logs/2026-11-12.jsonl",
+      "kind": "text-sanitized",
+      "bytes": 16867,
+      "sha256": "b7b15757b7508faae13aafa8e712e88decbde85164a2478adb633c53a6a0ca6e"
+    },
+    {
+      "path": "runtime/logs/2026-11-13.jsonl",
+      "source": "LOCALAPPDATA:GravityWeComReport/logs/2026-11-13.jsonl",
+      "kind": "text-sanitized",
+      "bytes": 24556,
+      "sha256": "a4181051e4618d0f160f58183c4e56b149133fd87407b64c80a5959f77c29402"
+    },
+    {
+      "path": "runtime/logs/2026-11-14.jsonl",
+      "source": "LOCALAPPDATA:GravityWeComReport/logs/2026-11-14.jsonl",
+      "kind": "text-sanitized",
+      "bytes": 25062,
+      "sha256": "379a5157488655f5761ba503a02cee0fb41514ea9ef45136c0fce7797cd77976"
+    },
+    {
+      "path": "runtime/logs/2026-11-15.jsonl",
+      "source": "LOCALAPPDATA:GravityWeComReport/logs/2026-11-15.jsonl",
+      "kind": "text-sanitized",
+      "bytes": 23870,
+      "sha256": "91f5821d0cc41eddd116ddd9fddaf60ed9d866b45384ef2ce27918bb5d197896"
+    },
+    {
+      "path": "runtime/logs/2026-11-16.jsonl",
+      "source": "LOCALAPPDATA:GravityWeComReport/logs/2026-11-16.jsonl",
+      "kind": "text-sanitized",
+      "bytes": 25186,
+      "sha256": "91785658e1c85390bd0abc9bc4bac94dcf31c182a884efcb6c92e119fc53869f"
+    },
+    {
+      "path": "runtime/logs/2026-11-17.jsonl",
+      "source": "LOCALAPPDATA:GravityWeComReport/logs/2026-11-17.jsonl",
+      "kind": "text-sanitized",
+      "bytes": 29656,
+      "sha256": "f17ed3043ce4e8be811bc5591d41090e4174efc94743c70e58c42d1c2f9996c8"
+    },
+    {
+      "path": "runtime/logs/2026-11-18.jsonl",
+      "source": "LOCALAPPDATA:GravityWeComReport/logs/2026-11-18.jsonl",
+      "kind": "text-sanitized",
+      "bytes": 44825,
+      "sha256": "7086b519be7bfa2de9d4305b9e2ac87f98853cd638bb67cc3d06cfe894972ca2"
+    },
+    {
+      "path": "runtime/logs/2026-11-19.jsonl",
+      "source": "LOCALAPPDATA:GravityWeComReport/logs/2026-11-19.jsonl",
+      "kind": "text-sanitized",
+      "bytes": 42000,
+      "sha256": "7f5cfbfe0cf0a3ea3da3e59abb0a6c9e2c9a1aae85967267d68d60dae489a4c8"
+    },
+    {
+      "path": "runtime/logs/2026-11-20.jsonl",
+      "source": "LOCALAPPDATA:GravityWeComReport/logs/2026-11-20.jsonl",
+      "kind": "text-sanitized",
+      "bytes": 38194,
+      "sha256": "7710f49e01a0962bf044a7b8ef57fd1a55fb7ac3bea9fae47d7a33f664a2f91a"
+    },
+    {
+      "path": "runtime/logs/panel-launcher.log",
+      "source": "LOCALAPPDATA:GravityWeComReport/logs/panel-launcher.log",
+      "kind": "text-sanitized",
+      "bytes": 5833,
+      "sha256": "7c846291194a77bc8f9073ed1c7ab17088050850693b7ee6c91413e9582e406d"
+    },
+    {
+      "path": "runtime/retired-configs/tower-20261119-101920/config.json",
+      "source": "LOCALAPPDATA:GravityWeComReport/retired-configs/tower-20261119-101920/config.json",
+      "kind": "text-sanitized",
+      "bytes": 1256,
+      "sha256": "3326d150ea03e5d0723de1f3d9f3d87028f2b3960b3c4abb44d00eac62b47c5a"
+    },
+    {
+      "path": "runtime/retired-configs/tower-20261119-101920/config.json.projects.json",
+      "source": "LOCALAPPDATA:GravityWeComReport/retired-configs/tower-20261119-101920/config.json.projects.json",
+      "kind": "text-sanitized",
+      "bytes": 283,
+      "sha256": "9d7b5be1977baf291a8088a9263f61def0577f7aa6f1bba58e0a81f2f2111651"
+    },
+    {
+      "path": "runtime/scheduler.json",
+      "source": "LOCALAPPDATA:GravityWeComReport/scheduler.json",
+      "kind": "text-sanitized",
+      "bytes": 80,
+      "sha256": "56423330cf3f99c400a8fdd67a5e6992767c869e49a43a0f73d3c50239055808"
+    }
+  ],
+  "databases": [
+    {
+      "path": "reports/hero/conversion-snapshots.sqlite",
+      "rows": 3,
+      "first": "2026-11-20 16:00",
+      "last": "2026-11-20 18:00"
+    },
+    {
+      "path": "reports/hero/hourly-snapshots.sqlite",
+      "rows": 3,
+      "first": "2026-11-20 16:00",
+      "last": "2026-11-20 18:00"
+    },
+    {
+      "path": "reports/hero-acquisition-test/conversion-snapshots.sqlite",
+      "rows": 2,
+      "first": "2026-11-20 16:00",
+      "last": "2026-11-20 17:00"
+    },
+    {
+      "path": "reports/hero-acquisition-test/hourly-snapshots.sqlite",
+      "rows": 2,
+      "first": "2026-11-20 16:00",
+      "last": "2026-11-20 17:00"
+    },
+    {
+      "path": "runtime/external/hourly-snapshots.sqlite",
+      "rows": 81,
+      "first": "2026-11-16 24:00",
+      "last": "2026-11-20 18:00"
+    },
+    {
+      "path": "runtime/external/manual-backups/20261120-15-1795164297571/hourly-snapshots.sqlite",
+      "rows": 78,
+      "first": "2026-11-16 24:00",
+      "last": "2026-11-20 16:00"
+    },
+    {
+      "path": "runtime/external/migration-backups/paid-metrics-1794990099110/hourly-snapshots.sqlite",
+      "rows": 31,
+      "first": "2026-11-16 24:00",
+      "last": "2026-11-18 16:00"
+    },
+    {
+      "path": "runtime/external/reset-backups/pre-11-cutover-20261117-105645/hourly-snapshots.sqlite",
+      "rows": 3,
+      "first": "2026-11-16 21:00",
+      "last": "2026-11-17 10:00"
+    },
+    {
+      "path": "runtime/external/reset-backups/pre-21-cutover-20261116-205256/hourly-snapshots.sqlite",
+      "rows": 3,
+      "first": "2026-11-16 10:00",
+      "last": "2026-11-16 13:00"
+    }
+  ],
+  "notes": [
+    "Per-file snapshots; separate databases are not an atomic cross-database snapshot.",
+    "Aggregated business data publication explicitly authorized by user.",
+    "Restore is manual; credentials must be reauthorized; schedules must first be disabled."
+  ],
+  "excluded": [
+    "Chrome and TA-Chrome profiles",
+    "CLI credentials and QR codes",
+    "*.dpapi",
+    "dependency packages",
+    "live sent-slot marker files",
+    "*.inspect.ndjson (render diagnostics)",
+    "unrelated workspace files and unprovided chat attachments"
+  ]
+}

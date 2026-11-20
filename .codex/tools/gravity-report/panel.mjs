@@ -9,6 +9,7 @@ import {readWebhook,saveWebhook,webhookStatus} from './webhook.mjs';
 import {gameProjects,gravityProject,projectScript} from './game-projects.mjs';
 import {externalWorkbookName} from './external-hourly.mjs';
 import {claimExternalAttempt,externalAttemptTimeout} from './external-retry.mjs';
+import {orderProjects,readScheduleOrder,saveScheduleOrder} from './schedule-order.mjs';
 
 const host = '127.0.0.1';
 const port = Number(process.env.GRAVITY_PANEL_PORT ?? 8731);
@@ -18,7 +19,9 @@ const page = await readFile(new URL('./panel.html', import.meta.url));
 const projectsPage = await readFile(new URL('./game-projects.html', import.meta.url));
 const outputDirectory = fileURLToPath(new URL('../../../outputs/gravity-wecom/', import.meta.url));
 const logDirectory = path.join(path.dirname(configPath),'logs');
+const scheduleOrderFile=path.join(path.dirname(configPath),'scheduler.json');
 const jobs = new Map();
+let historyExport = null;
 const isRunning = () => [...jobs.values()].some(job=>job.state === 'running');
 let saving = false;
 let scheduling = false;
@@ -36,7 +39,7 @@ async function logEvent(event, details = {}) {
 
 function startJob(project, webhook, slot = null, retry = null) {
   const push = Boolean(webhook);
-  const job = {state:'running',log:'',startedAt:new Date().toISOString(),push,slot};
+  const job = {state:'running',log:'',startedAt:new Date().toISOString(),push,slot,scriptId:project.scriptId};
   if (retry) job.attempt=retry.attempt;
   jobs.set(project.id,job);
   const env = {...process.env,GRAVITY_REPORT_CONFIG:project.config,GRAVITY_LOGIN_CONFIG:configPath};
@@ -46,10 +49,10 @@ function startJob(project, webhook, slot = null, retry = null) {
   if (slot) env.GRAVITY_REPORT_SLOT = slot;
   else delete env.GRAVITY_REPORT_SLOT;
   const directory = project === gravityProject ? outputDirectory : path.join(outputDirectory,project.id);
-  const output = path.join(directory,project.id === 'external' ? externalWorkbookName : Date.now()+'.xlsx');
+  const output = path.join(directory,projectScript(project).workbookName ?? (project.id === 'external' ? externalWorkbookName : Date.now()+'.xlsx'));
   const child = spawn(process.execPath,[projectScript(project).entry,output],{env,windowsHide:true,
     timeout:retry ? externalAttemptTimeout : 20*60*1000});
-  void logEvent('job-started',{project:project.id,slot,push,startedAt:job.startedAt,...(retry ? {attempt:retry.attempt} : {})});
+  void logEvent('job-started',{project:project.id,scriptId:project.scriptId,slot,push,startedAt:job.startedAt,...(retry ? {attempt:retry.attempt} : {})});
   const append = message => { job.log = (job.log+message).slice(-10000); };
   for (const stream of [child.stdout,child.stderr]) stream.setEncoding('utf8').on('data',append);
   child.once('error',error => append('无法启动脚本：'+error.message));
@@ -73,9 +76,10 @@ async function checkSchedule() {
   scheduling = true;
   try {
     const slot = beijing.toISOString().slice(0,13);
-    for (const project of gameProjects) {
-      // Noon and midnight can already have other projects using the shared browser.
-      if (minute >= 5 && project.id !== 'external') continue;
+    const order=await readScheduleOrder(scheduleOrderFile,gameProjects);
+    for (const project of orderProjects(gameProjects,order)) {
+      // All projects share the 20-minute dispatch window, so a higher priority
+      // report's query/retry cannot make later reports expire after five minutes.
       try {
         const {schedule} = await loadConfig(project.config,project.id);
         if (!schedule.enabled || !schedule.hours.includes(beijing.getUTCHours())) continue;
@@ -97,6 +101,9 @@ async function checkSchedule() {
         void logEvent('schedule-error',{project:project.id,message:error.message.replace(/https?:\/\/[^\s"'<>]+/g,'[URL]')});
       }
     }
+  } catch(error) {
+    console.error('小时发送调度失败：'+error.message);
+    void logEvent('schedule-error',{message:error.message.replace(/https?:\/\/[^\s"'<>]+/g,'[URL]')});
   } finally { scheduling = false; }
 }
 
@@ -119,6 +126,10 @@ async function bodyOf(request) {
 const server = createServer(async (request,response) => {
   try {
     if (request.headers.host !== host+':'+port) return json(response,403,{error:'请使用本机后台地址'});
+    if (request.method==='GET' && ['/hero-conversion','/hero-conversion/'].includes(request.url)) {
+      response.writeHead(302,{'Location':'/hero#taSection','Cache-Control':'no-store'});
+      return response.end();
+    }
     if (request.url === '/tower' || request.url.startsWith('/tower/')) {
       return json(response,404,{error:'该播报配置已移除，请使用联合小时报'});
     }
@@ -131,11 +142,12 @@ const server = createServer(async (request,response) => {
       return response.end(route === 'GET /' ? page : projectsPage);
     }
     if (project === gravityProject && route === 'GET /api/game-projects') {
-      return json(response,200,await Promise.all(gameProjects.map(async item=>{
+      const ordered=orderProjects(gameProjects,await readScheduleOrder(scheduleOrderFile,gameProjects));
+      return json(response,200,await Promise.all(ordered.map(async (item,index)=>{
         const config = await loadConfig(item.config,item.id);
         return {id:item.id,name:config.project.name || item.name || '引力投放项目',
           script:projectScript(item).name,settings:item.settings,
-          configured:Boolean(config.report.url),scheduleEnabled:config.schedule.enabled};
+          configured:Boolean(config.report.url),scheduleEnabled:config.schedule.enabled,executionPosition:index+1};
       })));
     }
     if (route === 'GET /api/config') return json(response,200,await loadConfig(project.config,project.id));
@@ -159,6 +171,44 @@ const server = createServer(async (request,response) => {
     if (route === 'GET /api/webhook') return json(response,200,await webhookStatus(project.config));
     if (request.headers.origin !== origin || !request.headers['content-type']?.startsWith('application/json')) {
       return json(response,403,{error:'请求必须来自本机后台页面'});
+    }
+    if(project===gravityProject && route==='PUT /api/schedule-order') {
+      const {order}=await bodyOf(request);
+      if(saving || scheduling) return json(response,409,{error:'请稍候重试'});
+      saving=true;
+      try {
+        const saved=await saveScheduleOrder(scheduleOrderFile,order,gameProjects);
+        void logEvent('execution-order-updated',{order:saved});
+        return json(response,200,{order:saved});
+      } finally {saving=false;}
+    }
+    if (route === 'POST /api/history' && ['external','hero'].includes(project.id)) {
+      if (historyExport) return json(response,409,{error:'正在生成历史副本，请稍候'});
+      const archive=project.id==='hero' ? path.join(outputDirectory,'hero') : path.join(path.dirname(project.config),'hourly-snapshots.sqlite');
+      const directory=path.join(outputDirectory,project.id==='hero' ? 'hero-history' : 'external-history');
+      // Export in a separate process; do not claim a report job or block the scheduler.
+      historyExport=new Promise((resolve,reject)=>{
+        const worker=spawn(process.execPath,[fileURLToPath(new URL(project.id==='hero' ? './hero-history.mjs' : './external-history.mjs',import.meta.url)),archive,directory],
+          {windowsHide:true,timeout:120_000});
+        let stdout='',stderr='';
+        worker.stdout.setEncoding('utf8').on('data',chunk=>{stdout+=chunk;});
+        worker.stderr.setEncoding('utf8').on('data',chunk=>{stderr=(stderr+chunk).slice(-4000);});
+        worker.once('error',reject);
+        worker.once('close',code=>{
+          if (code!==0) return reject(new Error(stderr.replace(/\(node:\d+\).*\n/g,'').trim() || '历史副本生成失败，请重试'));
+          try { resolve(JSON.parse(stdout.trim().split(/\r?\n/).at(-1))); } catch { reject(new Error('历史副本结果读取失败')); }
+        });
+      });
+      try {
+        const result=await historyExport;
+        // Open only the newly exported copy, never the live cumulative workbook.
+        await new Promise((resolve,reject)=>{
+          const opener=spawn('explorer.exe',[result.output],{windowsHide:true,detached:true,stdio:'ignore'});
+          opener.once('error',reject);
+          opener.once('spawn',()=>{opener.unref();resolve();});
+        });
+        return json(response,200,result);
+      } finally { historyExport=null; }
     }
     if (route === 'PUT /api/webhook') {
       const settings = await bodyOf(request);

@@ -1,0 +1,84 @@
+{
+  "report": {
+    "url": "https://web.gravity-engine.com/#/pivotReport/mine?id=1794471283176646&category=adreport",
+    "title": "IAA_副本",
+    "product": "IAA游戏",
+    "timeoutSeconds": 120,
+    "retries": 1,
+    "browserMode": "dedicated",
+    "fields": {
+      "spend": "平台_消耗",
+      "metric0": "平台_展示数",
+      "metric1": "平台_点击数",
+      "metric2": "平台_点击率",
+      "metric3": "平台_转化数",
+      "metric4": "平台_转化成本",
+      "metric5": "腾讯_注册首日广告变现ROI（平台上报）(转化回传)"
+    },
+    "spendUnit": "yuan",
+    "metrics": [
+      {
+        "label": "展示数",
+        "column": "平台_展示数",
+        "format": "integer"
+      },
+      {
+        "label": "点击数",
+        "column": "平台_点击数",
+        "format": "integer"
+      },
+      {
+        "label": "点击率",
+        "column": "平台_点击率",
+        "format": "percent"
+      },
+      {
+        "label": "注册数",
+        "column": "平台_转化数",
+        "format": "integer"
+      },
+      {
+        "label": "注册成本",
+        "column": "平台_转化成本",
+        "format": "number"
+      },
+      {
+        "label": "腾讯注册首日广告变现 ROI",
+        "column": "腾讯_注册首日广告变现ROI（平台上报）(转化回传)",
+        "format": "percent"
+      }
+    ],
+    "layout": "flat"
+  },
+  "project": {
+    "name": "IAA 项目",
+    "groups": [
+      {
+        "name": "越耍越解压",
+        "projects": [
+          {
+            "name": "越耍越解压",
+            "id": "29524786"
+          }
+        ]
+      }
+    ]
+  },
+  "schedule": {
+    "enabled": false,
+    "hours": [
+      0,
+      2,
+      4,
+      6,
+      8,
+      10,
+      12,
+      14,
+      16,
+      18,
+      20,
+      22
+    ]
+  }
+}

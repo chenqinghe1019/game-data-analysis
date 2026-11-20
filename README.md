@@ -2,6 +2,8 @@
 
 这个仓库用于同步项目相关的 Codex 知识资产，方便换电脑后继续使用同一套埋点、数数看板、SQL 和分析流程。
 
+新增项目：[倍特小时报](projects/beite-hourly-report/README.md)。统一维护下方了、IAA、别推我的塔联合小时报、英雄就是我买量与前期转化；包含生产源码地图、指标口径、分时归档、运维经验及 [Codex 技能](.codex/skills/beite-hourly-report/SKILL.md) / [GPT 指令](projects/beite-hourly-report/gpt/INSTRUCTIONS.md)。
+
 ## 内容
 
 ### Skill 定义（`.codex/skills/`）

@@ -1,0 +1,29 @@
+{
+  "project": {
+    "name": "英雄就是我",
+    "groups": []
+  },
+  "report": {
+    "url": "https://ta-data.feiyu.com/#/panel/panel/44_1752_0",
+    "title": "激活登录（排除剧情）",
+    "timeoutSeconds": 120,
+    "retries": 1
+  },
+  "schedule": {
+    "enabled": false,
+    "hours": [
+      0,
+      2,
+      4,
+      6,
+      8,
+      10,
+      12,
+      14,
+      16,
+      18,
+      20,
+      22
+    ]
+  }
+}

@@ -1,0 +1,4 @@
+interface:
+  display_name: "倍特小时报"
+  short_description: "维护引力数数取数、指标校验、多日追加、双图推送与定时故障处理"
+  default_prompt: "使用 $beite-hourly-report 检查倍特小时报，按当前项目口径完成调整并给出独立预览。"

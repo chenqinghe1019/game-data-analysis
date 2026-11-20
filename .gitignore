@@ -13,3 +13,8 @@
 # Portable Codex project skills
 !.codex/
 !.codex/**
+
+# 倍特小时报：可复现的项目资料与明确导出的归档；运行中的文件仍在原路径。
+!/projects/
+!/projects/beite-hourly-report/
+!/projects/beite-hourly-report/**

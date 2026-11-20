@@ -1,0 +1,77 @@
+{
+  "report": {
+    "url": "https://web.gravity-engine.com/#/pivotReport/shared?id=1776394520115533&category=adreport",
+    "title": "下方-每日_拉取分时数",
+    "product": "下方了-全部",
+    "timeoutSeconds": 120,
+    "retries": 1,
+    "browserMode": "dedicated",
+    "fields": {
+      "spend": "平台_消耗",
+      "activations": "标准_激活数",
+      "activationCost": "标准激活成本",
+      "payers": "标准_首日付费人数",
+      "payCost": "标准_首日付费成本",
+      "revenue": "标准_首日付费金额",
+      "roi": "标准_首日付费ROI"
+    },
+    "spendUnit": "wan-decimal"
+  },
+  "project": {
+    "name": "下方了",
+    "groups": [
+      {
+        "name": "微小",
+        "projects": [
+          {
+            "name": "微小",
+            "id": "29756138"
+          }
+        ]
+      },
+      {
+        "name": "抖小",
+        "projects": [
+          {
+            "name": "抖小",
+            "id": "25048291"
+          }
+        ]
+      },
+      {
+        "name": "APP",
+        "projects": [
+          {
+            "name": "下方了-厦门内部直播1",
+            "id": "25437280"
+          },
+          {
+            "name": "下方了 iOS",
+            "id": "29461382"
+          },
+          {
+            "name": "下方了-深圳外部直播1",
+            "id": "22403791"
+          }
+        ]
+      }
+    ]
+  },
+  "schedule": {
+    "enabled": true,
+    "hours": [
+      0,
+      2,
+      4,
+      6,
+      8,
+      10,
+      12,
+      14,
+      16,
+      18,
+      20,
+      22
+    ]
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "date": "2026-11-20",
+  "time": "17:00",
+  "images": [
+    "C:\\Users\\feiyu\\Documents\\飞鱼游戏-倍特工作室\\outputs\\gravity-wecom\\hero-acquisition-test\\英雄就是我_买量小时报_累计.png",
+    "C:\\Users\\feiyu\\Documents\\飞鱼游戏-倍特工作室\\outputs\\gravity-wecom\\hero-acquisition-test\\英雄就是我_前期转化_累计.png"
+  ],
+  "workbooks": [
+    "C:\\Users\\feiyu\\Documents\\飞鱼游戏-倍特工作室\\outputs\\gravity-wecom\\hero-acquisition-test\\英雄就是我_买量小时报_累计.xlsx",
+    "C:\\Users\\feiyu\\Documents\\飞鱼游戏-倍特工作室\\outputs\\gravity-wecom\\hero-acquisition-test\\英雄就是我_前期转化_累计.xlsx"
+  ],
+  "archive": "C:\\Users\\feiyu\\Documents\\飞鱼游戏-倍特工作室\\outputs\\gravity-wecom\\hero-acquisition-test\\hourly-snapshots.sqlite",
+  "conversionArchive": "C:\\Users\\feiyu\\Documents\\飞鱼游戏-倍特工作室\\outputs\\gravity-wecom\\hero-acquisition-test\\conversion-snapshots.sqlite"
+}

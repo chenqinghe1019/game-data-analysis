@@ -4,6 +4,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>引力引擎企微播报后台</title>
 <style>
+[hidden]{display:none!important}
 *{box-sizing:border-box}body{margin:0;background:#f3f7fb;color:#19324a;font:15px/1.55 "Microsoft YaHei",sans-serif}
 main{max-width:1440px;margin:auto;padding:24px 20px}header{margin-bottom:16px}h1{margin:0;font-size:30px}h2{font-size:19px;margin:0 0 12px}h3{font-size:15px;margin:16px 0 8px}
 p{margin:6px 0;color:#52677a}.card{background:white;border:1px solid #dbe6f1;border-radius:12px;padding:20px;margin-bottom:14px}
@@ -28,7 +29,11 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#f4f8fc;padding:12px;
 </style>
 <main>
 <header><nav><a href="/projects">游戏项目</a> · <a href="/external">外部小时报</a></nav><h1 id="pageTitle">引力引擎企微播报后台</h1><p id="pageDescription">取北京时间「今日」累计，生成 Excel 和企微播报。</p></header>
+<section class="card" id="historySection" hidden><h2>历史记录</h2>
+<p>展开已存档的全部小时记录。每次生成独立的 Excel 查看副本，编辑或关闭副本均不影响定时播报。</p>
+<button id="openHistory" type="button">打开历史记录副本</button><p id="historyStatus" role="status"></p></section>
 <form id="config" hidden>
+<nav id="heroReports" class="card" hidden><a href="/hero">投放与转化播报</a> · <a href="/hero#taSection">前期转化参数</a></nav>
 <div class="config-columns">
 <section class="card"><h2>引力报表参数</h2><div id="report" class="grid"></div>
 <label>浏览器模式<select id="browserMode"><option value="existing">复用已登录的 Chrome</option><option value="dedicated">使用独立播报 Chrome</option></select></label>
@@ -49,6 +54,7 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#f4f8fc;padding:12px;
 <div id="metrics"></div><button type="button" id="addMetric">添加指标</button>
 </div></section>
 <div>
+<section class="card" id="heroAcquisitionSection" hidden><h2>买量小时报参数</h2><div id="heroAcquisitionReport" class="grid"></div><p>ROI 使用引力首日付费 ROI。正式底档含买量小时报、前期转化两个 sheet。</p></section>
 <section class="card" id="taSection" hidden aria-labelledby="taTitle">
 <h2 id="taTitle">数数报表参数</h2><div id="taReport"></div>
 <p>填写已保存的数数 SQL 报表链接。首次取数前，运行 start-external-ta.ps1 并在打开的 Chrome 中登录数数。</p>
@@ -82,6 +88,7 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#f4f8fc;padding:12px;
 </section>
 <section class="card actions"><button class="primary" type="submit">保存参数</button><button id="run" type="button">生成 Excel</button><button id="push" type="button" disabled>生成并推送</button><span id="saved"></span></section>
 </form>
+
 <section class="card" aria-live="polite"><h2>运行状态</h2><p id="status">正在读取配置</p><p id="message"></p><p id="output"></p><pre id="log" hidden></pre></section>
 </main>
 <script type="module">
@@ -89,13 +96,16 @@ const get = id => document.getElementById(id);
 const apiPrefix = location.pathname.replace(/\/$/,'');
 const isIaa = apiPrefix === '/iaa';
 const isExternal = apiPrefix === '/external';
-const fieldLabels = isExternal
+const isConversion = apiPrefix === '/hero-conversion';
+const fieldLabels = isConversion ? {} : isExternal
   ? {spend:'累计消耗',impressions:'累计广告曝光',roi:'首日付费 ROI'}
   : isIaa
   ? {spend:'消耗对应的引力原表列名'}
   : {spend:'消耗',activations:'激活数',activationCost:'激活成本',payers:'首日付费人数',payCost:'首付成本',revenue:'首日付费金额',roi:'ROI'};
-const reportLabels = {url:'引力报表链接',title:'报表标题',product:'产品筛选名称',timeoutSeconds:'查询超时（秒）',retries:'失败重试次数'};
-if (apiPrefix === '/tower' || isExternal) reportLabels.productAppId='引力产品 APPID';
+const reportLabels = isConversion
+  ? {url:'数数看板地址',title:'看板卡片名称',timeoutSeconds:'查询超时（秒）',retries:'失败重试次数'}
+  : {url:'引力报表链接',title:'报表标题',product:'产品筛选名称',timeoutSeconds:'查询超时（秒）',retries:'失败重试次数'};
+if (apiPrefix === '/tower' || apiPrefix === '/hero' || isExternal) reportLabels.productAppId='引力产品 APPID';
 let busy = false;
 let canPush = false;
 let action = false;
@@ -289,6 +299,9 @@ function formConfig() {
   const projectName=isExternal ? report.broadcastProjectName : values(get('project')).name;
   delete report.broadcastProjectName;
   if (isExternal) Object.assign(report,values(get('taReport')));
+  if (apiPrefix==='/hero') report.conversion={...values(get('taReport')),
+    timeoutSeconds:report.timeoutSeconds,retries:report.retries};
+  if(apiPrefix==='/hero') report.acquisition={...values(get('heroAcquisitionReport')),roiMode:'gravity'};
   if (isIaa) {
     report.metrics=Array.from(get('metrics').children,values);
     report.layout=get('reportLayout').value;
@@ -308,7 +321,7 @@ function buttons() {
   get('saveWebhook').disabled=busy||action||webhookSettings.source==='environment';
   get('clearWebhook').disabled=get('saveWebhook').disabled||!webhookSettings.configured;
   get('webhookUrl').disabled=get('saveWebhook').disabled;
-  get('push').title=canPush?'先发截图，再发标题':'请先保存企微 Webhook';
+  get('push').title=canPush?(apiPrefix==='/hero' ? '依次发送买量、前期转化两张截图，再发标题' : '先发截图，再发标题'):'请先保存企微 Webhook';
   get('scheduleHint').textContent=canPush?'':'在下方「企微推送」保存 Webhook 后即可发送。';
   for (const select of get('discovery').querySelectorAll('select')) select.disabled=busy||action;
 }
@@ -348,6 +361,58 @@ async function saveAndRun(push) {
 
 try {
   const {report,project,schedule}=await request('/api/config');
+  if (isConversion || apiPrefix === '/hero') get('heroReports').hidden=false;
+  if (isConversion) {
+    get('pageTitle').textContent='英雄就是我 · 前期转化播报';
+    document.title='英雄就是我 · 前期转化播报';
+    get('pageDescription').textContent='首次激活设备当日累计，从加载开始到进入大厅；仅展示指定的15个中文节点。';
+    get('report').previousElementSibling.textContent='数数看板参数';
+    get('browserMode').closest('label').hidden=true;
+    get('browserHint').hidden=true;
+    get('loginEmail').closest('details').hidden=true;
+    get('fields').previousElementSibling.hidden=true;
+    get('fields').hidden=true;
+    const projectSection=get('project').closest('section');
+    for (const child of projectSection.children) if (child!==get('project') && child.tagName!=='H2') child.hidden=true;
+    const note=document.createElement('p');
+    note.textContent='设备数按源报表 #distinct_id 去重，加载开始为到达比分母。每次取数保留原始 CSV 和节点快照。';
+    projectSection.append(note);
+    get('run').textContent='生成转化 Excel 和预览图';
+  }
+  if (apiPrefix === '/hero') {
+    get('pageTitle').textContent='英雄就是我 · 播报配置';
+    document.title='英雄就是我 · 企微播报';
+    get('pageDescription').textContent='买量小时报、前期转化两张截图依次推送，共用一份双 sheet 累计底档。';
+    get('run').textContent='生成双 sheet Excel 和两张预览图';
+    get('historySection').querySelector('p').textContent='另生成一份包含买量小时报、前期转化两个 sheet 的历史副本，编辑副本不影响播报。';
+    const heroProjectSection=get('project').closest('section');
+    for(const child of heroProjectSection.children) if(child!==get('project') && child.tagName!=='H2') child.hidden=true;
+    get('heroAcquisitionSection').hidden=false;
+    const acq=report.acquisition??{};
+    input(get('heroAcquisitionReport'),'数数投放看板','url',acq.url??'https://ta-data.feiyu.com/#/panel/panel/44_1749_0',{wide:true});
+    input(get('heroAcquisitionReport'),'分媒体卡片名称','mediaCard',acq.mediaCard??'投放数据');
+    input(get('heroAcquisitionReport'),'含自然量汇总卡片','totalCard',acq.totalCard??'【汇总】投放数据');
+    input(get('heroAcquisitionReport'),'累计消耗起算日期','startDate',acq.startDate??'2026-11-20');
+    get('heroAcquisitionReport').querySelector('[data-key="startDate"]').type='date';
+    get('taSection').hidden=false;
+    get('taTitle').textContent='前期转化参数';
+    for(const note of get('taSection').querySelectorAll(':scope > p')) note.remove();
+    input(get('taReport'),'数数看板地址','url',report.conversion?.url??'https://ta-data.feiyu.com/#/panel/panel/44_1752_0');
+    input(get('taReport'),'看板卡片名称','title',report.conversion?.title??'激活登录（排除剧情）');
+  }
+  if (isExternal || apiPrefix==='/hero') {
+    get('historySection').hidden=false;
+    get('openHistory').onclick=async()=>{
+      const button=get('openHistory');
+      button.disabled=true;
+      get('historyStatus').textContent='正在生成历史记录副本…';
+      try {
+        const result=await request('/api/history','POST',{});
+        get('historyStatus').textContent='已打开副本，共 '+result.rows+' 条，截至 '+result.last+'。保存位置：'+result.output;
+      } catch(error) { get('historyStatus').textContent=error.message; }
+      finally { button.disabled=false; }
+    };
+  }
   if (isExternal) {
     get('pageTitle').textContent='外部小时报';
     document.title='外部小时报 · 企微播报';
@@ -417,7 +482,7 @@ try {
   for(const [key,label] of Object.entries(reportLabels)) input(get('report'),label,key,report[key]??'',{wide:key==='url'});
   const browserMode=get('browserMode');
   browserMode.value=report.browserMode;
-  const updateBrowserHint=()=>{get('browserHint').hidden=browserMode.value!=='existing';};
+  const updateBrowserHint=()=>{get('browserHint').hidden=isConversion || browserMode.value!=='existing';};
   browserMode.onchange=updateBrowserHint;
   updateBrowserHint();
   get('saveLogin').onclick=()=>updateLogin(false);
@@ -431,6 +496,7 @@ try {
     if (key==='spend' && !isExternal) {
       const wrapper=document.createElement('label');
       wrapper.textContent='消耗显示格式';
+      if(apiPrefix==='/hero') wrapper.hidden=true;
       const select=document.createElement('select');
       select.id='spendUnit';
       select.append(new Option('整数（元）','yuan'),new Option('整数（万）','wan'),

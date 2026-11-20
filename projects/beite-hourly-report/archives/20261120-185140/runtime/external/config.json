@@ -1,0 +1,56 @@
+{
+  "report": {
+    "url": "https://web.gravity-engine.com/#/pivotReport/mine?id=1794557619314845&category=adreport",
+    "title": "别推我的塔，小时报用",
+    "product": "别推我的塔",
+    "timeoutSeconds": 120,
+    "retries": 1,
+    "browserMode": "dedicated",
+    "fields": {
+      "spend": "平台_消耗",
+      "impressions": "平台_展示数",
+      "roi": "标准_首日付费ROI",
+      "registrations": "腾讯_注册人数(平台上报)(激活时间)"
+    },
+    "spendUnit": "wan-decimal",
+    "productAppId": "27361504",
+    "pushTitleTemplate": "【{项目}】{日期} {时段}",
+    "taPanelUrl": "https://ta-data.feiyu.com/#/panel/panel/51_2221_0",
+    "taTotalCard": "每日累计指标",
+    "taMediaCard": "【分媒体】每日累计指标"
+  },
+  "project": {
+    "name": "别推我的塔",
+    "groups": []
+  },
+  "schedule": {
+    "enabled": true,
+    "startAt": "2026-11-17T11:00",
+    "hours": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23
+    ]
+  }
+}

@@ -1,0 +1,93 @@
+[
+  {
+    "date": "2026-11-16",
+    "time": "10:00",
+    "period": "截至北京时间 10 点",
+    "ta": [
+      32,
+      34,
+      3,
+      18,
+      0.53,
+      0.0882,
+      null,
+      null
+    ],
+    "gravity": {
+      "total": null,
+      "paid": null
+    },
+    "projectName": "别推我的塔"
+  },
+  {
+    "date": "2026-11-16",
+    "time": "12:00",
+    "period": "截至北京时间 12 点",
+    "ta": [
+      157,
+      159,
+      15,
+      624,
+      3.92,
+      0.0943,
+      null,
+      null
+    ],
+    "gravity": {
+      "total": {
+        "spend": 345.08,
+        "impressions": 1558,
+        "registrations": 0,
+        "registrationCost": 0,
+        "payCost": 33.09,
+        "frequency": 3.2,
+        "roi": 1.5127
+      },
+      "paid": {
+        "spend": 345.08,
+        "impressions": 6614,
+        "tencentRegistrations": 140,
+        "registrationCost": 2.464857142857143,
+        "payCost": 23.01,
+        "frequency": 0,
+        "roi": 0
+      }
+    },
+    "projectName": "别推我的塔"
+  },
+  {
+    "date": "2026-11-16",
+    "time": "13:00",
+    "period": "截至北京时间 13 点",
+    "ta": [
+      163,
+      165,
+      15,
+      624,
+      3.78,
+      0.0909,
+      null,
+      null
+    ],
+    "gravity": {
+      "total": {
+        "spend": 405.93,
+        "impressions": 8903,
+        "payCost": 50.7413,
+        "frequency": 2.375,
+        "roi": 1.212,
+        "registrations": 207
+      },
+      "paid": {
+        "spend": 405.93,
+        "impressions": 8903,
+        "payCost": 0,
+        "frequency": 0,
+        "roi": 0,
+        "tencentRegistrations": 207,
+        "registrationCost": 1.9610144927536233
+      }
+    },
+    "projectName": "别推我的塔"
+  }
+]

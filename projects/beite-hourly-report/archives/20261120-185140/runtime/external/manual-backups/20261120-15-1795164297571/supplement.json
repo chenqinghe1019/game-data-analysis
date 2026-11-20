@@ -1,0 +1,73 @@
+{
+  "snapshot": {
+    "date": "2026-11-20",
+    "time": "15:00",
+    "period": "截至北京时间 15 点",
+    "projectName": "别推我的塔",
+    "ta": [
+      817,
+      1916,
+      119,
+      12587,
+      6.57,
+      0.0621,
+      null,
+      null,
+      1.86,
+      1470
+    ],
+    "gravity": {
+      "paid": {
+        "spend": 23599.51,
+        "impressions": 63636,
+        "roi": 0.0553
+      },
+      "total": {
+        "spend": 23599.51,
+        "impressions": 63636,
+        "roi": 0.0623
+      }
+    },
+    "paidTa": {
+      "registrations": 795,
+      "firstDayArppu": 30.37
+    },
+    "manualOverrides": {
+      "registrationCost": 29.7,
+      "payCost": 548.83,
+      "firstDayPayRate": 0.0541
+    },
+    "sourceKind": "user-supplied-screenshot",
+    "source": {
+      "image": "C:/Users/feiyu/AppData/Local/Temp/codex-clipboard-85ca1d82-8ab3-4a53-bed2-aeea583bb626.png",
+      "recordedAt": "2026-11-20T08:44:57.595Z",
+      "cumulativeRule": "用户确认沿用原累计规则：总累计新进10014，总累计收入55053；未从四舍五入值反推付费人数"
+    }
+  },
+  "expected": [
+    "2026-11-20",
+    "截至北京时间 15 点",
+    817,
+    1916,
+    119,
+    10014,
+    12587,
+    6.57,
+    0.0621,
+    1.86,
+    1470,
+    55053,
+    23599.51,
+    63636,
+    795,
+    29.7,
+    548.83,
+    0.0541,
+    30.37,
+    172082.06,
+    0.0553,
+    0.0623,
+    "-",
+    "-"
+  ]
+}

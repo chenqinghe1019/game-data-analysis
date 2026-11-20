@@ -134,7 +134,7 @@ export function parseTaRetentions(csv) {
   });
 }
 
-async function connectTaBrowser(chromium,timeout) {
+export async function connectTaBrowser(chromium,timeout) {
   const endpoint='http://127.0.0.1:9223';
   try {
     return await chromium.connectOverCDP(endpoint,{timeout:Math.min(timeout,5000)});
@@ -341,7 +341,7 @@ export async function writeExternalHourly(snapshot, output, deps, snapshots = [s
   return png;
 }
 
-function externalTotals(rows,baseline) {
+export function externalTotals(rows,baseline) {
   const daily = row=>[row.ta[0],row.ta[3],row.gravity.paid?.spend ?? (row.gravity.total ? 0 : null)];
   const closed = new Map(rows.filter(row=>row.time === '24:00').map(row=>[row.date,daily(row)]));
   const totals = new Map();
@@ -359,7 +359,7 @@ function externalTotals(rows,baseline) {
   return totals;
 }
 
-function buildExternalWorkbook(Workbook, snapshots, {projectName}, totals) {
+export function buildExternalWorkbook(Workbook, snapshots, {projectName}, totals) {
   const wb = Workbook.create();
   const sheet = wb.worksheets.add('外部小时报');
   sheet.showGridLines = false;
@@ -389,7 +389,7 @@ function buildExternalWorkbook(Workbook, snapshots, {projectName}, totals) {
       const registrations = paidTa === undefined ? paid?.tencentRegistrations : paidTa?.registrations;
       const spend=paid?.spend ?? null;
       const costPayers=row.baseline ? payers : paidTa?.firstDayPayers;
-      return [
+      const values = [
         date,period.replace(/^截至北京时间 (\d{2}):\d{2}$/,(_,hour)=>externalPeriod(hour)),
         newUsers,active,payers,totalNew,revenue,arpu,payRate,frequency ?? null,
         firstDayAmount ?? null,totalRevenue,
@@ -402,6 +402,16 @@ function buildExternalWorkbook(Workbook, snapshots, {projectName}, totals) {
         totalSpend,
         paid?.roi ?? '-',total?.roi ?? '-',payerRetention ?? '-',registrationRetention ?? '-',
       ];
+      // User-supplied historical rows can contain rounded costs/rates without
+      // the original denominators. Preserve these values instead of inventing counts.
+      const manualColumns={totalNew:5,totalRevenue:11,registrationCost:15,payCost:16,firstDayPayRate:17,firstDayArppu:18};
+      for(const [key,value] of Object.entries(row.manualOverrides ?? {})) {
+        if(!Object.hasOwn(manualColumns,key) || row.sourceKind!=='user-supplied-screenshot' ||
+            !Number.isFinite(value) || value<0 || (key==='firstDayPayRate' && value>1) ||
+            (key==='totalNew' && !Number.isSafeInteger(value))) throw new Error('人工补录指标无效：'+key);
+        values[manualColumns[key]]=value;
+      }
+      return values;
     });
   for (let start=0;start<snapshots.length;) {
     let end=start+1;

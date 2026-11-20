@@ -1,0 +1,25 @@
+{
+  "date": "2026-11-20",
+  "project": "英雄就是我",
+  "rollups": {
+    "total": {
+      "spend": 2427.63,
+      "activations": 161,
+      "activationCost": 15.0784,
+      "payers": 1,
+      "payCost": 2427.63,
+      "revenue": 18,
+      "roi": 0.0074
+    },
+    "paid": {
+      "spend": 2427.63,
+      "activations": 145,
+      "activationCost": 16.7423,
+      "payers": 1,
+      "payCost": 2427.63,
+      "revenue": 18,
+      "roi": 0.0074
+    }
+  },
+  "observedAt": "2026-11-20T10:01:05.036Z"
+}

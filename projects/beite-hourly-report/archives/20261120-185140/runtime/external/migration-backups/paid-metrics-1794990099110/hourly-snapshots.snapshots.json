@@ -1,0 +1,1144 @@
+[
+  {
+    "date": "2026-11-16",
+    "time": "24:00",
+    "period": "截至北京时间 24 点",
+    "projectName": "别推我的塔",
+    "baseline": true,
+    "ta": [
+      548,
+      552,
+      45,
+      1804,
+      3.27,
+      0.0815,
+      0.8444,
+      0.4288,
+      1.96,
+      1804
+    ],
+    "gravity": {
+      "paid": {
+        "spend": 3661.27,
+        "impressions": 66472,
+        "roi": null
+      },
+      "total": {
+        "roi": 0.4927
+      }
+    },
+    "paidTa": {
+      "registrations": 380
+    }
+  },
+  {
+    "date": "2026-11-17",
+    "time": "11:00",
+    "period": "截至北京时间 11 点",
+    "ta": [
+      225,
+      415,
+      22,
+      962,
+      2.32,
+      0.053,
+      null,
+      null,
+      1,
+      30
+    ],
+    "gravity": {
+      "total": {
+        "spend": 1898.4,
+        "impressions": 26820,
+        "roi": 0.0158
+      },
+      "paid": {
+        "spend": 1898.4,
+        "impressions": 26820,
+        "roi": 0.0158
+      }
+    },
+    "projectName": "别推我的塔",
+    "paidTa": {
+      "registrations": 212,
+      "payers": 13,
+      "firstDayPayers": 5,
+      "firstDayFrequency": 1,
+      "ambiguousFrequency": false
+    }
+  },
+  {
+    "date": "2026-11-17",
+    "time": "12:00",
+    "period": "截至北京时间 12 点",
+    "ta": [
+      688,
+      887,
+      35,
+      1754,
+      1.98,
+      0.0395,
+      null,
+      null,
+      1.08,
+      102
+    ],
+    "gravity": {
+      "total": {
+        "spend": 7798.72,
+        "impressions": 106930,
+        "roi": 0.0131
+      },
+      "paid": {
+        "spend": 7798.72,
+        "impressions": 106930,
+        "roi": 0.0131
+      }
+    },
+    "projectName": "别推我的塔",
+    "paidTa": {
+      "registrations": 656,
+      "payers": 22,
+      "firstDayPayers": 12,
+      "firstDayFrequency": 1.08,
+      "ambiguousFrequency": false
+    }
+  },
+  {
+    "date": "2026-11-17",
+    "time": "13:00",
+    "period": "截至北京时间 13 点",
+    "ta": [
+      1043,
+      1250,
+      49,
+      2972,
+      2.38,
+      0.0392,
+      null,
+      null,
+      1.12,
+      264
+    ],
+    "gravity": {
+      "total": {
+        "spend": 12269.35,
+        "impressions": 172007,
+        "roi": 0.0215
+      },
+      "paid": {
+        "spend": 12269.35,
+        "impressions": 172007,
+        "roi": 0.0215
+      }
+    },
+    "projectName": "别推我的塔",
+    "paidTa": {
+      "registrations": 1007,
+      "payers": 36,
+      "firstDayPayers": 25,
+      "firstDayFrequency": 1.12,
+      "ambiguousFrequency": false
+    }
+  },
+  {
+    "date": "2026-11-17",
+    "time": "14:00",
+    "period": "截至北京时间 14 点",
+    "ta": [
+      1270,
+      1485,
+      62,
+      3470,
+      2.34,
+      0.0418,
+      null,
+      null,
+      1.16,
+      506
+    ],
+    "gravity": {
+      "total": {
+        "spend": 13879.71,
+        "impressions": 196199,
+        "roi": 0.036000000000000004
+      },
+      "paid": {
+        "spend": 13879.71,
+        "impressions": 196199,
+        "roi": 0.036
+      }
+    },
+    "projectName": "别推我的塔",
+    "paidTa": {
+      "registrations": 1231,
+      "payers": 48,
+      "firstDayPayers": 37,
+      "firstDayFrequency": 1.16,
+      "ambiguousFrequency": false
+    }
+  },
+  {
+    "date": "2026-11-17",
+    "time": "15:00",
+    "period": "截至北京时间 15 点",
+    "ta": [
+      1514,
+      1735,
+      76,
+      4164,
+      2.4,
+      0.0438,
+      null,
+      null,
+      1.18,
+      810
+    ],
+    "gravity": {
+      "total": {
+        "spend": 15849.28,
+        "impressions": 222319,
+        "roi": 0.051100000000000007
+      },
+      "paid": {
+        "spend": 15849.28,
+        "impressions": 222319,
+        "roi": 0.0507
+      }
+    },
+    "projectName": "别推我的塔",
+    "paidTa": {
+      "registrations": 1463,
+      "payers": 60,
+      "firstDayPayers": 48,
+      "firstDayFrequency": 1.19,
+      "ambiguousFrequency": false
+    }
+  },
+  {
+    "date": "2026-11-17",
+    "time": "16:00",
+    "period": "截至北京时间 16 点",
+    "ta": [
+      1759,
+      1988,
+      91,
+      5632,
+      2.83,
+      0.0458,
+      null,
+      null,
+      1.24,
+      1076
+    ],
+    "gravity": {
+      "total": {
+        "spend": 19121.57,
+        "impressions": 256415,
+        "roi": 0.056299999999999996
+      },
+      "paid": {
+        "spend": 19121.57,
+        "impressions": 256415,
+        "roi": 0.0556
+      }
+    },
+    "projectName": "别推我的塔",
+    "paidTa": {
+      "registrations": 1676,
+      "payers": 71,
+      "firstDayPayers": 59,
+      "firstDayFrequency": 1.25,
+      "ambiguousFrequency": false
+    }
+  },
+  {
+    "date": "2026-11-17",
+    "time": "17:00",
+    "period": "截至北京时间 17 点",
+    "ta": [
+      2016,
+      2250,
+      109,
+      6966,
+      3.1,
+      0.0484,
+      null,
+      null,
+      1.44,
+      2032
+    ],
+    "gravity": {
+      "total": {
+        "spend": 22679.6,
+        "impressions": 275962,
+        "roi": 0.08800000000000001
+      },
+      "paid": {
+        "spend": 22679.6,
+        "impressions": 275962,
+        "roi": 0.0875
+      }
+    },
+    "projectName": "别推我的塔",
+    "paidTa": {
+      "registrations": 1922,
+      "payers": 84,
+      "firstDayPayers": 72,
+      "firstDayFrequency": 1.44,
+      "ambiguousFrequency": false
+    }
+  },
+  {
+    "date": "2026-11-17",
+    "time": "18:00",
+    "period": "截至北京时间 18 点",
+    "ta": [
+      2346,
+      2583,
+      124,
+      8346,
+      3.23,
+      0.048,
+      null,
+      null,
+      1.64,
+      3274
+    ],
+    "gravity": {
+      "total": {
+        "spend": 29373.37,
+        "impressions": 299763,
+        "roi": 0.11130000000000001
+      },
+      "paid": {
+        "spend": 29373.37,
+        "impressions": 299763,
+        "roi": 0.1108
+      }
+    },
+    "projectName": "别推我的塔",
+    "paidTa": {
+      "registrations": 2246,
+      "payers": 99,
+      "firstDayPayers": 86,
+      "firstDayFrequency": 1.65,
+      "ambiguousFrequency": false
+    }
+  },
+  {
+    "date": "2026-11-17",
+    "time": "19:00",
+    "period": "截至北京时间 19 点",
+    "ta": [
+      2721,
+      2963,
+      139,
+      8690,
+      2.93,
+      0.0469,
+      null,
+      null,
+      1.65,
+      3544
+    ],
+    "gravity": {
+      "total": {
+        "spend": 38121.42,
+        "impressions": 330275,
+        "roi": 0.09269999999999999
+      },
+      "paid": {
+        "spend": 38121.42,
+        "impressions": 330275,
+        "roi": 0.0923
+      }
+    },
+    "projectName": "别推我的塔",
+    "paidTa": {
+      "registrations": 2613,
+      "payers": 114,
+      "firstDayPayers": 100,
+      "firstDayFrequency": 1.66,
+      "ambiguousFrequency": false
+    }
+  },
+  {
+    "date": "2026-11-17",
+    "time": "20:00",
+    "period": "截至北京时间 20 点",
+    "ta": [
+      3134,
+      3381,
+      157,
+      9212,
+      2.72,
+      0.0464,
+      null,
+      null,
+      1.59,
+      3724
+    ],
+    "gravity": {
+      "total": {
+        "spend": 47068.72,
+        "impressions": 363397,
+        "roi": 0.079
+      },
+      "paid": {
+        "spend": 47068.72,
+        "impressions": 363397,
+        "roi": 0.0787
+      }
+    },
+    "projectName": "别推我的塔",
+    "paidTa": {
+      "registrations": 3021,
+      "payers": 132,
+      "firstDayPayers": 118,
+      "firstDayFrequency": 1.59,
+      "ambiguousFrequency": false
+    }
+  },
+  {
+    "date": "2026-11-17",
+    "time": "21:00",
+    "period": "截至北京时间 21 点",
+    "ta": [
+      3564,
+      3814,
+      179,
+      10018,
+      2.63,
+      0.0469,
+      null,
+      null,
+      1.57,
+      4268
+    ],
+    "gravity": {
+      "total": {
+        "spend": 52575.62,
+        "impressions": 380629,
+        "roi": 0.08109999999999999
+      },
+      "paid": {
+        "spend": 52575.62,
+        "impressions": 380629,
+        "roi": 0.0808
+      }
+    },
+    "projectName": "别推我的塔",
+    "paidTa": {
+      "registrations": 3446,
+      "payers": 151,
+      "firstDayPayers": 137,
+      "firstDayFrequency": 1.58,
+      "ambiguousFrequency": false
+    }
+  },
+  {
+    "date": "2026-11-17",
+    "time": "22:00",
+    "period": "截至北京时间 22 点",
+    "ta": [
+      3730,
+      3982,
+      197,
+      10618,
+      2.67,
+      0.0495,
+      null,
+      null,
+      1.57,
+      4630
+    ],
+    "gravity": {
+      "total": {
+        "spend": 56856.98,
+        "impressions": 392390,
+        "roi": 0.08130000000000001
+      },
+      "paid": {
+        "spend": 56856.98,
+        "impressions": 392390,
+        "roi": 0.0811
+      }
+    },
+    "projectName": "别推我的塔",
+    "paidTa": {
+      "registrations": 3614,
+      "payers": 169,
+      "firstDayPayers": 151,
+      "firstDayFrequency": 1.58,
+      "ambiguousFrequency": false
+    }
+  },
+  {
+    "date": "2026-11-17",
+    "time": "23:00",
+    "period": "截至北京时间 23 点",
+    "ta": [
+      3804,
+      4061,
+      210,
+      10968,
+      2.7,
+      0.0517,
+      null,
+      null,
+      1.59,
+      4980
+    ],
+    "gravity": {
+      "total": {
+        "spend": 57003.28,
+        "impressions": 392705,
+        "roi": 0.0873
+      },
+      "paid": {
+        "spend": 57003.28,
+        "impressions": 392705,
+        "roi": 0.087
+      }
+    },
+    "projectName": "别推我的塔",
+    "paidTa": {
+      "registrations": 3688,
+      "payers": 182,
+      "firstDayPayers": 164,
+      "firstDayFrequency": 1.59,
+      "ambiguousFrequency": false
+    }
+  },
+  {
+    "date": "2026-11-17",
+    "time": "24:00",
+    "period": "截至北京时间 24 点",
+    "ta": [
+      3843,
+      4104,
+      217,
+      11314,
+      2.76,
+      0.0529,
+      0.761,
+      0.1902,
+      1.59,
+      5296
+    ],
+    "gravity": {
+      "total": {
+        "spend": 57050.13,
+        "impressions": 392904,
+        "roi": 0.09269999999999999
+      },
+      "paid": {
+        "spend": 57050.13,
+        "impressions": 392904,
+        "roi": 0.0925
+      }
+    },
+    "projectName": "别推我的塔",
+    "paidTa": {
+      "registrations": 3727,
+      "payers": 189,
+      "firstDayPayers": 171,
+      "firstDayFrequency": 1.6,
+      "ambiguousFrequency": false
+    }
+  },
+  {
+    "date": "2026-11-18",
+    "time": "01:00",
+    "period": "截至北京时间 1 点",
+    "ta": [
+      22,
+      212,
+      11,
+      536,
+      2.53,
+      0.0519,
+      null,
+      null,
+      1,
+      6
+    ],
+    "gravity": {
+      "total": {
+        "spend": 50.38,
+        "impressions": 77,
+        "roi": 0.1191
+      },
+      "paid": {
+        "spend": 50.38,
+        "impressions": 77,
+        "roi": 0.1191
+      }
+    },
+    "projectName": "别推我的塔",
+    "paidTa": {
+      "registrations": 21,
+      "payers": 10,
+      "firstDayPayers": 1,
+      "firstDayFrequency": 1,
+      "ambiguousFrequency": false
+    }
+  },
+  {
+    "date": "2026-11-18",
+    "time": "02:00",
+    "period": "截至北京时间 2 点",
+    "ta": [
+      35,
+      268,
+      14,
+      730,
+      2.72,
+      0.0522,
+      null,
+      null,
+      1,
+      6
+    ],
+    "gravity": {
+      "total": {
+        "spend": 56.89,
+        "impressions": 132,
+        "roi": 0.10550000000000001
+      },
+      "paid": {
+        "spend": 56.89,
+        "impressions": 132,
+        "roi": 0.1055
+      }
+    },
+    "projectName": "别推我的塔",
+    "paidTa": {
+      "registrations": 34,
+      "payers": 13,
+      "firstDayPayers": 1,
+      "firstDayFrequency": 1,
+      "ambiguousFrequency": false
+    }
+  },
+  {
+    "date": "2026-11-18",
+    "time": "03:00",
+    "period": "截至北京时间 3 点",
+    "ta": [
+      42,
+      294,
+      15,
+      828,
+      2.82,
+      0.051,
+      null,
+      null,
+      1,
+      6
+    ],
+    "gravity": {
+      "total": {
+        "spend": 64.57,
+        "impressions": 152,
+        "roi": 0.0929
+      },
+      "paid": {
+        "spend": 64.57,
+        "impressions": 152,
+        "roi": 0.0929
+      }
+    },
+    "projectName": "别推我的塔",
+    "paidTa": {
+      "registrations": 41,
+      "payers": 14,
+      "firstDayPayers": 1,
+      "firstDayFrequency": 1,
+      "ambiguousFrequency": false
+    }
+  },
+  {
+    "date": "2026-11-18",
+    "time": "04:00",
+    "period": "截至北京时间 4 点",
+    "ta": [
+      49,
+      312,
+      17,
+      918,
+      2.94,
+      0.0545,
+      null,
+      null,
+      1,
+      6
+    ],
+    "gravity": {
+      "total": {
+        "spend": 65.92,
+        "impressions": 161,
+        "roi": 0.091
+      },
+      "paid": {
+        "spend": 65.92,
+        "impressions": 161,
+        "roi": 0.091
+      }
+    },
+    "projectName": "别推我的塔",
+    "paidTa": {
+      "registrations": 48,
+      "payers": 16,
+      "firstDayPayers": 1,
+      "firstDayFrequency": 1,
+      "ambiguousFrequency": false
+    }
+  },
+  {
+    "date": "2026-11-18",
+    "time": "05:00",
+    "period": "截至北京时间 5 点",
+    "ta": [
+      49,
+      325,
+      17,
+      918,
+      2.82,
+      0.0523,
+      null,
+      null,
+      1,
+      6
+    ],
+    "gravity": {
+      "total": {
+        "spend": 75.68,
+        "impressions": 166,
+        "roi": 0.0793
+      },
+      "paid": {
+        "spend": 75.68,
+        "impressions": 166,
+        "roi": 0.0793
+      }
+    },
+    "projectName": "别推我的塔",
+    "paidTa": {
+      "registrations": 48,
+      "payers": 16,
+      "firstDayPayers": 1,
+      "firstDayFrequency": 1,
+      "ambiguousFrequency": false
+    }
+  },
+  {
+    "date": "2026-11-18",
+    "time": "06:00",
+    "period": "截至北京时间 6 点",
+    "ta": [
+      53,
+      358,
+      17,
+      918,
+      2.56,
+      0.0475,
+      null,
+      null,
+      1,
+      6
+    ],
+    "gravity": {
+      "total": {
+        "spend": 77,
+        "impressions": 182,
+        "roi": 0.0779
+      },
+      "paid": {
+        "spend": 77,
+        "impressions": 182,
+        "roi": 0.0779
+      }
+    },
+    "projectName": "别推我的塔",
+    "paidTa": {
+      "registrations": 52,
+      "payers": 16,
+      "firstDayPayers": 1,
+      "firstDayFrequency": 1,
+      "ambiguousFrequency": false
+    }
+  },
+  {
+    "date": "2026-11-18",
+    "time": "07:00",
+    "period": "截至北京时间 7 点",
+    "ta": [
+      60,
+      413,
+      17,
+      918,
+      2.22,
+      0.0412,
+      null,
+      null,
+      1,
+      6
+    ],
+    "gravity": {
+      "total": {
+        "spend": 79.3,
+        "impressions": 203,
+        "roi": 0.0757
+      },
+      "paid": {
+        "spend": 79.3,
+        "impressions": 203,
+        "roi": 0.0757
+      }
+    },
+    "projectName": "别推我的塔",
+    "paidTa": {
+      "registrations": 59,
+      "payers": 16,
+      "firstDayPayers": 1,
+      "firstDayFrequency": 1,
+      "ambiguousFrequency": false
+    }
+  },
+  {
+    "date": "2026-11-18",
+    "time": "08:00",
+    "period": "截至北京时间 8 点",
+    "ta": [
+      84,
+      506,
+      20,
+      936,
+      1.85,
+      0.0395,
+      null,
+      null,
+      1,
+      12
+    ],
+    "gravity": {
+      "total": {
+        "spend": 119.74,
+        "impressions": 268,
+        "roi": 0.1002
+      },
+      "paid": {
+        "spend": 119.74,
+        "impressions": 268,
+        "roi": 0.1002
+      }
+    },
+    "projectName": "别推我的塔",
+    "paidTa": {
+      "registrations": 82,
+      "payers": 19,
+      "firstDayPayers": 2,
+      "firstDayFrequency": 1,
+      "ambiguousFrequency": false
+    }
+  },
+  {
+    "date": "2026-11-18",
+    "time": "09:00",
+    "period": "截至北京时间 9 点",
+    "ta": [
+      103,
+      603,
+      29,
+      1044,
+      1.73,
+      0.0481,
+      null,
+      null,
+      1,
+      36
+    ],
+    "gravity": {
+      "total": {
+        "spend": 153.64,
+        "impressions": 361,
+        "roi": 0.1953
+      },
+      "paid": {
+        "spend": 153.64,
+        "impressions": 361,
+        "roi": 0.1562
+      }
+    },
+    "projectName": "别推我的塔",
+    "paidTa": {
+      "registrations": 99,
+      "payers": 25,
+      "firstDayPayers": 4,
+      "firstDayFrequency": 1,
+      "ambiguousFrequency": false
+    }
+  },
+  {
+    "date": "2026-11-18",
+    "time": "10:00",
+    "period": "截至北京时间 10 点",
+    "ta": [
+      125,
+      713,
+      39,
+      1498,
+      2.1,
+      0.0547,
+      null,
+      null,
+      1.14,
+      72
+    ],
+    "gravity": {
+      "total": {
+        "spend": 211.99,
+        "impressions": 534,
+        "roi": 0.31129999999999997
+      },
+      "paid": {
+        "spend": 211.99,
+        "impressions": 534,
+        "roi": 0.283
+      }
+    },
+    "projectName": "别推我的塔",
+    "paidTa": {
+      "registrations": 121,
+      "payers": 32,
+      "firstDayPayers": 5,
+      "firstDayFrequency": 1.2,
+      "ambiguousFrequency": false
+    }
+  },
+  {
+    "date": "2026-11-18",
+    "time": "11:00",
+    "period": "截至北京时间 11 点",
+    "ta": [
+      187,
+      840,
+      51,
+      2222,
+      2.65,
+      0.0607,
+      null,
+      null,
+      1.13,
+      78
+    ],
+    "gravity": {
+      "total": {
+        "spend": 767,
+        "impressions": 2700,
+        "roi": 0.09390000000000001
+      },
+      "paid": {
+        "spend": 767,
+        "impressions": 2700,
+        "roi": 0.086
+      }
+    },
+    "projectName": "别推我的塔",
+    "paidTa": {
+      "registrations": 171,
+      "payers": 43,
+      "firstDayPayers": 6,
+      "firstDayFrequency": 1.17,
+      "ambiguousFrequency": false
+    }
+  },
+  {
+    "date": "2026-11-18",
+    "time": "12:00",
+    "period": "截至北京时间 12 点",
+    "ta": [
+      266,
+      962,
+      65,
+      3712,
+      3.86,
+      0.0676,
+      null,
+      null,
+      1.5,
+      558
+    ],
+    "gravity": {
+      "total": {
+        "spend": 1980.73,
+        "impressions": 6641,
+        "roi": 0.2787
+      },
+      "paid": {
+        "spend": 1980.73,
+        "impressions": 6641,
+        "roi": 0.2757
+      }
+    },
+    "projectName": "别推我的塔",
+    "paidTa": {
+      "registrations": 239,
+      "payers": 54,
+      "firstDayPayers": 12,
+      "firstDayFrequency": 1.58,
+      "ambiguousFrequency": false
+    }
+  },
+  {
+    "date": "2026-11-18",
+    "time": "13:00",
+    "period": "截至北京时间 13 点",
+    "ta": [
+      387,
+      1131,
+      78,
+      4612,
+      4.08,
+      0.069,
+      null,
+      null,
+      1.48,
+      680
+    ],
+    "gravity": {
+      "total": {
+        "spend": 5955.37,
+        "impressions": 17280,
+        "roi": 0.11320000000000001
+      },
+      "paid": {
+        "spend": 5955.37,
+        "impressions": 17280,
+        "roi": 0.1112
+      }
+    },
+    "projectName": "别推我的塔",
+    "paidTa": {
+      "registrations": 357,
+      "payers": 65,
+      "firstDayPayers": 18,
+      "firstDayFrequency": 1.56,
+      "ambiguousFrequency": false
+    }
+  },
+  {
+    "date": "2026-11-18",
+    "time": "14:00",
+    "period": "截至北京时间 14 点",
+    "ta": [
+      498,
+      1267,
+      89,
+      5738,
+      4.53,
+      0.0702,
+      null,
+      null,
+      1.57,
+      1030
+    ],
+    "gravity": {
+      "total": {
+        "spend": 7316.68,
+        "impressions": 22350,
+        "roi": 0.14
+      },
+      "paid": {
+        "spend": 7316.68,
+        "impressions": 22350,
+        "roi": 0.1342
+      }
+    },
+    "projectName": "别推我的塔",
+    "paidTa": {
+      "registrations": 441,
+      "payers": 75,
+      "firstDayPayers": 27,
+      "firstDayFrequency": 1.59,
+      "ambiguousFrequency": false
+    }
+  },
+  {
+    "date": "2026-11-18",
+    "time": "15:00",
+    "period": "截至北京时间 15 点",
+    "ta": [
+      681,
+      1482,
+      102,
+      6976,
+      4.71,
+      0.0688,
+      null,
+      null,
+      1.68,
+      1322
+    ],
+    "gravity": {
+      "total": {
+        "spend": 9209.79,
+        "impressions": 29970,
+        "roi": 0.1435
+      },
+      "paid": {
+        "spend": 9209.79,
+        "impressions": 29970,
+        "roi": 0.1212
+      }
+    },
+    "projectName": "别推我的塔",
+    "paidTa": {
+      "registrations": 583,
+      "payers": 87,
+      "firstDayPayers": 27,
+      "firstDayFrequency": 1.67,
+      "ambiguousFrequency": false
+    }
+  },
+  {
+    "date": "2026-11-18",
+    "time": "16:00",
+    "period": "截至北京时间 16 点",
+    "ta": [
+      944,
+      1774,
+      116,
+      7666,
+      4.32,
+      0.0654,
+      null,
+      null,
+      1.67,
+      1690
+    ],
+    "gravity": {
+      "total": {
+        "spend": 13114.86,
+        "impressions": 41611,
+        "roi": 0.12890000000000001
+      },
+      "paid": {
+        "spend": 13114.86,
+        "impressions": 41611,
+        "roi": 0.0915
+      }
+    },
+    "projectName": "别推我的塔",
+    "paidTa": {
+      "registrations": 800,
+      "payers": 97,
+      "firstDayPayers": 36,
+      "firstDayFrequency": 1.53,
+      "ambiguousFrequency": false
+    }
+  }
+]

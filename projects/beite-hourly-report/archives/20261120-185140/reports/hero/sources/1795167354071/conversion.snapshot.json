@@ -1,0 +1,105 @@
+{
+  "date": "2026-11-20",
+  "start": 151,
+  "launch": 151,
+  "end": 29,
+  "rate": 0.19205298013245034,
+  "nodes": [
+    {
+      "id": "launch_scene_start",
+      "label": "游戏启动",
+      "devices": 151,
+      "rate": null
+    },
+    {
+      "id": "launch_scene_loading_begin",
+      "label": "加载开始",
+      "devices": 151,
+      "rate": 1
+    },
+    {
+      "id": "main_scene_start",
+      "label": "进入主界面",
+      "devices": 151,
+      "rate": 1
+    },
+    {
+      "id": "login_game_success",
+      "label": "登录成功",
+      "devices": 151,
+      "rate": 1
+    },
+    {
+      "id": "load_mainview_begin",
+      "label": "游戏资源加载开始",
+      "devices": 151,
+      "rate": 1
+    },
+    {
+      "id": "load_mainview_success",
+      "label": "游戏资源加载成功",
+      "devices": 148,
+      "rate": 0.9801324503311258
+    },
+    {
+      "id": "war_start_first",
+      "label": "战斗开始",
+      "devices": 118,
+      "rate": 0.7814569536423841
+    },
+    {
+      "id": "story_show_first",
+      "label": "剧情文案出现",
+      "devices": 110,
+      "rate": 0.7284768211920529
+    },
+    {
+      "id": "turret_show",
+      "label": "炮台出现",
+      "devices": 99,
+      "rate": 0.6556291390728477
+    },
+    {
+      "id": "cutscene_show",
+      "label": "过场动画展示",
+      "devices": 72,
+      "rate": 0.4768211920529801
+    },
+    {
+      "id": "turret_overload",
+      "label": "炮台过热",
+      "devices": 71,
+      "rate": 0.47019867549668876
+    },
+    {
+      "id": "welfare_show",
+      "label": "干抽福利拍脸",
+      "devices": 68,
+      "rate": 0.4503311258278146
+    },
+    {
+      "id": "cutscene_over",
+      "label": "过场动画结束",
+      "devices": 62,
+      "rate": 0.4105960264900662
+    },
+    {
+      "id": "war_end_first",
+      "label": "战斗结束",
+      "devices": 29,
+      "rate": 0.19205298013245034
+    },
+    {
+      "id": "enter_home_first",
+      "label": "进入大厅",
+      "devices": 29,
+      "rate": 0.19205298013245034
+    }
+  ],
+  "time": "17:00",
+  "source": {
+    "panel": "https://ta-data.feiyu.com/#/panel/panel/44_1752_0",
+    "card": "激活登录（排除剧情）",
+    "observedAt": "2026-11-20T09:36:48.167Z"
+  }
+}

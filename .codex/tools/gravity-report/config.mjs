@@ -1,5 +1,6 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import {conversionDefaults,validateConversionConfig} from './hero-conversion.mjs';
 
 export const defaults = JSON.parse(await fs.readFile(new URL('./defaults.json', import.meta.url), 'utf8'));
 defaults.schedule = {enabled:false,hours:[2]};
@@ -11,6 +12,8 @@ export const configPath = process.env.GRAVITY_REPORT_CONFIG ??
 export const iaaConfigPath = path.join(path.dirname(configPath),'iaa','config.json');
 export const towerConfigPath = path.join(path.dirname(configPath),'tower','config.json');
 export const externalConfigPath = path.join(path.dirname(configPath),'external','config.json');
+export const heroConfigPath = path.join(path.dirname(configPath),'hero','config.json');
+export const heroConversionConfigPath = path.join(path.dirname(configPath),'hero-conversion','config.json');
 export const externalName = '外部小时报';
 export const externalRegistrationColumn = '腾讯_注册人数(平台上报)(激活时间)';
 export const towerName = '别推我的塔';
@@ -32,6 +35,7 @@ function normalizeProject(project) {
 }
 
 export function validateConfig(config, kind = 'gravity') {
+  if (kind === 'hero-conversion') return validateConversionConfig(config);
   const {report, project:rawProject} = config ?? {};
   const validText = value => typeof value === 'string' && value.trim().length > 0 && value.length <= 160;
   if (!report || !rawProject || typeof report.url !== 'string') throw new Error('缺少报表或项目配置');
@@ -99,6 +103,18 @@ export function validateConfig(config, kind = 'gravity') {
     throw new Error('首报时点须为有效的北京时间整点');
   }
   const {url:reportUrl,title,product,timeoutSeconds,retries,browserMode='existing'} = report;
+  const conversion=kind==='hero' && report.conversion ? validateConversionConfig({
+    project:{name:project.name},report:report.conversion,schedule:{enabled:false,hours:[]},
+  }).report : undefined;
+  let acquisition;
+  if(kind==='hero' && report.acquisition) {
+    const source=report.acquisition;
+    const checked=validateConversionConfig({project:{name:project.name},schedule:{enabled:false,hours:[]},
+      report:{url:source.url,title:source.mediaCard,timeoutSeconds,retries}}).report;
+    if(!validText(source.totalCard) || source.totalCard===source.mediaCard || source.roiMode!=='gravity' ||
+        !/^\d{4}-\d{2}-\d{2}$/.test(source.startDate) || new Date(source.startDate+'T00:00:00Z').toJSON()?.slice(0,10)!==source.startDate) throw new Error('请核对投放汇总卡片、累计起算日期和引力ROI口径');
+    acquisition={url:checked.url,mediaCard:checked.title,totalCard:source.totalCard,startDate:source.startDate,roiMode:'gravity'};
+  }
   if (!['existing','dedicated'].includes(browserMode)) throw new Error('浏览器模式无效');
   const layout = kind === 'iaa' ? report.layout ?? 'project' : 'project';
   if (!['project','daily','flat'].includes(layout)) throw new Error('报表展示维度无效');
@@ -106,6 +122,7 @@ export function validateConfig(config, kind = 'gravity') {
   if (!['yuan','wan','wan-decimal'].includes(spendUnit)) throw new Error('消耗显示单位无效');
   const productAppId = report.productAppId ?? '';
   if ((external || kind === 'tower') && !draft && !/^\d+$/.test(productAppId)) throw new Error('请填写引力产品 APPID');
+  if (productAppId && !/^\d+$/.test(productAppId)) throw new Error('引力产品 APPID 须为数字');
   const taUrl = report.taUrl ?? '';
   const taPanelUrl = external ? report.taPanelUrl ?? '' : '';
   if (taPanelUrl) {
@@ -133,7 +150,9 @@ export function validateConfig(config, kind = 'gravity') {
     throw new Error('数数总表与分媒体卡片需要填写不同的卡片名称');
   }
   return {...config,report:{url:reportUrl,title,product,timeoutSeconds,retries,browserMode,
-    fields,spendUnit,...(external || kind === 'tower' ? {productAppId} : {}),
+    fields,spendUnit,...(external || kind === 'tower' || productAppId ? {productAppId} : {}),
+    ...(conversion ? {conversion} : {}),
+    ...(acquisition ? {acquisition} : {}),
     ...(external ? {pushTitleTemplate,...(taPanelUrl ? {taPanelUrl,taTotalCard,taMediaCard} : {taUrl,taMediaUrl})} : {}),
     ...(metrics ? {metrics,layout} : {})},
     project:{name:project.name,groups:project.groups.map(group=>({name:group.name,
@@ -156,6 +175,14 @@ export async function loadConfig(file = configPath, kind = 'gravity') {
   try {
     return validateConfig(JSON.parse(await fs.readFile(file,'utf8')),kind);
   } catch (error) {
+    if (error.code === 'ENOENT' && kind === 'hero-conversion') return conversionDefaults();
+    if (error.code === 'ENOENT' && kind === 'hero') {
+      return validateConfig({...defaults,report:{...defaults.report,
+        url:'https://web.gravity-engine.com/#/pivotReport/mine?id=1795155162413133&category=adreport',
+        title:'英雄就是我-每日_拉取分时数',product:'英雄就是我',productAppId:'13204597',conversion:conversionDefaults().report},
+        project:{name:'英雄就是我',groups:[{name:'微小',projects:[{name:'英雄就是我',id:'13204597'}]}]},
+        schedule:{...defaults.schedule,enabled:false}},'hero');
+    }
     if (error.code === 'ENOENT' && kind === 'external') {
       return {...defaults,project:{name:externalName,groups:[]},schedule:{enabled:false,hours:[]},
         report:{...defaults.report,productAppId:'',taUrl:'',fields:{

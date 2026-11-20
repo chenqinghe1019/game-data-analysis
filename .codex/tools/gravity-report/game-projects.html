@@ -14,10 +14,25 @@ p{margin:0;color:#52677a}
 article{display:grid;align-content:start;gap:12px;padding:20px;background:#fff;border:1px solid #dbe6f1;border-radius:12px}
 a{justify-self:start;color:#174777;text-underline-offset:3px}
 a:focus-visible{outline:2px solid #2565d4;outline-offset:4px}
+.order-card{padding:20px;margin-bottom:20px;background:white;border:1px solid #dbe6f1;border-radius:12px}
+.order-card ol{padding:0;list-style:none;display:grid;gap:8px;margin:14px 0}
+.order-card li{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.order-card li span{flex:1;min-width:180px}
+button{border:1px solid #bfd1e6;border-radius:7px;padding:7px 12px;background:#f2f7ff;color:#174777;font:inherit;cursor:pointer}
+button:disabled{opacity:.45;cursor:default}
+#saveOrder{background:#2565d4;border-color:#2565d4;color:#fff}
+#orderMessage{margin-top:8px}
 </style>
 <main>
   <h1>游戏项目</h1>
   <p id="status" role="status">正在读取项目</p>
+  <section id="executionOrder" class="order-card" hidden aria-labelledby="orderTitle">
+    <h2 id="orderTitle">定时执行顺序</h2>
+    <p>同一整点按顺序依次执行，未开启定时的项目会跳过。</p>
+    <ol id="orderList"></ol>
+    <button id="saveOrder" type="button">保存执行顺序</button>
+    <p id="orderMessage" role="status"></p>
+  </section>
   <section id="projects" aria-label="游戏项目列表"></section>
 </main>
 <script type="module">
@@ -26,8 +41,46 @@ const list = document.getElementById('projects');
 try {
   const response = await fetch('/api/game-projects');
   if (!response.ok) throw new Error('项目列表读取失败');
-  for (const project of await response.json()) {
+  const projects=await response.json();
+  let savingOrder=false;
+  const orderList=document.getElementById('orderList');
+  const orderMessage=document.getElementById('orderMessage');
+  const saveOrder=document.getElementById('saveOrder');
+  const renderOrder=()=>{
+    orderList.replaceChildren();
+    projects.forEach((project,index)=>{
+      const row=document.createElement('li');
+      const caption=document.createElement('span');
+      caption.textContent=(index+1)+'. '+project.name+(project.scheduleEnabled ? '' : '（定时关闭）');
+      row.append(caption);
+      for(const [label,delta] of [['上移',-1],['下移',1]]) {
+        const button=document.createElement('button');button.type='button';button.textContent=label;
+        button.setAttribute('aria-label',project.name+label);
+        button.disabled=savingOrder || index+delta<0 || index+delta>=projects.length;
+        button.onclick=()=>{
+          [projects[index],projects[index+delta]]=[projects[index+delta],projects[index]];
+          orderMessage.textContent='顺序已调整，请保存。';renderOrder();
+        };
+        row.append(button);
+      }
+      orderList.append(row);
+    });
+    saveOrder.disabled=savingOrder;
+  };
+  saveOrder.onclick=async()=>{
+    savingOrder=true;renderOrder();orderMessage.textContent='正在保存…';
+    try {
+      const response=await fetch('/api/schedule-order',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({order:projects.map(project=>project.id)})});
+      const result=await response.json();if(!response.ok) throw new Error(result.error || '保存失败');
+      for(const project of projects) list.append(list.querySelector('[data-project-id="'+project.id+'"]'));
+      orderMessage.textContent='已保存，下一个待执行任务按此顺序运行。';
+    } catch(error) {orderMessage.textContent=error.message;}
+    finally {savingOrder=false;renderOrder();}
+  };
+  renderOrder();document.getElementById('executionOrder').hidden=false;
+  for (const project of projects) {
     const card = document.createElement('article');
+    card.dataset.projectId=project.id;
     const title = document.createElement('h2');
     title.textContent = project.name;
     const script = document.createElement('p');
@@ -40,6 +93,27 @@ try {
       link.href = project.settings;
       link.textContent = '打开播报配置';
       card.append(schedule,link);
+      if (['external','hero'].includes(project.id)) {
+        const history=document.createElement('button');
+        history.type='button';
+        history.textContent='打开历史记录副本';
+        history.style.cssText='justify-self:start;border:1px solid #bfd1e6;border-radius:7px;padding:8px 13px;background:#f2f7ff;color:#174777;font:inherit;cursor:pointer';
+        const hint=document.createElement('p');
+        hint.textContent='独立 Excel 副本，查看不影响播报';
+        hint.setAttribute('role','status');
+        history.onclick=async()=>{
+          history.disabled=true;
+          hint.textContent='正在生成历史记录副本…';
+          try {
+            const response=await fetch(project.settings+'/api/history',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});
+            const result=await response.json();
+            if (!response.ok) throw new Error(result.error || '历史副本生成失败');
+            hint.textContent='已打开 '+result.rows+' 条记录，截至 '+result.last;
+          } catch(error) { hint.textContent=error.message; }
+          finally { history.disabled=false; }
+        };
+        card.append(history,hint);
+      }
     }
     list.append(card);
   }
