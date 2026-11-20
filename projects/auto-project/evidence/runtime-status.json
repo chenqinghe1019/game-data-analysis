@@ -1,0 +1,123 @@
+{
+  "observedAtBeijing": "2026-11-20T19:16:08.036716+08:00",
+  "readOnly": true,
+  "projects": [
+    {
+      "route": "/",
+      "project": "下方了",
+      "schedule": {
+        "enabled": true,
+        "hours": [
+          0,
+          2,
+          4,
+          6,
+          8,
+          10,
+          12,
+          14,
+          16,
+          18,
+          20,
+          22
+        ]
+      },
+      "gravityUrl": "https://web.gravity-engine.com/#/pivotReport/shared?id=1776394520115533&category=adreport"
+    },
+    {
+      "route": "/external",
+      "project": "别推我的塔",
+      "schedule": {
+        "enabled": true,
+        "startAt": "2026-11-17T11:00",
+        "hours": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23
+        ]
+      },
+      "gravityUrl": "https://web.gravity-engine.com/#/pivotReport/mine?id=1794557619314845&category=adreport"
+    },
+    {
+      "route": "/hero",
+      "project": "英雄就是我",
+      "schedule": {
+        "enabled": true,
+        "hours": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23
+        ]
+      },
+      "gravityUrl": "https://web.gravity-engine.com/#/pivotReport/mine?id=1795155162413133&category=adreport"
+    },
+    {
+      "route": "/iaa",
+      "project": "IAA 项目",
+      "schedule": {
+        "enabled": false,
+        "hours": [
+          0,
+          2,
+          4,
+          6,
+          8,
+          10,
+          12,
+          14,
+          16,
+          18,
+          20,
+          22
+        ]
+      },
+      "gravityUrl": "https://web.gravity-engine.com/#/pivotReport/mine?id=1794471283176646&category=adreport"
+    }
+  ],
+  "task": {
+    "TaskName": "GravityWeComReport",
+    "State": "Running"
+  }
+}

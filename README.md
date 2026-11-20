@@ -4,6 +4,8 @@
 
 新增项目：[倍特小时报](projects/beite-hourly-report/README.md)。统一维护下方了、IAA、别推我的塔联合小时报、英雄就是我买量与前期转化；包含生产源码地图、指标口径、分时归档、运维经验及 [Codex 技能](.codex/skills/beite-hourly-report/SKILL.md) / [GPT 指令](projects/beite-hourly-report/gpt/INSTRUCTIONS.md)。
 
+换账号 / 新会话接手：[《自动项目》交接入口](projects/auto-project/START_HERE.md)。涵盖项目索引、当前进度、资料缺口、技能清单、验收样例与可下载交接包；读取范围同时区分本机Codex和ChatGPT的同名项目。
+
 ## 内容
 
 ### Skill 定义（`.codex/skills/`）

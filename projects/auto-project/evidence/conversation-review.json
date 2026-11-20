@@ -1,0 +1,176 @@
+{
+  "reviewedAt": "2026-11-20",
+  "scope": [
+    "Codex本机《自动项目》",
+    "ChatGPT《自动项目》"
+  ],
+  "listing": {
+    "codexActiveComplete": true,
+    "chatgptActivePages": 4,
+    "chatgptActiveComplete": true,
+    "codexArchivedComplete": true,
+    "chatgptArchivedComplete": true
+  },
+  "threads": [
+    {
+      "title": "了解企业微信 Webhook 图片推送",
+      "surface": "codex",
+      "project": "Codex本机《自动项目》",
+      "review": "当前聊天上下文及已归档项目资料",
+      "reviewedTurns": null,
+      "pages": null,
+      "historyPaginationComplete": true,
+      "latestRecordedResult": "倍特小时报项目、代码、382份归档及Codex/GPT资料已推送；当前继续整理自动项目换号交接资料。"
+    },
+    {
+      "title": "搭建 IAA_Game 埋点看板",
+      "surface": "codex",
+      "project": "Codex本机《自动项目》",
+      "review": "read_thread按游标读至末页；仅提取用户消息和最终答复，排除推理与工具调用",
+      "reviewedTurns": 15,
+      "pages": 3,
+      "historyPaginationComplete": true,
+      "latestRecordedResult": "已更新[大盘看板](https://ta-data.feiyu.com/#/panel/panel/37_1017_0)中的分媒体、汇总两张报表，补齐全部 14 个指标，核对无差异。\n\n按你确认保留原 DAU、新增及充值口径。补充字段按参考看板计算，渗透率分母使用 `ta_mg_show` 活跃人数，时长单位为分钟，比例输出为 0–1。\n\n[完整 SQL](https://github.com/chenqinghe1019/game-data-analysis/blob/master/sql/luobo4/overview_ad_duration_20261119.md)\n\n![新增广告指标](C:/Users/feiyu/Documents/飞鱼游戏-倍特工作室/outputs/luobo4_overview_20261119/分媒体广告指标.jpg)"
+    },
+    {
+      "title": "汇总保卫萝卜4三端掉线数据",
+      "surface": "codex",
+      "project": "Codex本机《自动项目》",
+      "review": "read_thread按游标读至末页；仅提取用户消息和最终答复，排除推理与工具调用",
+      "reviewedTurns": 24,
+      "pages": 6,
+      "historyPaginationComplete": true,
+      "latestRecordedResult": "已完成取数、名称核对和汇总：\n\n- 二测收入：25,130\n- 三测收入：36,602\n- 增加：11,472，增幅 45.65%\n- 未发现仅因符号不同产生的重复计费点\n- “新赛季18元冲刺礼”和“赛季末18元冲刺礼”按不同商品保留\n- Excel 包含“计费点对比”和“数据明细与合并映射”两张表\n\n文件：[下载计费点收入对比.xlsx](</C:/Users/feiyu/Documents/飞鱼游戏-倍特工作室/outputs/01a04687-6ed7-72d3-a3a4-54d899bde3bf/保卫萝卜4微信小游戏_二测三测计费点收入对比.xlsx>)"
+    },
+    {
+      "title": "迁移新增分析空间到别推我的塔",
+      "surface": "codex",
+      "project": "Codex本机《自动项目》",
+      "review": "read_thread按游标读至末页；仅提取用户消息和最终答复，排除推理与工具调用",
+      "reviewedTurns": 30,
+      "pages": 11,
+      "historyPaginationComplete": true,
+      "latestRecordedResult": "已建好：[打开「付费」看板](https://ta-data.feiyu.com/#/panel/panel/51_2235_0)。\n\n位置：个人空间 → 空间-付费分析 → 付费。\n\n包含首充关卡、前7日付费路径、每日礼包类型及礼包明细，共4张报表。均从 **2026-11-16** 起统计，仅计现金购买，金额使用 `payment`，相关标签已刷新。\n\n另外修正了礼包 ARPPU：分母按对应礼包的付费人数计算，已复算并确认保存。"
+    },
+    {
+      "title": "检查数数后台访问",
+      "surface": "codex",
+      "project": "Codex本机《自动项目》",
+      "review": "read_thread按游标读至末页；仅提取用户消息和最终答复，排除推理与工具调用",
+      "reviewedTurns": 3,
+      "pages": 1,
+      "historyPaginationComplete": true,
+      "latestRecordedResult": "「【喵喵岛】留存」看板共 8 张报表，已保存并核对其中 7 张。它们已切换为交叉表，2 留到 30 留按天数升序排列，留存率最多显示两位小数。\n\n「【分媒体】注册留存」已配好，但多次提交后看板仍显示明细数据。我保留了配置好的报表标签页。\n\n交叉表会把尚未到观察日的空值显示为 `0%`。"
+    },
+    {
+      "title": "进行代号T埋点验收",
+      "surface": "codex",
+      "project": "Codex本机《自动项目》",
+      "review": "read_thread按游标读至末页；仅提取用户消息和最终答复，排除推理与工具调用",
+      "reviewedTurns": 11,
+      "pages": 2,
+      "historyPaginationComplete": true,
+      "latestRecordedResult": "开服时间在2027年、且 `domain='release'` 的 **5,957条**记录，`area` 分布为：\n\n| area | 条数 | 占比 |\n|---|---:|---:|\n| `prod-weixin` | 5,957 | 100% |\n\n全部为 `online_log`，没有其他 `area` 或空值。"
+    },
+    {
+      "title": "拉取三端广告数据",
+      "surface": "codex",
+      "project": "Codex本机《自动项目》",
+      "review": "read_thread按游标读至末页；仅提取用户消息和最终答复，排除推理与工具调用",
+      "reviewedTurns": 9,
+      "pages": 1,
+      "historyPaginationComplete": true,
+      "latestRecordedResult": "已补齐并置顶[关卡汇总](https://ta-data.feiyu.com/#/panel/panel/54_2165)，总转化率按你确认的“所选新老用户当日活跃人数”作分母。\n\n看板现有四张报表，数据核对和组合筛选验证均通过，口径已记入项目知识库。\n\n![完成后的看板](C:/Users/feiyu/Documents/飞鱼游戏-倍特工作室/outputs/yishua_level_analysis/关卡分析_完成.png)"
+    },
+    {
+      "title": "确认数数埋点验收能力",
+      "surface": "codex",
+      "project": "Codex本机《自动项目》",
+      "review": "read_thread按游标读至末页；仅提取用户消息和最终答复，排除推理与工具调用",
+      "reviewedTurns": 11,
+      "pages": 2,
+      "historyPaginationComplete": true,
+      "latestRecordedResult": "你说得对，我之前查成了“喵喵岛_逍遥”（项目 27）。这次已按你指定的**本地 Excel 方案**，在“喵喵岛”（项目 **52**）重新验收，并整理了只列差异及待核项的总览：\n\n[下载喵喵岛项目 52 埋点验收差异表](</C:/Users/feiyu/Documents/飞鱼游戏-倍特工作室/outputs/01a0f147-6210-7d30-92e9-64f858d75d05/喵喵岛_52埋点验收差异_20261023.xlsx>)\n\n2026-08-24 至 10-22 期间，方案的 26 种事件中有 24 种查到上报；`mail_log`、`online_log` 未查到。表内共列出 **147 条差异或待核项**，包括字段缺失、类型和枚举不符，以及需要结合触发条件判断的低非空率。每行都附有对应的查询 SQL_ID。我也修正了本地项目映射。\n\n**此前不带“_52”的报告查的是项目 27，不能用于喵喵岛验收。**该旧文件当前被占用，未能移走，请以这份新表为准。\n\n:codex-file-citation{path=\"C:\\Users\\feiyu\\Documents\\飞鱼游戏-倍特工作室\\outputs\\01a0f147-6210-7d30-92e9-64f858d75d05\\喵喵岛_52埋点验收差异_20261023.xlsx\" purpose=\"output\"}"
+    },
+    {
+      "title": "查找自动播报系统",
+      "surface": "codex",
+      "project": "Codex本机《自动项目》",
+      "review": "read_thread按游标读至末页；仅提取用户消息和最终答复，排除推理与工具调用",
+      "reviewedTurns": 8,
+      "pages": 1,
+      "historyPaginationComplete": true,
+      "latestRecordedResult": "已打成 **Skill＋通用提示词**分享包：\n\n[下载日报截图分享包 ZIP](C:/Users/feiyu/Documents/飞鱼游戏-倍特工作室/outputs/daily-report-screenshot-share.zip)\n\n包内包括：\n\n- **Skill**：规范数据校验、Excel 日报生成、截图和预览。\n- **PROMPT.md**：可直接粘贴给其他 AI 使用。\n- **README.md**：安装方法、依赖和使用示例。\n\n对方提供数据和可选的 Excel 模板，然后说：\n\n> 根据这些数据生成日报 Excel 和对应截图，展示推送预览，不实际发送。\n\n**这是 AI 工作流包，尚不是一键运行程序**：接收方需要具备 Excel 文件处理和图片渲染能力。已通过 Skill 结构校验，未包含实际截图脚本、定时器或推送功能。"
+    },
+    {
+      "title": "查找萝卜4埋点",
+      "surface": "codex",
+      "project": "Codex本机《自动项目》",
+      "review": "read_thread按游标读至末页；仅提取用户消息和最终答复，排除推理与工具调用",
+      "reviewedTurns": 19,
+      "pages": 15,
+      "historyPaginationComplete": true,
+      "latestRecordedResult": "付费留存报表已补充并更新成功：\n\n- 付费留存1–30\n- 付费留存45、60、90、120、150、180\n- 全部设置为百分比，保留2位小数\n- 原有行分组字段及顺序已恢复\n- 报表已显示“更新成功”"
+    },
+    {
+      "title": "开发数数看板采集器 v0.1",
+      "surface": "codex",
+      "project": "Codex本机《自动项目》",
+      "review": "read_thread按游标读至末页；仅提取用户消息和最终答复，排除推理与工具调用",
+      "reviewedTurns": 5,
+      "pages": 1,
+      "historyPaginationComplete": true,
+      "latestRecordedResult": "你指出得对，刚才点进独立报表后，口径已经发生变化：\n\n- 看板阶段值：`19752`\n- 独立报表阶段值：`19766`\n- 原因：看板默认筛选“内充用户v2不属于分群”未被继承\n\n我已作以下处理：\n\n- 未保存独立报表的临时筛选\n- 已关闭独立报表，保留正确看板\n- 看板日期仍为“过去30天”\n- 已确认“内充用户v2不属于分群”仍然生效\n- 采集器新增 `requiredDashboardFilters` 强制校验\n- 缺失必需筛选时返回 `DASHBOARD_FILTER_MISMATCH`，拒绝采集\n- 测试和语法检查均通过\n\n因此后续原则是：所有日期和分层筛选都必须在看板上下文完成，不能进入独立报表取数。下一步需要研究如何在看板层临时增加“首日付费分层（创角）→ 动态匹配 → 6元及以下”，同时保留内充排除条件。"
+    },
+    {
+      "title": "同步GPT项目到Codex",
+      "surface": "codex",
+      "project": "Codex本机《自动项目》",
+      "review": "read_thread按游标读至末页；仅提取用户消息和最终答复，排除推理与工具调用",
+      "reviewedTurns": 1,
+      "pages": 1,
+      "historyPaginationComplete": true,
+      "latestRecordedResult": "目前 ChatGPT 项目不能完整“一键同步”为 Codex 项目：ChatGPT 项目的聊天、上传文件和项目指令属于云端上下文；Codex 项目主要对应电脑上的本地文件夹，而且两边聊天历史是分开的。\n\n推荐这样迁移：\n\n1. 在 ChatGPT 项目中下载需要的文件。\n2. 在电脑上新建一个项目文件夹，把文件放进去。\n3. 在 Codex 桌面端选择“打开文件夹/创建本地项目”。\n4. 把 ChatGPT 的“项目指令”整理到项目根目录的 `AGENTS.md`。\n5. 如需保留旧对话内容，将关键结论导出或复制成 `CONTEXT.md`，让 Codex读取。\n6. 如果代码原本在 GitHub，最方便的是直接在 Codex 中打开克隆后的仓库。\n\n需要注意：\n\n- ChatGPT 项目本身不能直接访问你电脑上的代码目录。\n- Codex CLI/IDE 只把当前目录或工作区视为项目，不显示 ChatGPT Projects。\n- 在新版桌面应用中，ChatGPT 项目和本地项目可统一展示，但 Codex仍保留独立的任务历史，不会自动复制全部聊天记录。\n- 如果只是想继续某次对话，可以把那次对话的需求、决策和待办复制到 Codex 新任务中。\n\n官方说明：[Projects and chats](https://learn.chatgpt.com/docs/projects) · [AGENTS.md 项目指令](https://learn.chatgpt.com/docs/agent-configuration/agents-md)"
+    },
+    {
+      "title": "找回分析流程和思维导图",
+      "surface": "codex",
+      "project": "Codex本机《自动项目》",
+      "review": "read_thread按游标读至末页；仅提取用户消息和最终答复，排除推理与工具调用",
+      "reviewedTurns": 3,
+      "pages": 1,
+      "historyPaginationComplete": true,
+      "latestRecordedResult": "找到了，就是这份：\n\n[游戏运营投放分析模板_多Sheet_升级版.xlsx](</C:/Users/feiyu/Downloads/%E6%B8%B8%E6%88%8F%E8%BF%90%E8%90%A5%E6%8A%95%E6%94%BE%E5%88%86%E6%9E%90%E6%A8%A1%E6%9D%BF_%E5%A4%9ASheet_%E5%8D%87%E7%BA%A7%E7%89%88.xlsx>)\n\n位置在下载目录：  \n`C:\\Users\\feiyu\\Downloads\\%E6%B8%B8%E6%88%8F%E8%BF%90%E8%90%A5%E6%8A%95%E6%94%BE%E5%88%86%E6%9E%90%E6%A8%A1%E6%9D%BF_%E5%A4%9ASheet_%E5%8D%87%E7%BA%A7%E7%89%88.xlsx`\n\n它解码后的文件名是：`游戏运营投放分析模板_多Sheet_升级版.xlsx`。  \n里面有 `00_脑图`、`00_脑图_流程图`、`01_模板目录`、`13_问题拆解SOP` 等 sheet，应该就是你说的那份分析模板。"
+    },
+    {
+      "title": "读取下载中的埋点",
+      "surface": "codex",
+      "project": "Codex本机《自动项目》",
+      "review": "read_thread按游标读至末页；仅提取用户消息和最终答复，排除推理与工具调用",
+      "reviewedTurns": 8,
+      "pages": 1,
+      "historyPaginationComplete": true,
+      "latestRecordedResult": "已调整完成并加入看板。\n\n现在报表采用长表结构：\n\n`日期｜指标｜ABO（商品ID）｜商品名称｜ABO系列名｜数值`\n\n- 固定指标：每天各一行，ABO 显示“全部”\n- 商品指标：按 ABO 分行展示\n- 已验证 7 项指标数据正常，最新日期为 2026-06-23\n- 报表名保持“收藏家数据”\n\n指标口径也已同步至 [baoweiluoboshe_tracking.yaml](<C:\\Users\\feiyu\\Documents\\飞鱼游戏-倍特工作室\\baoweiluoboshe_tracking.yaml>)。"
+    },
+    {
+      "title": "整理分析SLG数据",
+      "surface": "chatgpt",
+      "project": "ChatGPT《自动项目》",
+      "review": "read_thread按游标读至末页；仅提取用户消息和最终答复，排除推理与工具调用",
+      "reviewedTurns": 5,
+      "pages": 1,
+      "historyPaginationComplete": true,
+      "latestRecordedResult": "**剔除 826–1040 服后，第二批（147–825 服）三天流水增长 35.95%，日均活跃下降 6.07%，次日回访率基本持平（69.54% → 69.86%）。** 流水增量主要来自 SLG 礼包，礼包占上线后流水的 **31.00%**，同期其他付费流水下降 **6.19%**。分区服看，**560–825 服贡献约 63% 的流水增量，但次日回访率从 72.5% 降至 69.1%**。**300–432 服和 433–559 服**的流水和次日回访率均有提升。\n\n**826–1040 服专项报表剔除的 9 个付费小类**为赛季英雄雅典娜、萱萱升星、天魔法印、限时双战令、S2赛季礼包、天师驱诡、S2赛季战令、萱萱补星包、闹诡金矿。"
+    },
+    {
+      "title": "连通性测试成功",
+      "surface": "chatgpt",
+      "project": "ChatGPT《自动项目》",
+      "review": "read_thread按游标读至末页；仅提取用户消息和最终答复，排除推理与工具调用",
+      "reviewedTurns": 1,
+      "pages": 1,
+      "historyPaginationComplete": true,
+      "latestRecordedResult": "未从该页提取最终答复；不可据此认定业务已完成"
+    }
+  ]
+}

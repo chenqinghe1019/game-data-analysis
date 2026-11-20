@@ -1,0 +1,293 @@
+{
+  "createdAtBeijing": "2026-11-20T19:16:07.734710+08:00",
+  "files": [
+    {
+      "path": "materials/luobo4-analysis/保卫萝卜4_三端掉线情况_2026-07-30至08-26.xlsx",
+      "source": "C:\\Users\\feiyu\\Documents\\飞鱼游戏-倍特工作室\\outputs\\01a04687-6ed7-72d3-a3a4-54d899bde3bf\\保卫萝卜4_三端掉线情况_2026-07-30至08-26.xlsx",
+      "status": "historical-deliverable",
+      "bytes": 5999,
+      "sha256": "d0e4f6783aa56eb9aac447ae6fcdb3ce0c150415b8cef1b2e8f5ce54db0586a6"
+    },
+    {
+      "path": "materials/luobo4-analysis/保卫萝卜4_无限冲浪上线前后数据分析_三端汇总.xlsx",
+      "source": "C:\\Users\\feiyu\\Documents\\飞鱼游戏-倍特工作室\\outputs\\01a04687-6ed7-72d3-a3a4-54d899bde3bf\\保卫萝卜4_无限冲浪上线前后数据分析_三端汇总.xlsx",
+      "status": "historical-deliverable",
+      "bytes": 18013,
+      "sha256": "9212d23ae81c418afec901e28592e5c0c881d084479053e971dbd10f20fd191a"
+    },
+    {
+      "path": "materials/luobo4-analysis/保卫萝卜4_无限冲浪掉线数据补充_三端汇总_2026-09-23.xlsx",
+      "source": "C:\\Users\\feiyu\\Documents\\飞鱼游戏-倍特工作室\\outputs\\01a04687-6ed7-72d3-a3a4-54d899bde3bf\\保卫萝卜4_无限冲浪掉线数据补充_三端汇总_2026-09-23.xlsx",
+      "status": "historical-deliverable",
+      "bytes": 26162,
+      "sha256": "50128e9720d4db89dc21cddde26180318e37773defcaad1c598df05fc91f39f2"
+    },
+    {
+      "path": "materials/luobo4-analysis/保卫萝卜4_无限冲浪第二周数据分析_三端汇总_2026-08-30.xlsx",
+      "source": "C:\\Users\\feiyu\\Documents\\飞鱼游戏-倍特工作室\\outputs\\01a04687-6ed7-72d3-a3a4-54d899bde3bf\\保卫萝卜4_无限冲浪第二周数据分析_三端汇总_2026-08-30.xlsx",
+      "status": "historical-deliverable",
+      "bytes": 25231,
+      "sha256": "65f8d6a2e8768bdcf4c754ba776031abcf4630faa9c18e19649aa7e4ac7eba3e"
+    },
+    {
+      "path": "materials/luobo4-analysis/保卫萝卜4微信小游戏_二测三测计费点收入对比.xlsx",
+      "source": "C:\\Users\\feiyu\\Documents\\飞鱼游戏-倍特工作室\\outputs\\01a04687-6ed7-72d3-a3a4-54d899bde3bf\\保卫萝卜4微信小游戏_二测三测计费点收入对比.xlsx",
+      "status": "historical-deliverable",
+      "bytes": 11002,
+      "sha256": "d68915be834e0784b167ba8e922565b1550c90778e72f0a8f0934fd4355e6819"
+    },
+    {
+      "path": "materials/tracking-review/喵喵岛_52埋点验收差异_20261023.xlsx",
+      "source": "C:\\Users\\feiyu\\Documents\\飞鱼游戏-倍特工作室\\outputs\\01a0f147-6210-7d30-92e9-64f858d75d05\\喵喵岛_52埋点验收差异_20261023.xlsx",
+      "status": "historical-deliverable",
+      "bytes": 16337,
+      "sha256": "4b7d2a9ad394da4ca277fc5b92d115bb722f18c6665fff3fdf1bb1f61469f09c"
+    },
+    {
+      "path": "materials/tracking-review/T埋点_属性名修正_保留格式.xlsx",
+      "source": "C:\\Users\\feiyu\\Documents\\飞鱼游戏-倍特工作室\\outputs\\01a0f147-6210-7d30-92e9-64f858d75d05\\T埋点_属性名修正_保留格式.xlsx",
+      "status": "historical-deliverable",
+      "bytes": 932533,
+      "sha256": "d7cae22109a9f13ef7df9828698593ce15c2b73593cbdf80bcf94d9617493ecb"
+    },
+    {
+      "path": "materials/tracking-review/T埋点差异总览_修正版_20260930.xlsx",
+      "source": "C:\\Users\\feiyu\\Documents\\飞鱼游戏-倍特工作室\\outputs\\01a0f147-6210-7d30-92e9-64f858d75d05\\T埋点差异总览_修正版_20260930.xlsx",
+      "status": "historical-deliverable",
+      "bytes": 16960,
+      "sha256": "b172a93e8481aaf1e7f899d7ff274ca3a0c9a4641f030bbbfd0b12901999af77"
+    },
+    {
+      "path": "materials/tracking-review/T埋点验收初查_20260930.xlsx",
+      "source": "C:\\Users\\feiyu\\Documents\\飞鱼游戏-倍特工作室\\outputs\\01a0f147-6210-7d30-92e9-64f858d75d05\\T埋点验收初查_20260930.xlsx",
+      "status": "historical-deliverable",
+      "bytes": 45113,
+      "sha256": "c43dfdc382e8ebe4ff0d025f105a5df644e62ac310f1657dbc24df41bb044875"
+    },
+    {
+      "path": "materials/luobo4-overview/qa.sql",
+      "source": "C:\\Users\\feiyu\\Documents\\飞鱼游戏-倍特工作室\\outputs\\luobo4_overview_20261119\\qa.sql",
+      "status": "final-sql-and-validation",
+      "bytes": 16767,
+      "sha256": "971f28eedd25f1e498746efd4f40ef8c4ee6b19fa77199f5a991aeca1dc715e5"
+    },
+    {
+      "path": "materials/luobo4-overview/report_3513.sql",
+      "source": "C:\\Users\\feiyu\\Documents\\飞鱼游戏-倍特工作室\\outputs\\luobo4_overview_20261119\\report_3513.sql",
+      "status": "final-sql-and-validation",
+      "bytes": 6963,
+      "sha256": "c10208d3b9e14a574e93cb0f3aa06c32bfe2437fb77881619873b7a9f66249aa"
+    },
+    {
+      "path": "materials/luobo4-overview/report_3846.sql",
+      "source": "C:\\Users\\feiyu\\Documents\\飞鱼游戏-倍特工作室\\outputs\\luobo4_overview_20261119\\report_3846.sql",
+      "status": "final-sql-and-validation",
+      "bytes": 6874,
+      "sha256": "433733ccb3666f62012ec7d2957b084398856b065b6827d54f290d5ff1ecd379"
+    },
+    {
+      "path": "materials/luobo4-overview/最终完整SQL.md",
+      "source": "C:\\Users\\feiyu\\Documents\\飞鱼游戏-倍特工作室\\outputs\\luobo4_overview_20261119\\最终完整SQL.md",
+      "status": "final-sql-and-validation",
+      "bytes": 13891,
+      "sha256": "42b236c94e463d800a9cb43ad9f2e8e18b9fb6a097f5dda2615a2d0e3392435f"
+    },
+    {
+      "path": "materials/yishua-dashboards/report_5984.sql",
+      "source": "C:\\Users\\feiyu\\Documents\\飞鱼游戏-倍特工作室\\outputs\\yishuajiushangtou_20261102\\report_5984.sql",
+      "status": "final-sql-and-validation",
+      "bytes": 2159,
+      "sha256": "421cf594c5bec0364551ba4c5478dc1943ff94336aa233d5dd98945ef94ae909"
+    },
+    {
+      "path": "materials/yishua-dashboards/report_5987.sql",
+      "source": "C:\\Users\\feiyu\\Documents\\飞鱼游戏-倍特工作室\\outputs\\yishuajiushangtou_20261102\\report_5987.sql",
+      "status": "final-sql-and-validation",
+      "bytes": 2703,
+      "sha256": "ebd33b1ac2bc800241997c2e98fb31e628d42c42e986448ab78c7411c148a333"
+    },
+    {
+      "path": "materials/yishua-dashboards/report_5988.sql",
+      "source": "C:\\Users\\feiyu\\Documents\\飞鱼游戏-倍特工作室\\outputs\\yishuajiushangtou_20261102\\report_5988.sql",
+      "status": "final-sql-and-validation",
+      "bytes": 5598,
+      "sha256": "671db699f14c8f30b3d6165b221d0d0ac37ad0027ff6b3fe92787826cc503ff5"
+    },
+    {
+      "path": "materials/yishua-dashboards/report_5989.sql",
+      "source": "C:\\Users\\feiyu\\Documents\\飞鱼游戏-倍特工作室\\outputs\\yishuajiushangtou_20261102\\report_5989.sql",
+      "status": "final-sql-and-validation",
+      "bytes": 3492,
+      "sha256": "7094a9d92cdef7f651d383eebf8768cc2c7af20667115fb9af0598c158e7fa3f"
+    },
+    {
+      "path": "materials/yishua-dashboards/report_5990.sql",
+      "source": "C:\\Users\\feiyu\\Documents\\飞鱼游戏-倍特工作室\\outputs\\yishuajiushangtou_20261102\\report_5990.sql",
+      "status": "final-sql-and-validation",
+      "bytes": 7357,
+      "sha256": "affdb978a8ddb25cf10e57d09539d63f3b00c660903d95e9d3ac17675ea8315b"
+    },
+    {
+      "path": "materials/yishua-dashboards/report_5991.sql",
+      "source": "C:\\Users\\feiyu\\Documents\\飞鱼游戏-倍特工作室\\outputs\\yishuajiushangtou_20261102\\report_5991.sql",
+      "status": "final-sql-and-validation",
+      "bytes": 7516,
+      "sha256": "611d3b733111d0f0e486b02a2a740636726949e80a92fdb0482f416be83a6438"
+    },
+    {
+      "path": "materials/yishua-dashboards/report_6083.sql",
+      "source": "C:\\Users\\feiyu\\Documents\\飞鱼游戏-倍特工作室\\outputs\\yishuajiushangtou_20261102\\report_6083.sql",
+      "status": "final-sql-and-validation",
+      "bytes": 3976,
+      "sha256": "33ebd28a599c45c9eced8c1fdb7340e4de4cd276952360a47ed2d41480b25292"
+    },
+    {
+      "path": "materials/yishua-dashboards/report_6084.sql",
+      "source": "C:\\Users\\feiyu\\Documents\\飞鱼游戏-倍特工作室\\outputs\\yishuajiushangtou_20261102\\report_6084.sql",
+      "status": "final-sql-and-validation",
+      "bytes": 4051,
+      "sha256": "1be5740c641ed41b0aba0df2ba835e2eb2960ede871fe25d7a264437df36e5c7"
+    },
+    {
+      "path": "materials/yishua-dashboards/report_6085.sql",
+      "source": "C:\\Users\\feiyu\\Documents\\飞鱼游戏-倍特工作室\\outputs\\yishuajiushangtou_20261102\\report_6085.sql",
+      "status": "final-sql-and-validation",
+      "bytes": 4938,
+      "sha256": "45e07479c824f7ad4afb7d34941d2256716cac9ccb6d46075c4dc8f8d2880ea0"
+    },
+    {
+      "path": "materials/yishua-dashboards/一致性检查.sql",
+      "source": "C:\\Users\\feiyu\\Documents\\飞鱼游戏-倍特工作室\\outputs\\yishuajiushangtou_20261102\\一致性检查.sql",
+      "status": "final-sql-and-validation",
+      "bytes": 19432,
+      "sha256": "717b73488ffa02f1123b811df3fba92f47eabe9c3ed931b9c477060908e49677"
+    },
+    {
+      "path": "materials/yishua-dashboards/最终完整SQL.md",
+      "source": "C:\\Users\\feiyu\\Documents\\飞鱼游戏-倍特工作室\\outputs\\yishuajiushangtou_20261102\\最终完整SQL.md",
+      "status": "final-sql-and-validation",
+      "bytes": 42271,
+      "sha256": "74b32ce17b1032993d131063d16fbaa201cf831970d38d60294ea7eab9293456"
+    },
+    {
+      "path": "materials/yishua-dashboards/看板修改说明.md",
+      "source": "C:\\Users\\feiyu\\Documents\\飞鱼游戏-倍特工作室\\outputs\\yishuajiushangtou_20261102\\看板修改说明.md",
+      "status": "final-sql-and-validation",
+      "bytes": 1566,
+      "sha256": "b1d64c95b1f0b6f3742687d441fb9f51b5acf4c11d33428a3352280e449c3db6"
+    },
+    {
+      "path": "materials/yishua-level/关卡汇总.sql",
+      "source": "C:\\Users\\feiyu\\Documents\\飞鱼游戏-倍特工作室\\outputs\\yishua_level_analysis\\关卡汇总.sql",
+      "status": "final-sql-and-validation",
+      "bytes": 4626,
+      "sha256": "23f4178783229971a2de12f02cdf4ee94cc476012fb75b11ec6edd5b6ce94e7c"
+    },
+    {
+      "path": "materials/yishua-level/失败汇总.sql",
+      "source": "C:\\Users\\feiyu\\Documents\\飞鱼游戏-倍特工作室\\outputs\\yishua_level_analysis\\失败汇总.sql",
+      "status": "final-sql-and-validation",
+      "bytes": 2045,
+      "sha256": "d7947003ea5af574a36ac7b90eaa422cd697f5d7edf95ea4ca41be7bf423cbbc"
+    },
+    {
+      "path": "materials/yishua-level/失败剩余螺丝分布.sql",
+      "source": "C:\\Users\\feiyu\\Documents\\飞鱼游戏-倍特工作室\\outputs\\yishua_level_analysis\\失败剩余螺丝分布.sql",
+      "status": "final-sql-and-validation",
+      "bytes": 3739,
+      "sha256": "b64ff4e78ed2c492becfa83c955212dc5fb0f62193cc07f25541af28528d55a1"
+    },
+    {
+      "path": "materials/yishua-level/交付说明.md",
+      "source": "C:\\Users\\feiyu\\Documents\\飞鱼游戏-倍特工作室\\outputs\\yishua_level_analysis\\交付说明.md",
+      "status": "final-sql-and-validation",
+      "bytes": 1797,
+      "sha256": "5af27943cd9702708e5783337b6332c89dffc12494a26313ec7f1e3fa2acec7c"
+    },
+    {
+      "path": "materials/yishua-level/验证结果.json",
+      "source": "C:\\Users\\feiyu\\Documents\\飞鱼游戏-倍特工作室\\outputs\\yishua_level_analysis\\验证结果.json",
+      "status": "final-sql-and-validation",
+      "bytes": 215,
+      "sha256": "10eee29b59834add376f1500c9d2065d8032c7c4f54036b317153e2e63c21296"
+    },
+    {
+      "path": "materials/yishua-level/关卡分析_完成.png",
+      "source": "C:\\Users\\feiyu\\Documents\\飞鱼游戏-倍特工作室\\outputs\\yishua_level_analysis\\关卡分析_完成.png",
+      "status": "final-sql-and-validation",
+      "bytes": 44704,
+      "sha256": "1d922e775dbf79cab7dd5a612a233ebfbc780a4a8d84c340973393388207c9ec"
+    },
+    {
+      "path": "materials/reference-tools/build_wechat_billing_compare.mjs",
+      "source": "C:\\Users\\feiyu\\Documents\\飞鱼游戏-倍特工作室\\build_wechat_billing_compare.mjs",
+      "status": "historical-source-review-before-execution",
+      "bytes": 14206,
+      "sha256": "22b630645bf3f007a4251e19a95c6353538d15be4e5bb9775a9c8aa25bf52ff8"
+    },
+    {
+      "path": "materials/reference-tools/update_trend_duration.mjs",
+      "source": "C:\\Users\\feiyu\\Documents\\飞鱼游戏-倍特工作室\\update_trend_duration.mjs",
+      "status": "historical-source-review-before-execution",
+      "bytes": 9392,
+      "sha256": "781fc50a183129e735de30cdaa5fd4592f237e5d07eddb0afdf00c21683d1a52"
+    },
+    {
+      "path": "materials/reference-tools/create_baoweiluobo_collector_report_15.js",
+      "source": "C:\\Users\\feiyu\\Documents\\飞鱼游戏-倍特工作室\\create_baoweiluobo_collector_report_15.js",
+      "status": "historical-source-review-before-execution",
+      "bytes": 14746,
+      "sha256": "5a58cbf086c5d9e20b316129aed0fb7fa1dfc342ede6f44728fea59d3bed45c8"
+    },
+    {
+      "path": "materials/reference-tools/finalize_baoweiluobo_collector_dashboard_250.js",
+      "source": "C:\\Users\\feiyu\\Documents\\飞鱼游戏-倍特工作室\\finalize_baoweiluobo_collector_dashboard_250.js",
+      "status": "historical-source-review-before-execution",
+      "bytes": 2599,
+      "sha256": "1f944319576b2f0ff37403a011aafc945d37a8293321beb3b828f71edb2963e2"
+    },
+    {
+      "path": "materials/reference-tools/refresh_baoweiluobo_collector_dashboard_data.js",
+      "source": "C:\\Users\\feiyu\\Documents\\飞鱼游戏-倍特工作室\\refresh_baoweiluobo_collector_dashboard_data.js",
+      "status": "historical-source-review-before-execution",
+      "bytes": 2162,
+      "sha256": "2bb2237f3f20adfd61be9cf83e4225e05cc8f9dac7c3e2e185f639aa542e2fb6"
+    },
+    {
+      "path": "materials/reference-tools/verify_baoweiluobo_collector_report_15.js",
+      "source": "C:\\Users\\feiyu\\Documents\\飞鱼游戏-倍特工作室\\verify_baoweiluobo_collector_report_15.js",
+      "status": "historical-source-review-before-execution",
+      "bytes": 2616,
+      "sha256": "4468ae6b08e64ca54111c3a6ca275a73cad49da3edd562920bf3722865b24c73"
+    },
+    {
+      "path": "materials/templates/游戏运营投放分析模板_多Sheet_升级版.xlsx",
+      "source": "C:\\Users\\feiyu\\Downloads\\%E6%B8%B8%E6%88%8F%E8%BF%90%E8%90%A5%E6%8A%95%E6%94%BE%E5%88%86%E6%9E%90%E6%A8%A1%E6%9D%BF_%E5%A4%9ASheet_%E5%8D%87%E7%BA%A7%E7%89%88.xlsx",
+      "status": "analysis-template",
+      "bytes": 786553,
+      "sha256": "bf1ae7a7fb37b08c8b3423b79569d74952e3cdbfee360f3287f832ac616cec6c"
+    },
+    {
+      "path": "materials/templates/游戏运营投放分析模板_流程图版.xlsx",
+      "source": "C:\\Users\\feiyu\\Downloads\\游戏运营投放分析模板_流程图版.xlsx",
+      "status": "analysis-template",
+      "bytes": 18590,
+      "sha256": "e18a94477823e310ecb85063d2af1e19f3117299d2a8f0578d82443d3283a9ab"
+    }
+  ],
+  "missing": [
+    {
+      "source": ".codex/tools/ta-dashboard-collector/README.md",
+      "reason": "Historical conversation references this path, but it is absent now; not recreated."
+    },
+    {
+      "source": "baoweiluoboshe_tracking.yaml",
+      "reason": "Historical conversation references this path, but it is absent now; not recreated."
+    }
+  ],
+  "notes": [
+    "Selected final deliverables and source evidence, not every temporary file.",
+    "Historical files are not a new online verification. No production inputs modified.",
+    "Excluded wrong-project27 report, intermediate previews, render inspection dumps, authentication material."
+  ]
+}

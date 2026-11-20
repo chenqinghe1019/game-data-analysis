@@ -18,3 +18,10 @@
 !/projects/
 !/projects/beite-hourly-report/
 !/projects/beite-hourly-report/**
+!/projects/auto-project/
+!/projects/auto-project/**
+!AGENTS.md
+
+# Local Python execution caches are never project knowledge.
+**/__pycache__/
+*.pyc

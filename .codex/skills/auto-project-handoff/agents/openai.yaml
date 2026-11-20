@@ -1,0 +1,4 @@
+interface:
+  display_name: "自动项目交接"
+  short_description: "整理项目进度、规则与资料缺口，生成换账号和新电脑接手的知识包"
+  default_prompt: "使用 $auto-project-handoff 盘点自动项目，更新交接入口并保存已授权资料到GitHub。"
