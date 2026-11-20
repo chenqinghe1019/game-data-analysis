@@ -15,4 +15,6 @@ description: 盘点倍特工作室《自动项目》的当前进度、项目索�
 
 采用项目自带 `scripts/collect-materials.py` 导出明确选择的成品和文件校验清单，`scripts/package-handoff.py` 生成技能与知识包。整理操作不启停任务、不触发推送、不覆盖生产库。按用户授权保存GitHub，推送后验证远端提交。
 
+项目身份与职责对应以 `catalog/project-registry.json` 为登记源。修改已登记源文档后运行 `python scripts/repo-maintenance.py build` 和 `check`；参考副本和包不手改。本机安装是明确的 `--install` 选项，构建不发布插件或自动更新GPT知识。
+
 交付应给入口、覆盖范围、校验结果和缺口；换号用[验收样例](references/ACCEPTANCE.md)核对业务规则，不能承诺账号历史、记忆、工具和模型行为完全无缝。

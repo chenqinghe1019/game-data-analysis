@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "exceptions": [
+    {
+      "path": "docs/塔防类产品_外挂治理搭建流程_思维导图.xlsx",
+      "sha256": "47be0fac7b723b810e4731b85ebee14078ae71d46e24957fc23d3e7867b91288",
+      "status": "unverified",
+      "reason": "历史已提交文件存在负数ZIP成员偏移，标准zipfile读取报Invalid argument；保留原件，暂不能完成内部XML扫描。",
+      "followUp": "从原始Excel重新另存并独立核验后移除此例外；只有完全相同SHA256的旧文件适用。"
+    }
+  ]
+}

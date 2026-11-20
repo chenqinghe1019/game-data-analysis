@@ -13,6 +13,8 @@ description: 维护倍特小时报的引力/数数取数、指标校验、Excel�
 
 按任务加载：
 
+源文档在 `projects/beite-hourly-report/docs/`，以下参考副本由仓库统一构建器生成，版本指纹见 `catalog/generated-state.json`。更新源文档后执行 `python scripts/repo-maintenance.py build` 和 `check`；本机技能安装需明确选择，不自动触发。
+
 - 指标 / 表格 / 加媒体：读 [指标与格式](references/metrics.md)。
 - 追加 / 跨天 / 历史 / 保护底档：读 [归档规则](references/archive.md)。
 - 定时 / 登录 / 卡住 / 重试 / 推送：读 [运行与故障](references/operations.md)。

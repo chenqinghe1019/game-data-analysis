@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "verifiedOn": "2026-11-20",
+  "repository": "chenqinghe1019/game-data-analysis",
+  "purpose": "Documentation and identity registry; does not drive production scheduling or credentials.",
+  "projects": [
+    {"id":"beite-hourly","name":"倍特小时报","kind":"automation","aliases":["引力引擎企微播报"],"entry":"projects/beite-hourly-report/README.md","code":".codex/tools/gravity-report","status":"implemented","sources":[]},
+    {"id":"auto-project","name":"自动项目交接","kind":"handoff","aliases":["自动项目"],"entry":"projects/auto-project/START_HERE.md","status":"maintained","sources":[]},
+    {"id":"xiafangle","name":"下方了","kind":"game","aliases":[],"entry":"knowledge/projects/xiafangle/FACTS.md","sources":[{"system":"thinkingdata","id":"41"}],"status":"documented"},
+    {"id":"tower","name":"别推我的塔","kind":"game","aliases":[],"entry":"knowledge/projects/bietuiwodeta/FACTS.md","sources":[{"system":"thinkingdata","id":"51","panels":["51_2221_0","51_2225","51_2226","51_2227"]}],"status":"documented"},
+    {"id":"hero-hourly","name":"英雄就是我（小时报）","kind":"game-context","aliases":[],"entry":"projects/beite-hourly-report/docs/metrics.md","code":".codex/tools/gravity-report/run-hero-acquisition.mjs","sources":[{"system":"thinkingdata","id":"44","panels":["44_1749_0","44_1752_0"],"requiresContext":true},{"system":"gravity","id":"1795155162413133"}],"status":"context-required","note":"数数44与历史弯月勇者资料存在命名重叠；只确认当前小时报上下文，不能据此合并项目或迁移口径。"},
+    {"id":"wanyue","name":"弯月勇者（历史分析口径）","kind":"game-context","aliases":[],"entry":"knowledge/projects/wanyue/FACTS.md","sources":[{"system":"thinkingdata","id":"44","requiresContext":true}],"status":"context-required","note":"保留历史知识，使用前核对具体项目名、报表与时间；不自动套用于英雄就是我。"},
+    {"id":"yishua","name":"一耍就上头","kind":"game","aliases":[],"entry":"yishuajiushangtou_tracking.yaml","sources":[{"system":"thinkingdata","id":"54","panels":["54_2165","54_2144","54_2143"],"filter":"game_name='yishuajiushangtou'"}],"status":"documented"},
+    {"id":"luobo4-ta","name":"萝卜4小游戏（数数）","kind":"game-context","aliases":[],"entry":"knowledge/projects/luobo4/FACTS.md","sources":[{"system":"thinkingdata","id":"37","panels":["37_1017_0"]}],"status":"documented"},
+    {"id":"luobo4-applogger","name":"保卫萝卜4（AppLogger三端）","kind":"game-context","aliases":[],"entry":"applogger_baoweiluobo4_workflow.yaml","sources":[{"system":"applogger","id":"android-ios-harmony"}],"status":"documented","note":"安卓、苹果、鸿蒙的数据源，与数数37分开。"},
+    {"id":"miaomiaodao","name":"喵喵岛","kind":"game","aliases":[],"entry":"miaomiaodao_dashboard_rules.yaml","sources":[{"system":"thinkingdata","id":"52","panels":["52_2183"]}],"status":"documented","note":"喵喵岛_逍遥是27；不是本项目的别名。"},
+    {"id":"collector","name":"保卫萝卜社收藏家（历史）","kind":"game-context","aliases":[],"entry":"projects/auto-project/STATUS.md","sources":[{"system":"thinkingdata","id":"15","panels":["15_250_0"]}],"status":"materials-missing","note":"历史YAML当前缺失，只保留已读到的历史记录。"},
+    {"id":"t-tracking","name":"代号T验收（历史）","kind":"game-context","aliases":[],"entry":"projects/auto-project/STATUS.md","sources":[],"status":"historical","note":"未确认唯一表后缀，不猜测；验收成品在交接materials目录。"},
+    {"id":"bubu","name":"步步","kind":"game","aliases":[],"entry":"knowledge/projects/bubu/FACTS.md","sources":[{"system":"thinkingdata","id":"22"}],"status":"documented"},
+    {"id":"baodanfeshe","name":"暴弹飞射","kind":"game","aliases":[],"entry":"knowledge/projects/baodanfeshe/FACTS.md","sources":[{"system":"thinkingdata","id":"42"}],"status":"documented"},
+    {"id":"jisuchongci","name":"极速冲刺","kind":"game","aliases":[],"entry":"knowledge/projects/jisuchongci/FACTS.md","sources":[{"system":"thinkingdata","id":"39"}],"status":"documented"}
+  ],
+  "skills": [
+    {"id":"game-data-sql-analyst","name":"游戏数据SQL","purpose":"编写、修改和核验TrinoSQL","path":".codex/skills/game-data-sql-analyst","pluginSkills":["game-data-analysis"]},
+    {"id":"game-data-analysis-analyst","name":"游戏数据分析","purpose":"指标诊断、分层对比和结论验收","path":".codex/skills/game-data-analysis-analyst","pluginSkills":["game-data-analysis","slg-analysis","carrot4-analysis"]},
+    {"id":"thinkingdata-analysis","name":"数数看板操作","purpose":"分析模型、看板迁移与验收","path":".codex/skills/thinkingdata-analysis","pluginSkills":["game-tracking-dashboards"]},
+    {"id":"tracking-yaml","name":"埋点文档整理","purpose":"本地规格转标准YAML","path":".codex/skills/tracking-yaml","pluginSkills":["game-tracking-dashboards","game-event-review"]},
+    {"id":"daily-report-screenshot","name":"Excel日报与截图","purpose":"提供数据到Excel和图片预览","path":".codex/skills/daily-report-screenshot","pluginSkills":["game-data-analysis"]},
+    {"id":"beite-hourly-report","name":"倍特小时报","purpose":"生产取数、追加、发送和定时维护","path":".codex/skills/beite-hourly-report","pluginSkills":[]},
+    {"id":"auto-project-handoff","name":"自动项目交接","purpose":"盘点当前状态和换账号资料","path":".codex/skills/auto-project-handoff","pluginSkills":[]}
+  ],
+  "pluginMirror": {"path":"plugins/game-data-analysis-journey","mode":"published-snapshot","note":"只记录与Codex技能的职责对应，不自动覆盖云端发布版本。"},
+  "generatedReferences": [
+    {"source":"projects/beite-hourly-report/docs/architecture.md","target":".codex/skills/beite-hourly-report/references/architecture.md"},
+    {"source":"projects/beite-hourly-report/docs/archive.md","target":".codex/skills/beite-hourly-report/references/archive.md"},
+    {"source":"projects/beite-hourly-report/docs/decisions.md","target":".codex/skills/beite-hourly-report/references/decisions.md"},
+    {"source":"projects/beite-hourly-report/docs/metrics.md","target":".codex/skills/beite-hourly-report/references/metrics.md"},
+    {"source":"projects/beite-hourly-report/docs/operations.md","target":".codex/skills/beite-hourly-report/references/operations.md"},
+    {"source":"projects/beite-hourly-report/docs/wecom-doc-sync.md","target":".codex/skills/beite-hourly-report/references/wecom-doc-sync.md"},
+    {"source":"projects/auto-project/STATUS.md","target":".codex/skills/auto-project-handoff/references/STATUS.md"},
+    {"source":"projects/auto-project/ACCOUNT_HANDOFF.md","target":".codex/skills/auto-project-handoff/references/ACCOUNT_HANDOFF.md"},
+    {"source":"projects/auto-project/ACCEPTANCE.md","target":".codex/skills/auto-project-handoff/references/ACCEPTANCE.md"},
+    {"source":"knowledge/global/ta_analysis_foundations.md","target":".codex/skills/thinkingdata-analysis/references/ta_analysis_foundations.md"},
+    {"source":"knowledge/global/ta_funnel_distribution.md","target":".codex/skills/thinkingdata-analysis/references/ta_funnel_distribution.md"},
+    {"source":"knowledge/global/ta_data_menu.md","target":".codex/skills/thinkingdata-analysis/references/ta_data_menu.md","suffix":"\n查《下方了》「付费率_含代币消耗」的事件筛选和虚拟属性时，阅读 [付费率_含代币消耗](xiafangle-payment-rate.md)。\n"}
+  ]
+}

@@ -2,6 +2,8 @@
 
 此工作区在 Codex 中名为《自动项目》。跨账号 / 新会话接手先读 `projects/auto-project/START_HERE.md`，再按任务读取 `PROJECT_WORKING_RULES.md`、`knowledge/CANONICAL_INDEX.md` 和对应项目资料。聊天标题只用于追溯，不是项目边界。
 
+项目身份及入口优先查 `catalog/project-registry.json` / `catalog/PROJECT_INDEX.md`；维护方式见 `docs/repository-maintenance.md`。生成副本不要手改：修改登记源后运行 `python scripts/repo-maintenance.py build` 和 `check`。构建不自动安装本机技能或发布插件。
+
 - 用户本轮明确要求优先；确认来源、项目身份、金额单位和指标分母后再实现。
 - 先区分已上线、历史完成、模拟、待办和资料缺失。旧聊天里声称完成不等于代码仍存在或今天仍运行。
 - 小时报生产入口在 `.codex/tools/gravity-report/`，归属 `projects/beite-hourly-report/`。整理资料不启停任务、不推送、不覆盖正式数据库。

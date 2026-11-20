@@ -2,6 +2,8 @@
 
 整理日期：2026-11-20。仓库：[chenqinghe1019/game-data-analysis](https://github.com/chenqinghe1019/game-data-analysis)，默认分支 master。
 
+统一入口：[项目注册索引](../../catalog/PROJECT_INDEX.md)、[技能/插件对应](../../catalog/SKILL_INDEX.md)、[仓库维护与版本同步](../../docs/repository-maintenance.md)。本文的历史盘点范围保持不变，项目编号和入口的新变更维护注册表。
+
 ## 先读什么
 
 1. [当前进度与缺口](STATUS.md)：哪些已完成，哪些只在历史聊天中出现。
@@ -34,3 +36,5 @@ ChatGPT将 [启动指令](BOOTSTRAP.md) 的适用内容设为项目指令，并�
 - `evidence/materials-manifest.json`：39份精选成品/代码/SQL/模板及SHA256，另列2项本地缺失材料。
 
 维护工具：`scripts/collect-materials.py`只读复制和记录状态；`scripts/package-handoff.py`打包技能和知识；`scripts/audit-handoff.py`核对哈希、来源覆盖、入口链接及凭据特征。它们均不触发正式播报。
+
+打包统一调用仓库根 `scripts/repo-maintenance.py build`，默认不再安装本机技能。需要本机更新时使用 `package-handoff.py --install`。压缩包与参考副本的内容指纹见 `catalog/generated-state.json`；GitHub提交会检查是否与源文件同步，不自动替你发布或安装。

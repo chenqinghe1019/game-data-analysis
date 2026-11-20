@@ -1,0 +1,40 @@
+name: Repository checks
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: repository-checks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  offline-checks:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      LOCALAPPDATA: ${{ runner.temp }}
+      USERPROFILE: ${{ runner.temp }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Registry, knowledge sync, packages, links and credentials
+        run: python scripts/repo-maintenance.py check
+      - name: Maintenance failure-path and reproducibility tests
+        run: python scripts/test_repo_maintenance.py
+      - name: Hourly report offline business invariants
+        run: node projects/beite-hourly-report/scripts/verify-project.mjs
+      - name: Result scope
+        run: echo 'Offline checks only. No logins, business queries, rendering, pushes to WeCom or production changes.' >> "$GITHUB_STEP_SUMMARY"

@@ -8,6 +8,8 @@ last_verified: 2026-10-08
 
 换账号 / 新会话接手时，先用 [《自动项目》交接入口](../projects/auto-project/START_HERE.md) 定位当前状态与资料缺口，再按本索引读取稳定规则。交接状态和一次性分析记录不覆盖本层项目口径。
 
+项目名、系统编号和入口的登记源为 [项目注册表](../catalog/project-registry.json)，可读视图见 [项目索引](../catalog/PROJECT_INDEX.md)。知识源与技能生成副本的边界见 [仓库维护规则](../docs/repository-maintenance.md)。
+
 ## 读取优先级
 1. 当前用户明确指令
 2. 本文件

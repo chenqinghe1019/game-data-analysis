@@ -25,3 +25,16 @@
 # Local Python execution caches are never project knowledge.
 **/__pycache__/
 *.pyc
+
+# Repository navigation and offline maintenance; no production secrets.
+!/catalog/
+!/catalog/**
+!/scripts/
+!/scripts/repo-maintenance.py
+!/scripts/test_repo_maintenance.py
+!/.github/
+!/.github/workflows/
+!/.github/workflows/repository-checks.yml
+!/docs/
+!/docs/repository-maintenance.md
+!/docs/optimization-impact-20261120.md
