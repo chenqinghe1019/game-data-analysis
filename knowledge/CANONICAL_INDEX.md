@@ -36,6 +36,7 @@ last_verified: 2026-10-08
 
 ## 项目 Canonical
 - projects/xiafangle/FACTS.md
+  - [SLG 活跃付费与回访口径](projects/xiafangle/SLG_REVIEW.md)：项目 41 的上线前后对比、礼包映射、VIP 分层和回访观察窗。
 - projects/wanyue/FACTS.md
 - projects/bubu/FACTS.md
 - projects/baodanfeshe/FACTS.md
