@@ -359,6 +359,38 @@ export function externalTotals(rows,baseline) {
   return totals;
 }
 
+export function externalRowValues(row,cumulative) {
+  const {date,period,ta,paidTa,gravity:{paid,total}}=row;
+  const [newUsers,active,payers,revenue,arpu,payRate,payerRetention,registrationRetention,frequency,firstDayAmount]=ta;
+  const [totalNew,totalRevenue,totalSpend]=cumulative ?? [null,null,null];
+  const registrations = paidTa === undefined ? paid?.tencentRegistrations : paidTa?.registrations;
+  const spend=paid?.spend ?? null;
+  const costPayers=row.baseline ? payers : paidTa?.firstDayPayers;
+  const values = [
+    date,period.replace(/^截至北京时间 (\d{2}):\d{2}$/,(_,hour)=>externalPeriod(hour)),
+    newUsers,active,payers,totalNew,revenue,arpu,payRate,frequency ?? null,
+    firstDayAmount ?? null,totalRevenue,
+    spend,paid?.impressions ?? null,registrations ?? null,
+    spend !== null && registrations>0 ? spend/registrations : null,
+    spend !== null && costPayers>0 ? spend/costPayers : null,
+    paidTa?.registrations>0 && Number.isSafeInteger(paidTa.firstDayPayers) ? paidTa.firstDayPayers/paidTa.registrations : '-',
+    paidTa?.firstDayArppu ?? (paidTa?.firstDayPayers>0 && Number.isFinite(paidTa.firstDayAmount)
+      ? paidTa.firstDayAmount/paidTa.firstDayPayers : '-'),
+    totalSpend,
+    paid?.roi ?? '-',total?.roi ?? '-',payerRetention ?? '-',registrationRetention ?? '-',
+  ];
+  // User-supplied historical rows can contain rounded costs/rates without
+  // the original denominators. Preserve these values instead of inventing counts.
+  const manualColumns={totalNew:5,totalRevenue:11,registrationCost:15,payCost:16,firstDayPayRate:17,firstDayArppu:18};
+  for(const [key,value] of Object.entries(row.manualOverrides ?? {})) {
+    if(!Object.hasOwn(manualColumns,key) || row.sourceKind!=='user-supplied-screenshot' ||
+        !Number.isFinite(value) || value<0 || (key==='firstDayPayRate' && value>1) ||
+        (key==='totalNew' && !Number.isSafeInteger(value))) throw new Error('人工补录指标无效：'+key);
+    values[manualColumns[key]]=value;
+  }
+  return values;
+}
+
 export function buildExternalWorkbook(Workbook, snapshots, {projectName}, totals) {
   const wb = Workbook.create();
   const sheet = wb.worksheets.add('外部小时报');
@@ -382,37 +414,7 @@ export function buildExternalWorkbook(Workbook, snapshots, {projectName}, totals
       '消耗 ÷ 买量注册','消耗 ÷ 首日付费人数\n（仅媒体）','买量首日付费人数 ÷\n买量注册人数','买量首日付费金额 ÷\n买量首日付费人数','自 16 日累计',null,null,null,null],
   ];
   const last = snapshots.length+4;
-  if (snapshots.length) sheet.getRange('A5:X'+last).values = snapshots.map(row=>{
-      const {date,period,ta,paidTa,gravity:{paid,total}}=row;
-      const [newUsers,active,payers,revenue,arpu,payRate,payerRetention,registrationRetention,frequency,firstDayAmount]=ta;
-      const [totalNew,totalRevenue,totalSpend]=totals.get(row) ?? [null,null,null];
-      const registrations = paidTa === undefined ? paid?.tencentRegistrations : paidTa?.registrations;
-      const spend=paid?.spend ?? null;
-      const costPayers=row.baseline ? payers : paidTa?.firstDayPayers;
-      const values = [
-        date,period.replace(/^截至北京时间 (\d{2}):\d{2}$/,(_,hour)=>externalPeriod(hour)),
-        newUsers,active,payers,totalNew,revenue,arpu,payRate,frequency ?? null,
-        firstDayAmount ?? null,totalRevenue,
-        spend,paid?.impressions ?? null,registrations ?? null,
-        spend !== null && registrations>0 ? spend/registrations : null,
-        spend !== null && costPayers>0 ? spend/costPayers : null,
-        paidTa?.registrations>0 && Number.isSafeInteger(paidTa.firstDayPayers) ? paidTa.firstDayPayers/paidTa.registrations : '-',
-        paidTa?.firstDayArppu ?? (paidTa?.firstDayPayers>0 && Number.isFinite(paidTa.firstDayAmount)
-          ? paidTa.firstDayAmount/paidTa.firstDayPayers : '-'),
-        totalSpend,
-        paid?.roi ?? '-',total?.roi ?? '-',payerRetention ?? '-',registrationRetention ?? '-',
-      ];
-      // User-supplied historical rows can contain rounded costs/rates without
-      // the original denominators. Preserve these values instead of inventing counts.
-      const manualColumns={totalNew:5,totalRevenue:11,registrationCost:15,payCost:16,firstDayPayRate:17,firstDayArppu:18};
-      for(const [key,value] of Object.entries(row.manualOverrides ?? {})) {
-        if(!Object.hasOwn(manualColumns,key) || row.sourceKind!=='user-supplied-screenshot' ||
-            !Number.isFinite(value) || value<0 || (key==='firstDayPayRate' && value>1) ||
-            (key==='totalNew' && !Number.isSafeInteger(value))) throw new Error('人工补录指标无效：'+key);
-        values[manualColumns[key]]=value;
-      }
-      return values;
-    });
+  if (snapshots.length) sheet.getRange('A5:X'+last).values = snapshots.map(row=>externalRowValues(row,totals.get(row)));
   for (let start=0;start<snapshots.length;) {
     let end=start+1;
     while (end<snapshots.length && snapshots[end].date === snapshots[start].date) end++;

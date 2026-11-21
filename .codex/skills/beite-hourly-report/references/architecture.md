@@ -21,6 +21,8 @@
 | `hero-history.mjs` | 两个存档取已完整配对时点，输出同一文件两个 sheet |
 | `report-workbook.mjs` | 临时文件导出后替换，文件被占用时明确报错 |
 | `wecom-image-batch.mjs` | 逐图发送、MD5 / Base64、2MB 限制、部分成功恢复 |
+| `wecom-doc-sync.mjs` / `wecom-doc-sync.py` | 联合群播报成功后的独立文档补缺，11点起、既有行、保留原值/公式、98行格式模板 |
+| `wecom-doc-source.mjs` | 只读正式SQLite，复用生产行值，不导出或修改在线文档 |
 
 ## 本机状态
 

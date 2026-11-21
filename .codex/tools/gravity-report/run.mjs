@@ -8,6 +8,7 @@ import { readLogin } from './login.mjs';
 import { externalPeriod, externalPushTitle, externalWorkbookName, parseTaHourly, parseTaPaidHourly, readTaDashboard, readTaHourly, updateExternalHourly, writeExternalHourly } from './external-hourly.mjs';
 import { externalDelivery } from './external-retry.mjs';
 import {applyVerifiedGravityMetrics,canValidateProjectRollups,parseProjectRollups,validateGravityRollup} from './gravity-validation.mjs';
+import {queueExternalDocSync} from './wecom-doc-sync.mjs';
 
 const root = '.el-table-v2__root';
 const timeout = 120_000;
@@ -809,6 +810,7 @@ async function main(kind) {
   if (await delivery?.status('image') === 'sent') {
     console.log('企微截图已有发送确认，本次只处理标题');
     await sendWeComReport(webhook,Buffer.alloc(0),title,delivery);
+    await queueExternalDocSync(file,date,time);
     return;
   }
   if (appendBackup) {
@@ -876,7 +878,10 @@ async function main(kind) {
       const png = preview ? await writeExternalHourly(snapshot,output,deps)
         : await updateExternalHourly(snapshot,output,deps,archive,config.schedule.startAt,retentions ?? previousRetention);
       console.log(output);
-      if (webhook) await sendWeComReport(webhook,png,title,delivery);
+      if (webhook) {
+        await sendWeComReport(webhook,png,title,delivery);
+        await queueExternalDocSync(file,date,time);
+      }
       return;
     }
     const catalog = {date,reportUrl:report.url,product:report.product,

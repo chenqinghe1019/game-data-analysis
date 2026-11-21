@@ -6,7 +6,12 @@ import {fileURLToPath} from 'node:url';
 import {externalTotals} from '../../../.codex/tools/gravity-report/external-hourly.mjs';
 import {aggregateAcquisition,acquisitionView} from '../../../.codex/tools/gravity-report/hero-acquisition.mjs';
 import {imageBatchMessages,sendImageBatch} from '../../../.codex/tools/gravity-report/wecom-image-batch.mjs';
+import {docSyncHour} from '../../../.codex/tools/gravity-report/wecom-doc-sync.mjs';
 const code=new URL('../../../.codex/tools/gravity-report/',import.meta.url);
+assert.equal(docSyncHour('10:00'),false);
+assert.equal(docSyncHour('00:00'),false);
+assert.equal(docSyncHour('11:00'),true);
+assert.equal(docSyncHour('24:00'),true);
 for(const name of await fs.readdir(code)) if(name.endsWith('.mjs')) {
   const check=spawnSync(process.execPath,['--check',fileURLToPath(new URL(name,code))],{encoding:'utf8'});
   assert.equal(check.status,0,name+': '+check.stderr);

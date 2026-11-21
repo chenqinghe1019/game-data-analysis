@@ -20,7 +20,7 @@ description: 维护倍特小时报的引力/数数取数、指标校验、Excel�
 - 定时 / 登录 / 卡住 / 重试 / 推送：读 [运行与故障](references/operations.md)。
 - 新电脑 / 修改模块 / 保存配置：读 [源码与配置](references/architecture.md)。
 - 追溯已确认决策、避免恢复旧口径：读 [决策记录](references/decisions.md)。
-- 企微在线文档：读 [接入状态](references/wecom-doc-sync.md)，不要声称已完成同步。
+- 企微在线文档：读 [接入状态](references/wecom-doc-sync.md)，区分旧外部文档限制与新内部文档的正式补缺流程；只在图文成功后、11点起同步，按98行格式，不覆盖已有值或公式。
 
 ## 核心约束
 
