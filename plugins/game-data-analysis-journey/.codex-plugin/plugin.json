@@ -15,7 +15,7 @@
     "shortDescription": "游戏取数、指标口径、看板与活动复盘"
   },
   "name": "game-data-analysis-journey",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "沉淀游戏运营的取数口径、专项分析、埋点看板、活动复盘与 Excel 交付习惯。",
   "author": {
     "name": "ni ziyi"
