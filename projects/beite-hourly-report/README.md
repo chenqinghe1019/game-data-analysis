@@ -22,7 +22,7 @@
 - [归档与追加](docs/archive.md)：日期小时主键、跨天24点、底档保护、历史副本、手工补录。
 - [源码地图与配置](docs/architecture.md)：模块职责、数据流、配置位置和可恢复范围。
 - [对话决策与故障经验](docs/decisions.md)：从本次对话整理的最终要求及被替代的方案。
-- [企业微信文档接入状态](docs/wecom-doc-sync.md)：已做的验证、权限错误与未完成事项。
+- [企业微信文档补缺](docs/wecom-doc-sync.md)：别推我的塔联合小时报确认群播报成功后，只补内部「分时数据维度」子表的空缺。参见写入规则、校验结果与旧外部文档的权限限制。
 - [Codex 技能](../../.codex/skills/beite-hourly-report/SKILL.md)：自包含的维护流程与参考资料。
 - [GPT 配置](gpt/INSTRUCTIONS.md)：GPT 指令与知识文件使用方式；不承诺 GPT 自动获得本机执行能力。
 - `archives/<导出时间>/manifest.json`：逐文件 SHA256、源路径、数据库记录范围、排除说明。
