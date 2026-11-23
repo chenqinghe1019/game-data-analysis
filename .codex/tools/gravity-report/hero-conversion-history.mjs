@@ -55,8 +55,7 @@ export async function buildConversionWorkbook(rows,deps,{workbook,history=false,
   merge('A2:'+lastColumn+'2','当日累计 · 加载开始=100%');
   const wrapLabel=label=>({
     '进入主界面':'进入\n主界面','游戏资源加载开始':'游戏资源\n加载开始','游戏资源加载成功':'游戏资源\n加载成功',
-    '剧情文案出现':'剧情文案\n出现','过场动画展示':'过场动画\n展示','过场动画结束':'过场动画\n结束',
-    '干抽福利拍脸':'干抽福利\n拍脸',
+    '剧情文案出现':'剧情文案\n出现','过场动画结束':'过场动画\n结束',
   }[label] ?? label);
   sheet.getRange('A4:'+lastColumn+'4').values=[['日期','时间段','指标',...conversionNodes.map(([,label])=>wrapLabel(label))]];
   for(const [index,row] of visible.entries()) {

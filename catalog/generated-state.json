@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "textEncoding": "UTF-8/LF; BOM removed",
-  "sourceFingerprint": "2b76d138422a06943d3b1e21a2475f20d3c9ce5a873dc0ccdbe6d38723345aa6",
+  "sourceFingerprint": "707bbeabe3ae847ff6360ce191a5db477feecdd5de9d79f140d2df464b36b37e",
   "inputs": {
     ".codex/skills/auto-project-handoff/SKILL.md": "9a3e77f04f73c59f4a3196239ee0b50f8e0056c3ee219ac9e21882311f56579e",
     ".codex/skills/auto-project-handoff/agents/openai.yaml": "444acd93558c71a3a9cfd280afc534fb307db1e01c78a9856240da6a8fa251ec",
@@ -13,7 +13,7 @@
     ".codex/skills/beite-hourly-report/references/architecture.md": "041ff3fc5397867ddf46d4c8c9853210dece899e7f7d4780fdc54866e761d101",
     ".codex/skills/beite-hourly-report/references/archive.md": "9f39e8a09b981937c1e8e8f717fa623a7f76a38510f3cbe2d15d020900d83aaf",
     ".codex/skills/beite-hourly-report/references/decisions.md": "336496ec4f308a08123e484492f5cbc44df1b49b2f71c9442f6d6706bbe713d8",
-    ".codex/skills/beite-hourly-report/references/metrics.md": "e2f417f3607c2877b75bf920812235531a521bc8a68d90e239da8029bd1c058e",
+    ".codex/skills/beite-hourly-report/references/metrics.md": "f73477c54ed8bf8b76b79b7abc92946a6b8497af8d9e562c34a45ca572276091",
     ".codex/skills/beite-hourly-report/references/operations.md": "09722610241eb96c50780f7f7067c759ebe596d7f623603996b96a7396528c08",
     ".codex/skills/beite-hourly-report/references/wecom-doc-sync.md": "50dfa2fedc523d98d99612a929a47eaa0cf7a038baa8bbb9c3ad719117fb1716",
     ".codex/skills/daily-report-screenshot/SKILL.md": "eba7bc2a718bc90cc2f2d8437b732445940d960a84bd91a58d6789cfa129f4c7",
@@ -60,7 +60,7 @@
     "projects/beite-hourly-report/docs/architecture.md": "041ff3fc5397867ddf46d4c8c9853210dece899e7f7d4780fdc54866e761d101",
     "projects/beite-hourly-report/docs/archive.md": "9f39e8a09b981937c1e8e8f717fa623a7f76a38510f3cbe2d15d020900d83aaf",
     "projects/beite-hourly-report/docs/decisions.md": "336496ec4f308a08123e484492f5cbc44df1b49b2f71c9442f6d6706bbe713d8",
-    "projects/beite-hourly-report/docs/metrics.md": "e2f417f3607c2877b75bf920812235531a521bc8a68d90e239da8029bd1c058e",
+    "projects/beite-hourly-report/docs/metrics.md": "f73477c54ed8bf8b76b79b7abc92946a6b8497af8d9e562c34a45ca572276091",
     "projects/beite-hourly-report/docs/operations.md": "09722610241eb96c50780f7f7067c759ebe596d7f623603996b96a7396528c08",
     "projects/beite-hourly-report/docs/wecom-doc-sync.md": "50dfa2fedc523d98d99612a929a47eaa0cf7a038baa8bbb9c3ad719117fb1716",
     "projects/beite-hourly-report/gpt/INSTRUCTIONS.md": "fd4325f0b80cdcaa5995e14b01f9318a324b3766713bf8bcebff27037371d3fe",
@@ -85,7 +85,7 @@
     {
       "source": "projects/beite-hourly-report/docs/metrics.md",
       "target": ".codex/skills/beite-hourly-report/references/metrics.md",
-      "sha256": "e2f417f3607c2877b75bf920812235531a521bc8a68d90e239da8029bd1c058e"
+      "sha256": "f73477c54ed8bf8b76b79b7abc92946a6b8497af8d9e562c34a45ca572276091"
     },
     {
       "source": "projects/beite-hourly-report/docs/operations.md",
@@ -132,27 +132,27 @@
   "packages": [
     {
       "path": "projects/beite-hourly-report/packages/beite-hourly-report-codex-skill.zip",
-      "sha256": "f56338aa3e419201c57614d4680ea9c00e1507d4a60cc132a75b3153b3ec20b6",
+      "sha256": "87ec7fd28440722dc5094c88515d1e82293f6c4fdcfe62e7cb1e77c6fe00564d",
       "files": 8,
-      "bytes": 30329
+      "bytes": 30621
     },
     {
       "path": "projects/beite-hourly-report/packages/beite-hourly-report-gpt-knowledge.zip",
-      "sha256": "00335b8490ad10b749ef5eb51f9f5bedb8008f403a2eab041ccb941a826ce4b1",
+      "sha256": "842e68d3f7b0c6cd3f3acc85bf7504e7d94909ed6efd13962ef711c7cd6cda44",
       "files": 7,
-      "bytes": 27910
+      "bytes": 28202
     },
     {
       "path": "projects/auto-project/packages/auto-project-codex-skills.zip",
-      "sha256": "2f6361e991b7f6a059230c4b06e0ffd5f679e943a9601153fa41eece8242bfc0",
+      "sha256": "674f676a3adb881ac8574e1bc3535c50cbfa3601495321516a36cebfbe7692e7",
       "files": 35,
-      "bytes": 135090
+      "bytes": 135382
     },
     {
       "path": "projects/auto-project/packages/auto-project-chatgpt-knowledge.zip",
-      "sha256": "7a17d0b91fee70b795eec462fc5334460ef1e489fbd08c6f76dc74230007d7a6",
+      "sha256": "c41ba0a49afbb3037aad64bc5b413b9ec8a684f190ea5c0814dd80cd223b6462",
       "files": 17,
-      "bytes": 73838
+      "bytes": 74130
     }
   ]
 }
