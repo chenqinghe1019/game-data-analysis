@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "textEncoding": "UTF-8/LF; BOM removed",
-  "sourceFingerprint": "7942fe7a85dc865a9ac39abf95a3bd1c07ccd8329c36a096908f5769dbeff53c",
+  "sourceFingerprint": "8b4fb2c26e7a1267720ef3a45b43541ccc797b3f41bfe133a3472ad4731a0569",
   "inputs": {
     ".codex/skills/auto-project-handoff/SKILL.md": "9a3e77f04f73c59f4a3196239ee0b50f8e0056c3ee219ac9e21882311f56579e",
     ".codex/skills/auto-project-handoff/agents/openai.yaml": "444acd93558c71a3a9cfd280afc534fb307db1e01c78a9856240da6a8fa251ec",
@@ -15,7 +15,7 @@
     ".codex/skills/beite-hourly-report/references/decisions.md": "336496ec4f308a08123e484492f5cbc44df1b49b2f71c9442f6d6706bbe713d8",
     ".codex/skills/beite-hourly-report/references/metrics.md": "e4328bea25f9639dd8ca051f7b9fe7668cee684bf6faddcfbf2c9fd3d3ab7606",
     ".codex/skills/beite-hourly-report/references/operations.md": "09722610241eb96c50780f7f7067c759ebe596d7f623603996b96a7396528c08",
-    ".codex/skills/beite-hourly-report/references/wecom-doc-sync.md": "0ed1326435a748dbfa500564609659e13deebf077a80bf04e7174675e3820c64",
+    ".codex/skills/beite-hourly-report/references/wecom-doc-sync.md": "c71d4e2e9de5360aebaf5ddd6cd6ae7f6a81f9fb2e1b7951e264cc98b7a377e1",
     ".codex/skills/daily-report-screenshot/SKILL.md": "eba7bc2a718bc90cc2f2d8437b732445940d960a84bd91a58d6789cfa129f4c7",
     ".codex/skills/daily-report-screenshot/agents/openai.yaml": "053b177d94542e59d1dbee6fb1014f8ae226a3ba316edfe07473aed52da008ec",
     ".codex/skills/daily-report-screenshot/references/input-and-quality.md": "0d48edacd9d31e6cf51cdd164b85d74cce40cf414571f0eefb7c0d8337dabf08",
@@ -62,7 +62,7 @@
     "projects/beite-hourly-report/docs/decisions.md": "336496ec4f308a08123e484492f5cbc44df1b49b2f71c9442f6d6706bbe713d8",
     "projects/beite-hourly-report/docs/metrics.md": "e4328bea25f9639dd8ca051f7b9fe7668cee684bf6faddcfbf2c9fd3d3ab7606",
     "projects/beite-hourly-report/docs/operations.md": "09722610241eb96c50780f7f7067c759ebe596d7f623603996b96a7396528c08",
-    "projects/beite-hourly-report/docs/wecom-doc-sync.md": "0ed1326435a748dbfa500564609659e13deebf077a80bf04e7174675e3820c64",
+    "projects/beite-hourly-report/docs/wecom-doc-sync.md": "c71d4e2e9de5360aebaf5ddd6cd6ae7f6a81f9fb2e1b7951e264cc98b7a377e1",
     "projects/beite-hourly-report/gpt/INSTRUCTIONS.md": "fd4325f0b80cdcaa5995e14b01f9318a324b3766713bf8bcebff27037371d3fe",
     "scripts/repo-maintenance.py": "17d59dd82bf91c5d74d644710109af7fe24038a48df7759238ea55d0bf9b3bf5"
   },
@@ -95,7 +95,7 @@
     {
       "source": "projects/beite-hourly-report/docs/wecom-doc-sync.md",
       "target": ".codex/skills/beite-hourly-report/references/wecom-doc-sync.md",
-      "sha256": "0ed1326435a748dbfa500564609659e13deebf077a80bf04e7174675e3820c64"
+      "sha256": "c71d4e2e9de5360aebaf5ddd6cd6ae7f6a81f9fb2e1b7951e264cc98b7a377e1"
     },
     {
       "source": "projects/auto-project/STATUS.md",
@@ -132,21 +132,21 @@
   "packages": [
     {
       "path": "projects/beite-hourly-report/packages/beite-hourly-report-codex-skill.zip",
-      "sha256": "255036fffa2cb2a12b598789d4a5a8762526cab527574eb19ca063a4c688bc9e",
+      "sha256": "39b53c385698fdb551852bf690d9a34c7a688637361e543f1042a4a0288a5112",
       "files": 8,
-      "bytes": 31648
+      "bytes": 31687
     },
     {
       "path": "projects/beite-hourly-report/packages/beite-hourly-report-gpt-knowledge.zip",
-      "sha256": "cde1ef1f178bbd524484c9a8e7ab9e58fd235cdd0429c1936baa3e1d4c9f6c0a",
+      "sha256": "b7f9f67dd7f21e1cfd2f7c9a1da99231aecfdbb4bd99208e826833d38da94875",
       "files": 7,
-      "bytes": 29229
+      "bytes": 29268
     },
     {
       "path": "projects/auto-project/packages/auto-project-codex-skills.zip",
-      "sha256": "98e3c8a4b7579a72634988b851d0e87fd3cf0efd114156e617592fe8d014e37c",
+      "sha256": "e35110536d501a53149be5ed448b7c844573db5faa823058e9f344368ba8e0c5",
       "files": 35,
-      "bytes": 136409
+      "bytes": 136448
     },
     {
       "path": "projects/auto-project/packages/auto-project-chatgpt-knowledge.zip",
