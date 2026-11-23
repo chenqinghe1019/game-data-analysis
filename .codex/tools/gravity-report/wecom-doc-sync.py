@@ -85,7 +85,7 @@ def target_rows(cells):
         targets[key]=(index,row)
     return targets
 
-def plan_updates(cells,source,minimum_hour=11):
+def plan_updates(cells,source,minimum_hour=11,retention_date=None):
     targets=target_rows(cells)
     sources={}
     for record in source['rows']:
@@ -105,31 +105,34 @@ def plan_updates(cells,source,minimum_hour=11):
             if isinstance(current,dict) and current.get('formula'):
                 protected+=1
                 continue
-            if not missing(current):
+            refresh=key==(retention_date,'24:00') and offset in {24,25}
+            if not missing(current) and not refresh:
                 existing+=1
+                continue
+            if refresh and equal(value(current),source_value):
                 continue
             changes.append({'row':row_index,'col':offset+1,'value':source_value,'key':list(key),
                             # CLI considers stored empty strings occupied. These are
                             # still missing, and must pass the pre-write missing check.
-                            'overwrite':value(current) is not None})
+                            'overwrite':value(current) is not None,'refresh':refresh,'previous':current})
     return {'changes':changes,'protectedFormulaCells':protected,'existingDataCells':existing,
             'matchedRows':sum(eligible(k,minimum_hour) and k in sources for k in targets)}
 
 def batches(changes):
     horizontal=[]
     for item in sorted(changes,key=lambda x:(x['row'],x['col'])):
-        if horizontal and item['row']==horizontal[-1]['top'] and item['col']==horizontal[-1]['right']+1 and item['overwrite']==horizontal[-1]['overwrite']:
-            horizontal[-1]['right']=item['col'];horizontal[-1]['cells'][0].append(item['value'])
+        if horizontal and item['row']==horizontal[-1]['top'] and item['col']==horizontal[-1]['right']+1 and item['overwrite']==horizontal[-1]['overwrite'] and item.get('refresh',False)==horizontal[-1]['refresh']:
+            horizontal[-1]['right']=item['col'];horizontal[-1]['cells'][0].append(item['value']);horizontal[-1]['previous'][0].append(item.get('previous'))
         else:
             horizontal.append({'top':item['row'],'bottom':item['row'],'left':item['col'],'right':item['col'],
-                               'cells':[[item['value']]],'keys':[item['key']],'overwrite':item['overwrite']})
+                               'cells':[[item['value']]],'previous':[[item.get('previous')]],'refresh':item.get('refresh',False),'keys':[item['key']],'overwrite':item['overwrite']})
     packed=[]
     for group in horizontal:
         prior=next((p for p in reversed(packed) if p['bottom']+1==group['top'] and p['left']==group['left'] and
-                    p['right']==group['right'] and p['overwrite']==group['overwrite'] and
+                    p['right']==group['right'] and p['overwrite']==group['overwrite'] and p['refresh']==group['refresh'] and
                     (p['bottom']-p['top']+2)*(p['right']-p['left']+1)<=400),None)
         if prior:
-            prior['bottom']=group['bottom'];prior['cells']+=group['cells'];prior['keys']+=group['keys']
+            prior['bottom']=group['bottom'];prior['cells']+=group['cells'];prior['previous']+=group['previous'];prior['keys']+=group['keys']
         else:
             packed.append(group)
     for group in packed:
@@ -217,7 +220,10 @@ def sync_once(config,apply=False,required_key=None,deadline=None):
         raise SyncError('当前小时没有预置行，未新增或移动任何行，请补充模板日期')
     if required_key and not any((r['date'],r['time'])==tuple(required_key) for r in source['rows']):
         raise SyncError('当前小时没有正式存档，不使用旧数据代替')
-    plan=plan_updates(cells,source,config.get('minimumHour',11))
+    yesterday=(datetime.now(timezone(timedelta(hours=8))).date()-timedelta(days=1)).isoformat()
+    # A midnight closing snapshot must remain blank until a later report refreshes it.
+    retention_date=None if required_key and tuple(required_key)==(yesterday,'24:00') else yesterday
+    plan=plan_updates(cells,source,config.get('minimumHour',11),retention_date)
     groups=batches(plan['changes'])
     summary={k:v for k,v in plan.items() if k!='changes'}
     summary.update(plannedCells=len(plan['changes']),batches=len(groups),rows=sorted({x['row'] for x in plan['changes']}),applied=apply,writtenCells=0)
@@ -233,7 +239,10 @@ def sync_once(config,apply=False,required_key=None,deadline=None):
         if len(keys)!=len(group['keys']) or any(list(serial_slot(value(row[0])) or ())!=key for row,key in zip(keys,group['keys'])):
             raise SyncError('在线行位置在同步期间改变，已停止')
         current=client.get(group['range'])
-        if any(not missing(c) for row in current for c in row):
+        if group['refresh']:
+            if current!=group['previous'] or any(isinstance(c,dict) and c.get('formula') for row in current for c in row):
+                raise SyncError('历史留存在同步期间改变，停止本轮刷新')
+        elif any(not missing(c) for row in current for c in row):
             raise SyncError('在线单元格已被填写或存在公式，已停止避免覆盖')
         client.write(group)
         actual=client.get(group['range'])

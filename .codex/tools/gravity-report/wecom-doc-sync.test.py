@@ -27,6 +27,29 @@ class DocSyncTests(unittest.TestCase):
         self.assertEqual(len(m.plan_updates(table(11),source(11))['changes']),2)
         self.assertTrue(m.eligible(('2026-11-20','24:00')))
 
+    def test_previous_closing_retention_refreshes_existing_values_only(self):
+        cells=table(24);src=source(24)
+        cells[19][4]=999
+        cells[19][24]=0.1;cells[19][25]=0.2
+        src['rows'][0]['values'][22:24]=[0.75,0.4]
+        plan=m.plan_updates(cells,src,retention_date='2026-11-21')
+        refresh=[x for x in plan['changes'] if x['refresh']]
+        self.assertEqual([(x['col'],x['value']) for x in refresh],[(25,0.75),(26,0.4)])
+        self.assertFalse(any(x['col']==5 for x in plan['changes']))
+        self.assertFalse(any(x['refresh'] for x in m.plan_updates(cells,src,retention_date='2026-11-20')['changes']))
+        group=next(g for g in m.batches(plan['changes']) if g['refresh'])
+        self.assertEqual(group['range'],'Y20:Z20')
+        self.assertEqual(group['previous'],[[0.1,0.2]])
+
+    def test_retention_refresh_preserves_zero_missing_and_formulas(self):
+        cells=table(24);src=source(24)
+        cells[19][24]=0.5;cells[19][25]={'value':0.2,'formula':'=A1'}
+        src['rows'][0]['values'][22:24]=[0,0.4]
+        changes=m.plan_updates(cells,src,retention_date='2026-11-21')['changes']
+        self.assertEqual([(x['col'],x['value']) for x in changes if x['refresh']],[(25,0)])
+        src['rows'][0]['values'][22]=None
+        self.assertFalse(any(x['refresh'] for x in m.plan_updates(cells,src,retention_date='2026-11-21')['changes']))
+
     def test_midnight_belongs_to_previous_day(self):
         serial=(datetime(2026,11,22)-datetime(1899,12,30)).days
         self.assertEqual(m.serial_slot(serial),('2026-11-21','24:00'))
