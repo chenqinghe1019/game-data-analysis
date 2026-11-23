@@ -5,7 +5,7 @@ import { createRequire } from 'node:module';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { configPath, defaults, externalConfigPath, heroConfigPath, iaaConfigPath, loadConfig, validateTaMediaUrl } from './config.mjs';
 import { readLogin } from './login.mjs';
-import { externalPeriod, externalPushTitle, externalWorkbookName, parseTaHourly, parseTaPaidHourly, readTaDashboard, readTaHourly, updateExternalHourly, writeExternalHourly } from './external-hourly.mjs';
+import { externalPeriod, externalPushTitle, externalWorkbookName, externalSnapshotForCutoff, parseTaHourly, parseTaPaidHourly, readTaDashboard, readTaHourly, updateExternalHourly, writeExternalHourly } from './external-hourly.mjs';
 import { externalDelivery } from './external-retry.mjs';
 import {applyVerifiedGravityMetrics,canValidateProjectRollups,parseProjectRollups,validateGravityRollup} from './gravity-validation.mjs';
 import {queueExternalDocSync} from './wecom-doc-sync.mjs';
@@ -873,8 +873,8 @@ async function main(kind) {
       if (fromMedia && !paidTa) console.warn('数数分媒体当日没有非自然量记录，买量注册和付费相关字段留空');
       if (day() !== runDay) throw new Error('取数期间跨过北京时间日期');
       const period = previewCsv ? '数数导出快照' : externalPeriod(cutoffHour);
-      const snapshot = {date,time,period,ta,gravity:data,projectName:project.name,
-        ...(fromMedia ? {paidTa} : {})};
+      const snapshot = externalSnapshotForCutoff({date,time,period,ta,gravity:data,projectName:project.name,
+        ...(fromMedia ? {paidTa} : {})});
       const png = preview ? await writeExternalHourly(snapshot,output,deps)
         : await updateExternalHourly(snapshot,output,deps,archive,config.schedule.startAt,retentions ?? previousRetention);
       console.log(output);

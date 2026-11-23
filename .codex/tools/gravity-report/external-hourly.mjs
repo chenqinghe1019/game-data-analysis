@@ -271,7 +271,17 @@ export async function readTaDashboard(chromium, report, date, timeout, retries) 
   }
 }
 
+export function externalSnapshotForCutoff(snapshot) {
+  if(snapshot.time!=='24:00' || snapshot.baseline) return snapshot;
+  // Midnight queries can already contain a few seconds of next-day activity.
+  // The new daily closing row must not publish that partial next-day retention.
+  const ta=[...snapshot.ta];
+  ta[6]=null;ta[7]=null;
+  return {...snapshot,ta};
+}
+
 export async function updateExternalHourly(snapshot, output, deps, archive, startAt = '', previousRetention) {
+  snapshot=externalSnapshotForCutoff(snapshot);
   const {date,time} = snapshot;
   if (!snapshot.baseline && date+'T'+time < startAt) throw new Error('该快照早于外部小时报的正式首报时点');
   const [firstDate,firstTime=''] = startAt.split('T');
