@@ -158,7 +158,8 @@ class WeCom:
     def call(self,command,payload):
         args=[self.node,self.cli,'sheet',*command,'--json',json.dumps(payload,ensure_ascii=False)]
         try:
-            process=subprocess.run(args,capture_output=True,text=True,encoding='utf-8',timeout=35)
+            process=subprocess.run(args,capture_output=True,text=True,encoding='utf-8',timeout=35,
+                                   creationflags=getattr(subprocess,'CREATE_NO_WINDOW',0))
             result=json.loads(process.stdout)
         except (subprocess.TimeoutExpired,ValueError):
             raise SyncError('企业文档请求超时或结果未知；下次先重读再补缺',retryable=True) from None
@@ -206,7 +207,8 @@ def sync_once(config,apply=False,required_key=None,deadline=None):
     with tempfile.TemporaryDirectory() as directory:
         output=Path(directory)/'source.json'
         source_process=subprocess.run([client.node,str(Path(__file__).with_name('wecom-doc-source.mjs')),
-                              config['archive'],str(output)],capture_output=True,text=True,encoding='utf-8',timeout=45)
+                              config['archive'],str(output)],capture_output=True,text=True,encoding='utf-8',timeout=45,
+                              creationflags=getattr(subprocess,'CREATE_NO_WINDOW',0))
         if source_process.returncode:
             raise SyncError('正式小时报存档读取失败')
         source=json.loads(output.read_text(encoding='utf-8'))
