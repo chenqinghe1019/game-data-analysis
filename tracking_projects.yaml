@@ -31,6 +31,12 @@ global_tracking_rules:
       - 复用属性时沿用已有的数据类型、枚举和结构；如需扩展，在备注中说明兼容口径。
 
 tracking_projects:
+  - project: "代号T"
+    project_code: "code_t"
+    status: "documented_unverified_online"
+    yaml: "code_t_tracking.yaml"
+    updated_at: "2026-11-25"
+    notes: "最新用户提供的埋点说明文档；数数项目ID及表后缀待确认，历史验收仍保留。"
   - project: "方块也疯狂"
     yaml: "fangkuai_tracking.yaml"
     extract: "fangkuai_tracking_extract.json"
