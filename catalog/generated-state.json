@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "textEncoding": "UTF-8/LF; BOM removed",
-  "sourceFingerprint": "3c302334aa506223a663c2e365a723ef55cdcfff91c8ff73c9d2c6ec387066fb",
+  "sourceFingerprint": "2f22f8192985c6c688c74514bce1ddaa426b35b6d12266b41c183e60a07713c4",
   "inputs": {
     ".codex/skills/auto-project-handoff/SKILL.md": "9a3e77f04f73c59f4a3196239ee0b50f8e0056c3ee219ac9e21882311f56579e",
     ".codex/skills/auto-project-handoff/agents/openai.yaml": "444acd93558c71a3a9cfd280afc534fb307db1e01c78a9856240da6a8fa251ec",
@@ -41,7 +41,7 @@
     "PROJECT_WORKING_RULES.md": "7e325e5ca7b13345ad39d422fe20388a6e760bf091939ede4c40358fee0cbefe",
     "catalog/legacy-artifacts.json": "6a4182b6022fce8e385f6dde9a2897ba4762bd5b2c3133c54eb3494d75135a90",
     "catalog/project-registry.json": "b8f8de787993d7c48fb58c5e6dde8172bb87c04997f22f0b256a0d6afd66a66c",
-    "knowledge/CANONICAL_INDEX.md": "b373db2e4ec559ec2b738cf774e9a1d3c20a97718e9291cda287c1897befad1c",
+    "knowledge/CANONICAL_INDEX.md": "1f31c3359d63b055060fcf84265994ec21f161fa0c1985a1628a51587b05c1f8",
     "knowledge/global/analysis_method.md": "e75ba0f60c5cce66eb46f0a673feb02f1e93fc69a3104b06a20f13065f84d713",
     "knowledge/global/metric_definitions.md": "a413bf39038bb274469bb049b8a9b1a1a938370422c82d2701e30af2c98575d3",
     "knowledge/global/payment_policy.md": "2d65aa7ca7d7bd62b96d0628cb632ab28cc6415225162ae87ddc7d9c8f221f61",
@@ -150,9 +150,9 @@
     },
     {
       "path": "projects/auto-project/packages/auto-project-chatgpt-knowledge.zip",
-      "sha256": "bf8d724ec973028c121f89de6f647637f31a42ba2117f041c112a9b574437b8f",
+      "sha256": "afcabaa2bf6d7c0468647c7e65acc1795e5625142baf4de5d82d553ce0c5e84e",
       "files": 17,
-      "bytes": 75012
+      "bytes": 75415
     }
   ]
 }

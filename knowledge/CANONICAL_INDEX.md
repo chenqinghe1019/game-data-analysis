@@ -43,6 +43,11 @@ last_verified: 2026-10-08
 - projects/jisuchongci/FACTS.md（极速冲刺：用户已确认 v39，埋点文档已整理）
 - projects/luobo4/FACTS.md
 - [projects/bietuiwodeta/FACTS.md](projects/bietuiwodeta/FACTS.md)：别推我的塔的现金与代金券口径、原生留存及首日付费分层
+- [不许停手 IAA 看板](projects/buxutingshou/FACTS.md)：IAA_Game 项目 54、空间 827、七张看板及 `game_name = 'buxutingshou'` 默认筛选。
+
+## 埋点规格（线上待验收）
+
+- [代号 T 最新埋点规格](../code_t_tracking.yaml)：2026-11-25 版。数数项目编号、表后缀和线上验收状态待确认。早期验收记录见[项目索引](../catalog/PROJECT_INDEX.md)。
 
 ## 企微运营专题（2026-10-12）
 - [projects/game-community/WECOM_DASHBOARD.md](projects/game-community/WECOM_DASHBOARD.md)：项目35社区账号人数主体、分游戏数据源、好友指标忽略、比例四位小数及局部维护约束；下方了与一步两步均已实施账号主体变更；各看板布局和日期设置保持其各自范围。
