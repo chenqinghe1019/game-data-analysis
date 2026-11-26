@@ -15,7 +15,7 @@ import {sendImageBatch} from './wecom-image-batch.mjs';
 
 async function captureGravity(chromium,config,date) {
   const browser=await chromium.launchPersistentContext(path.join(process.env.LOCALAPPDATA,'GravityWeComReport/Chrome'),
-    {channel:'chrome',headless:false,viewport:{width:1600,height:1000}});
+    {channel:'chrome',headless:config.report.browserMode === 'headless',viewport:{width:1600,height:1000}});
   try {
     const page=browser.pages()[0] ?? await browser.newPage();
     for(let attempt=0;attempt<=config.report.retries;attempt++) {
@@ -76,11 +76,11 @@ async function main() {
   await fs.writeFile(path.join(sourceDirectory,'gravity.json'),JSON.stringify(gravity,null,2));
   console.log('正在读取数数投放汇总与分媒体数据');
   const cards=await readAcquisitionCards(chromium,sourceDirectory,{...config.report.acquisition,
-    timeout:config.report.timeoutSeconds*1000,retries:config.report.retries});
+    timeout:config.report.timeoutSeconds*1000,retries:config.report.retries,browserMode:config.report.browserMode});
   const data=aggregateAcquisition(cards.media,cards.total,date);
   console.log('正在读取数数前期转化');
   const conversion=await readConversionDashboard(chromium,config.report.conversion ?? conversionDefaults().report,date,
-    (csv,attempt)=>fs.writeFile(path.join(sourceDirectory,'conversion.attempt-'+attempt+'.csv'),csv));
+    (csv,attempt)=>fs.writeFile(path.join(sourceDirectory,'conversion.attempt-'+attempt+'.csv'),csv),config.report.browserMode);
   if(new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Shanghai'}).format(new Date())!==runDate) throw new Error('取数期间跨天');
   const snapshot={...data,time:hour+':00',gravity:gravityMetrics(gravity,date),source:cards.source};
   const conversionSnapshot={...conversion.data,time:hour+':00',source:conversion.source};

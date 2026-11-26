@@ -1,13 +1,13 @@
 import fs from 'node:fs/promises';
-import {connectTaBrowser} from './external-hourly.mjs';
+import {openTaSession} from './external-hourly.mjs';
 
-export async function readAcquisitionCards(chromium,directory,{timeout=120000,retries=1,
+export async function readAcquisitionCards(chromium,directory,{timeout=120000,retries=1,browserMode,
   url='https://ta-data.feiyu.com/#/panel/panel/44_1749_0',mediaCard='投放数据',totalCard='【汇总】投放数据'}={}) {
   const names=[mediaCard,totalCard];
-  const browser=await connectTaBrowser(chromium,timeout);
+  const {context,close}=await openTaSession(chromium,timeout,browserMode);
   let page;
   try {
-    page=await browser.contexts()[0].newPage();page.setDefaultTimeout(timeout);
+    page=await context.newPage();page.setDefaultTimeout(timeout);
     for(let attempt=0;attempt<=retries;attempt++) {
       try {
         await page.goto(url,{waitUntil:'domcontentloaded',timeout});
@@ -44,5 +44,5 @@ export async function readAcquisitionCards(chromium,directory,{timeout=120000,re
         console.warn('重新加载看板后重试：'+error.message.split('\n')[0]);
       }
     }
-  } finally {if(page) await page.close().catch(()=>{});await browser.close();}
+  } finally {if(page) await page.close().catch(()=>{});await close();}
 }

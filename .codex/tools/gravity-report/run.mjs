@@ -821,7 +821,7 @@ async function main(kind) {
   const profile = process.env.GRAVITY_PROFILE ?? path.join(process.env.LOCALAPPDATA,'GravityWeComReport','Chrome');
   const reuse = report.browserMode === 'existing';
   const browser = reuse ? await connectExistingChrome(chromium) :
-    await chromium.launchPersistentContext(profile,{channel:'chrome',headless:false,viewport:{width:1600,height:1000}});
+    await chromium.launchPersistentContext(profile,{channel:'chrome',headless:report.browserMode === 'headless',viewport:{width:1600,height:1000}});
   let page;
   try {
     if (reuse) {
@@ -864,10 +864,10 @@ async function main(kind) {
       } else {
         console.log('正在读取数数每日累计指标');
         ta = previewCsv ? parseTaHourly(await fs.readFile(previewCsv,'utf8'),date)
-          : await readTaHourly(chromium,report.taUrl,date,taTimeout,report.retries);
+          : await readTaHourly(chromium,report.taUrl,date,taTimeout,report.retries,parseTaHourly,report.browserMode);
         if (mediaUrl) {
           console.log('正在读取数数分媒体买量指标');
-          paidTa = await readTaHourly(chromium,mediaUrl,date,taTimeout,report.retries,parseTaPaidHourly);
+          paidTa = await readTaHourly(chromium,mediaUrl,date,taTimeout,report.retries,parseTaPaidHourly,report.browserMode);
         }
       }
       if (fromMedia && !paidTa) console.warn('数数分媒体当日没有非自然量记录，买量注册和付费相关字段留空');
@@ -904,7 +904,7 @@ async function main(kind) {
       await fs.writeFile(output.replace(/\.xlsx$/i,'.gravity.snapshot.json'),JSON.stringify({date,hour,project:project.name,rows},null,2));
       console.log('正在读取数数看板的前期转化');
       const conversion=await readConversionDashboard(chromium,report.conversion,date,
-        (csv,attempt)=>fs.writeFile(output.replace(/\.xlsx$/i,'.conversion.attempt-'+attempt+'.raw.csv'),csv));
+        (csv,attempt)=>fs.writeFile(output.replace(/\.xlsx$/i,'.conversion.attempt-'+attempt+'.raw.csv'),csv),report.browserMode);
       if(day()!==runDay) throw new Error('组合取数期间跨过北京时间日期');
       await fs.writeFile(output.replace(/\.xlsx$/i,'.conversion.raw.csv'),conversion.csv);
       await fs.writeFile(output.replace(/\.xlsx$/i,'.conversion.snapshot.json'),JSON.stringify({...conversion.data,source:conversion.source,hour},null,2));

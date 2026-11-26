@@ -158,12 +158,31 @@ export async function connectTaBrowser(chromium,timeout) {
   throw new Error('数数专用 Chrome 启动后仍未连接');
 }
 
-export async function readTaHourly(chromium, url, date, timeout, retries, parse = parseTaHourly) {
-  const browser=await connectTaBrowser(chromium,timeout);
+export async function openTaSession(chromium,timeout,browserMode) {
+  if (browserMode !== 'headless') {
+    const browser=await connectTaBrowser(chromium,timeout);
+    const context=browser.contexts()[0];
+    if (!context) {
+      await browser.close();
+      throw new Error('数数 Chrome 没有可用会话');
+    }
+    return {context,close:()=>browser.close()};
+  }
+  const profile=path.join(process.env.LOCALAPPDATA,'GravityWeComReport','TA-Chrome');
+  try {
+    const context=await chromium.launchPersistentContext(profile,{
+      channel:'chrome',headless:true,viewport:{width:1600,height:1000},acceptDownloads:true,timeout,
+    });
+    return {context,close:()=>context.close()};
+  } catch (error) {
+    throw new Error('数数静默浏览器启动失败。请确认专用数数 Chrome 已关闭，再重试。',{cause:error});
+  }
+}
+
+export async function readTaHourly(chromium, url, date, timeout, retries, parse = parseTaHourly, browserMode) {
+  const {context,close}=await openTaSession(chromium,timeout,browserMode);
   let page;
   try {
-    const context = browser.contexts()[0];
-    if (!context) throw new Error('数数 Chrome 没有可用会话');
     page = await context.newPage();
     page.setDefaultTimeout(timeout);
     for (let attempt=0;attempt<=retries;attempt++) {
@@ -197,18 +216,16 @@ export async function readTaHourly(chromium, url, date, timeout, retries, parse 
     }
   } finally {
     if (page) await page.close().catch(()=>{});
-    await browser.close();
+    await close();
   }
 }
 
 export async function readTaDashboard(chromium, report, date, timeout, retries) {
-  const browser=await connectTaBrowser(chromium,timeout);
+  const {context,close}=await openTaSession(chromium,timeout,report.browserMode);
   let page;
   try {
-    const context = browser.contexts()[0];
-    if (!context) throw new Error('数数 Chrome 没有可用会话');
     page = await context.newPage();
-    await page.bringToFront();
+    if (report.browserMode !== 'headless') await page.bringToFront();
     page.setDefaultTimeout(timeout);
     for (let attempt=0;attempt<=retries;attempt++) {
       try {
@@ -267,7 +284,7 @@ export async function readTaDashboard(chromium, report, date, timeout, retries) 
     }
   } finally {
     if (page) await page.close().catch(()=>{});
-    await browser.close();
+    await close();
   }
 }
 

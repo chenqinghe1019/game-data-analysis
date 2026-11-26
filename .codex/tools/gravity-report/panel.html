@@ -36,8 +36,9 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#f4f8fc;padding:12px;
 <nav id="heroReports" class="card" hidden><a href="/hero">投放与转化播报</a> · <a href="/hero#taSection">前期转化参数</a></nav>
 <div class="config-columns">
 <section class="card"><h2>引力报表参数</h2><div id="report" class="grid"></div>
-<label>浏览器模式<select id="browserMode"><option value="existing">复用已登录的 Chrome</option><option value="dedicated">使用独立播报 Chrome</option></select></label>
+<label>浏览器模式<select id="browserMode"><option value="existing">复用已登录的 Chrome</option><option value="dedicated">使用独立播报 Chrome</option><option value="headless">后台静默运行</option></select></label>
 <label id="layoutField" hidden>报表展示维度<select id="reportLayout"><option value="project">项目与媒体</option><option value="flat">项目与媒体（平铺报表）</option><option value="daily">按日期汇总</option></select></label>
+<p id="headlessHint" hidden>使用独立的播报登录状态。首次使用或登录过期时，请先用独立 Chrome 完成登录；切回静默前请关闭对应的独立浏览器。</p>
 <p id="browserHint">在已登录引力的 Chrome 中打开 chrome://inspect/#remote-debugging，开启远程调试并允许连接。</p>
 <details><summary>引力登录账号 <span id="loginStatus"></span></summary>
 <p>各播报项目共用引力登录账号。凭据加密保存在本机。</p>
@@ -482,7 +483,10 @@ try {
   for(const [key,label] of Object.entries(reportLabels)) input(get('report'),label,key,report[key]??'',{wide:key==='url'});
   const browserMode=get('browserMode');
   browserMode.value=report.browserMode;
-  const updateBrowserHint=()=>{get('browserHint').hidden=isConversion || browserMode.value!=='existing';};
+  const updateBrowserHint=()=>{
+    get('browserHint').hidden=isConversion || browserMode.value!=='existing';
+    get('headlessHint').hidden=isConversion || browserMode.value!=='headless';
+  };
   browserMode.onchange=updateBrowserHint;
   updateBrowserHint();
   get('saveLogin').onclick=()=>updateLogin(false);

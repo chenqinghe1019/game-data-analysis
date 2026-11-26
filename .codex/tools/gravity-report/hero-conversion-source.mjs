@@ -1,14 +1,12 @@
 import fs from 'node:fs/promises';
-import {connectTaBrowser} from './external-hourly.mjs';
+import {openTaSession} from './external-hourly.mjs';
 import {parseConversion} from './hero-conversion.mjs';
 
-export async function readConversionDashboard(chromium,report,date,onDownload=async()=>{}) {
+export async function readConversionDashboard(chromium,report,date,onDownload=async()=>{},browserMode) {
   const timeout=report.timeoutSeconds*1000;
-  const browser=await connectTaBrowser(chromium,timeout);
+  const {context,close}=await openTaSession(chromium,timeout,browserMode);
   let page;
   try {
-    const context=browser.contexts()[0];
-    if (!context) throw new Error('数数浏览器会话不可用');
     page=await context.newPage();page.setDefaultTimeout(timeout);
     for (let attempt=0;attempt<=report.retries;attempt++) {
       try {
@@ -45,5 +43,5 @@ export async function readConversionDashboard(chromium,report,date,onDownload=as
         console.warn('前期转化取数失败，重新打开看板后重试：'+error.message.split('\n')[0]);
       }
     }
-  } finally {if(page) await page.close().catch(()=>{});await browser.close();}
+  } finally {if(page) await page.close().catch(()=>{});await close();}
 }

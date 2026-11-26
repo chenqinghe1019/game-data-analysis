@@ -115,7 +115,7 @@ export function validateConfig(config, kind = 'gravity') {
         !/^\d{4}-\d{2}-\d{2}$/.test(source.startDate) || new Date(source.startDate+'T00:00:00Z').toJSON()?.slice(0,10)!==source.startDate) throw new Error('请核对投放汇总卡片、累计起算日期和引力ROI口径');
     acquisition={url:checked.url,mediaCard:checked.title,totalCard:source.totalCard,startDate:source.startDate,roiMode:'gravity'};
   }
-  if (!['existing','dedicated'].includes(browserMode)) throw new Error('浏览器模式无效');
+  if (!['existing','dedicated','headless'].includes(browserMode)) throw new Error('浏览器模式无效');
   const layout = kind === 'iaa' ? report.layout ?? 'project' : 'project';
   if (!['project','daily','flat'].includes(layout)) throw new Error('报表展示维度无效');
   const spendUnit = report.spendUnit ?? (kind === 'iaa' ? 'yuan' : defaults.report.spendUnit);
