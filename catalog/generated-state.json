@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "textEncoding": "UTF-8/LF; BOM removed",
-  "sourceFingerprint": "79d5ab4f5a10690acfa1afbc2aa7e9c0445a2ccc381350d2cb12b5b16e94fb0b",
+  "sourceFingerprint": "3e739cb7133169a579013e8387331f472d121884875fa387418496779df47cbd",
   "inputs": {
     ".codex/skills/auto-project-handoff/SKILL.md": "9a3e77f04f73c59f4a3196239ee0b50f8e0056c3ee219ac9e21882311f56579e",
     ".codex/skills/auto-project-handoff/agents/openai.yaml": "444acd93558c71a3a9cfd280afc534fb307db1e01c78a9856240da6a8fa251ec",
@@ -38,7 +38,7 @@
     ".codex/skills/tracking-yaml/references/yaml-schema.md": "6148264dc4e6f97b5a7e0f0a58ef8ff7d9f87ead6a67987e8b3207f27eaac719",
     ".codex/skills/tracking-yaml/scripts/extract-tracking-tables.ps1": "0631e1ffe377e17bd70e46c494acc44d09890428119905c25c12cefe4f6c2fef",
     ".codex/skills/tracking-yaml/scripts/watch-tracking-inputs.ps1": "1fe95e4d6420227f15a52b8e53d72d1ed705004f42d69028d956a7b4a5122223",
-    "PROJECT_WORKING_RULES.md": "7e325e5ca7b13345ad39d422fe20388a6e760bf091939ede4c40358fee0cbefe",
+    "PROJECT_WORKING_RULES.md": "efd50115a439f766820af641fd57a9cbeec7d221fbba7c6341760e804c000377",
     "catalog/legacy-artifacts.json": "6a4182b6022fce8e385f6dde9a2897ba4762bd5b2c3133c54eb3494d75135a90",
     "catalog/project-registry.json": "1a5bca47430ed6869a05a5342c536e35afb4972f266773ac7a67791bc6009d2f",
     "knowledge/CANONICAL_INDEX.md": "87d20576acbeb11fef59799aff2010902db66d826ae07644462fced6ee40ec18",
@@ -150,9 +150,9 @@
     },
     {
       "path": "projects/auto-project/packages/auto-project-chatgpt-knowledge.zip",
-      "sha256": "1bdbb7e22fd2f39197da19420df80699d7b962bdc5d03ce3d4249ebcd4c1fee1",
+      "sha256": "95c0c2204dc675bba6a287d022df65cf86a6405dc3713a9418a85a48c2209338",
       "files": 17,
-      "bytes": 76542
+      "bytes": 76785
     }
   ]
 }

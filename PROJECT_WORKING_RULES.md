@@ -129,12 +129,12 @@ Canonical 读取顺序：
 |---|---:|---|---|---|
 | 下方了 | 41 | `ta.v_user_41` | `ta.v_event_41` | `payment/100`；`create_role_time` 为 timestamp；活跃 `in_out_log`；主线开始 `battle_star`；主线 `battle_type=1` |
 | 步步 / 一步两步 | 22 | `ta.v_user_22` | `ta.v_event_22` | 活跃 `log_in_out`；v21/v2 旧口径作废 |
-| 弯月勇者 | 44 | `ta.v_user_44` | `ta.v_event_44` | 固定 v44；支付单位未验证时禁止自行 `/100`；战斗开始 `battle_star` |
+| 弯月勇者 | 44 | `ta.v_user_44` | `ta.v_event_44` | [主线关卡参考口径](knowledge/projects/wanyue/FACTS.md)：`battle_type=20`，开始事件含 `battle_star` 和 `battle_start`；其他报表按专题核对事件及支付单位 |
 | 暴弹飞射 | 42 | `ta.v_user_42` | `ta.v_event_42` | `payment` 为元；在线时长用 `ta_app_end.#duration`；战斗开始 `battle_start` |
 | 萝卜4小游戏 | 37 | `ta.v_user_37` | `ta.v_event_37` | 用户表无 `domain/create_role_time`；新增取 `register.$part_date` |
 | 喵喵岛 | 待确认 | 待确认 | 待确认 | 仍处埋点方案阶段，SQL 前必须先确认线上表 |
 
-完整项目配置优先读 `project_memory.yaml` 和对应 `*_tracking.yaml`，不要只依赖本表摘要。
+完整项目配置优先读 `project_memory.yaml` 和对应 `*_tracking.yaml`，不要只依赖本表摘要。 弯月勇者主线早期仅纳入 `battle_star` 的口径已于 2026-11-26 被上述主线参考替代，原埋点记录仍用于查证事件。
 
 ---
 
