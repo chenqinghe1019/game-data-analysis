@@ -4,6 +4,7 @@
 
 | 项目 | 状态 | 系统编号 / 上下文 | 资料入口 |
 |---|---|---|---|
+| 时光鸡 | documented | thinkingdata:36 | [入口](../knowledge/projects/shiguangji/FACTS.md) |
 | 倍特小时报 | implemented | 按具体任务确认 | [入口](../projects/beite-hourly-report/README.md) |
 | 自动项目交接 | maintained | 按具体任务确认 | [入口](../projects/auto-project/START_HERE.md) |
 | 下方了 | documented | thinkingdata:41 | [入口](../knowledge/projects/xiafangle/FACTS.md) |
@@ -23,6 +24,7 @@
 
 ## 编号冲突与待核实说明
 
+- **时光鸡**：2026-11-26在项目36创建客服空间，全服玩家信息报表6331，普客组查看者权限已保存回读。
 - **英雄就是我（小时报）**：数数44与历史弯月勇者资料存在命名重叠；只确认当前小时报上下文，不能据此合并项目或迁移口径。
 - **弯月勇者（历史分析口径）**：保留历史知识，使用前核对具体项目名、报表与时间；不自动套用于英雄就是我。
 - **一耍就上头**：IAA_Game共用项目54，按空间及game_name='yishuajiushangtou'区分游戏。

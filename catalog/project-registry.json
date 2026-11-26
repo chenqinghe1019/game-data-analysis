@@ -4,6 +4,7 @@
   "repository": "chenqinghe1019/game-data-analysis",
   "purpose": "Documentation and identity registry; does not drive production scheduling or credentials.",
   "projects": [
+    {"id":"shiguangji","name":"时光鸡","kind":"game","aliases":["时光机"],"entry":"knowledge/projects/shiguangji/FACTS.md","sources":[{"system":"thinkingdata","id":"36","panels":["36_2255_0"]}],"status":"documented","note":"2026-11-26在项目36创建客服空间，全服玩家信息报表6331，普客组查看者权限已保存回读。"},
     {"id":"beite-hourly","name":"倍特小时报","kind":"automation","aliases":["引力引擎企微播报"],"entry":"projects/beite-hourly-report/README.md","code":".codex/tools/gravity-report","status":"implemented","sources":[]},
     {"id":"auto-project","name":"自动项目交接","kind":"handoff","aliases":["自动项目"],"entry":"projects/auto-project/START_HERE.md","status":"maintained","sources":[]},
     {"id":"xiafangle","name":"下方了","kind":"game","aliases":[],"entry":"knowledge/projects/xiafangle/FACTS.md","sources":[{"system":"thinkingdata","id":"41"}],"status":"documented"},

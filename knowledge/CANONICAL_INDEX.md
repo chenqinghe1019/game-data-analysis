@@ -35,6 +35,7 @@ last_verified: 2026-10-08
 - global/analysis_method.md：统一分析方法
 
 ## 项目 Canonical
+- [时光鸡客服空间](projects/shiguangji/FACTS.md)：项目 36 的客服玩家查询、时间及支付字段适配、空间查看权限。
 - projects/xiafangle/FACTS.md
   - [SLG 活跃付费与回访口径](projects/xiafangle/SLG_REVIEW.md)：项目 41 的上线前后对比、礼包映射、VIP 分层和回访观察窗。
 - projects/wanyue/FACTS.md
