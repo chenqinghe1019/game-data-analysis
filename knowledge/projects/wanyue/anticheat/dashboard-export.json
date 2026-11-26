@@ -1,0 +1,176 @@
+{
+  "dashboardFolders": [],
+  "notes": [],
+  "reports": [
+    {
+      "cacheSeconds": 0,
+      "openQuery": {
+        "visualView": {},
+        "events": {
+          "sqlVoParams": [
+            {
+              "paramType": "PartDate",
+              "paramDisplay": "",
+              "paramRemark": "",
+              "paramName": "date",
+              "useTimezone": 0
+            },
+            {
+              "paramType": "Text",
+              "paramDisplay": "角色ID",
+              "paramRemark": "",
+              "paramName": "text",
+              "useTimezone": 0
+            }
+          ],
+          "sql": "SELECT\n    role_id AS \"角色ID\",\n    server_id AS \"服务器ID\",\n    abnormal_time AS \"异常时间\",\n    array_join(filter(ARRAY[\n        CASE WHEN refresh_card > 2 THEN '对局内刷卡次数修改' END,\n        CASE WHEN battle_type = 20 AND duration < 100 THEN '通关时间异常' END\n    ], x -> x IS NOT NULL), '、') AS \"异常情况\",\n    refresh_card AS \"修改刷卡次数\",\n    report_hp_max AS \"客户端城墙血量\",\n    svr_hp_max AS \"服务端城墙血量\",\n    round(duration, 2) AS \"实际通关时间（秒）\",\n    100.0 AS \"通关时间异常阈值（秒）\",\n    battle_uid AS \"异常battle_uid\",\n    battle_type AS \"battle_type\",\n    map_id AS \"map_id\"\nFROM (\n    SELECT cast(\"#account_id\" AS varchar) AS role_id,\n           try_cast(region_id AS bigint) AS server_id,\n           cast(\"#event_time\" AS timestamp) AS abnormal_time,\n           nullif(trim(cast(battle_uid AS varchar)), '') AS battle_uid,\n           try_cast(battle_type AS integer) AS battle_type,\n           try_cast(map_id AS integer) AS map_id,\n           try_cast(duration AS double) AS duration,\n           try_cast(\"refreshCard\" AS double) AS refresh_card,\n           try_cast(\"reportHpMax\" AS double) AS report_hp_max,\n           try_cast(\"svrHpMax\" AS double) AS svr_hp_max\n    FROM ta.v_event_44\n    WHERE \"$part_event\" = 'battle_check'\n      AND ${PartDate:date}\n      AND domain = 'release'\n      AND \"#account_id\" ${Text:text}\n      AND try_cast(map_id AS integer) > 10\n) t\nWHERE refresh_card > 2\n   OR (battle_type = 20 AND duration < 100)\nORDER BY abnormal_time DESC, role_id, battle_uid"
+        },
+        "eventView": {
+          "sqlViewParams": [
+            {
+              "paramType": "PartDate",
+              "recentDay": "0-2",
+              "startToNow": -1,
+              "startTime": "2026-10-26",
+              "paramName": "date",
+              "endTime": "2026-10-27",
+              "startToYesterday": -1
+            },
+            {
+              "paramType": "Text",
+              "paramExpress": "",
+              "quota": "C04",
+              "paramName": "text"
+            }
+          ],
+          "requireReferredProjectPrivilege": true,
+          "requiredEvents": [],
+          "uiCommonConfig": {}
+        }
+      },
+      "queryDurationMs": 1314,
+      "reportDesc": "弯月勇者：刷卡>2、主线battle_type=20且关卡ID>10、通关时间<100秒。去掉目标不支持的城墙受击扣血/回血、赛季、源VIP与战力监测；累充金额单位未核实时不展示。",
+      "reportId": 6339,
+      "reportModel": 10,
+      "reportModelDesc": "SQL_IDE",
+      "reportName": "外挂治理"
+    },
+    {
+      "cacheSeconds": 0,
+      "openQuery": {
+        "visualView": {
+          "groupBys": [],
+          "aggregates": [],
+          "filters": [],
+          "aggregateFilters": [],
+          "orderBys": []
+        },
+        "events": {
+          "sqlVoParams": [
+            {
+              "paramType": "PartDate",
+              "paramDisplay": "",
+              "paramRemark": "",
+              "paramName": "date1",
+              "useTimezone": 0
+            }
+          ],
+          "sql": "-- 弯月勇者：按战斗发生时累计现金充值分层；继承源报表P99及5/10/20倍分级。\nWITH battle_base AS (\n    SELECT cast(\"#account_id\" AS varchar) AS role_id,\n           try_cast(region_id AS bigint) AS server_id,\n           cast(\"#event_time\" AS timestamp) AS battle_time,\n           try_cast(map_id AS bigint) AS map_id,\n           nullif(trim(cast(battle_uid AS varchar)), '') AS battle_uid,\n           reduce(battle_array, cast(0 AS double),\n             (s,x) -> s + coalesce(try_cast(try(json_extract_scalar(x,'$.damage')) AS double),0),\n             s -> s) AS total_damage\n    FROM ta.v_event_44\n    WHERE \"$part_event\"='battle_check'\n      AND ${PartDate:date1}\n      AND domain='release'\n      AND try_cast(battle_type AS integer)=20\n      AND try_cast(map_id AS bigint)>0\n      AND \"#account_id\" IS NOT NULL\n      AND cardinality(battle_array)>0\n      -- 无法解析的伤害不作为0混入基准。\n      AND cardinality(filter(battle_array,x -> try_cast(try(json_extract_scalar(x,'$.damage')) AS double) IS NULL))=0\n), battle_dedup AS (\n    SELECT role_id,server_id,battle_time,map_id,battle_uid,total_damage\n    FROM (\n      SELECT b.*,row_number() OVER (\n        PARTITION BY role_id,server_id,map_id,coalesce(battle_uid,cast(battle_time AS varchar))\n        ORDER BY battle_time DESC) AS rn\n      FROM battle_base b\n    ) t WHERE rn=1 AND total_damage>=0\n), payment_by_time AS (\n    SELECT cast(\"#account_id\" AS varchar) AS role_id,\n           cast(\"#event_time\" AS timestamp) AS event_time,\n           sum(try_cast(payment AS double)) AS payment_fen\n    FROM ta.v_event_44\n    WHERE \"$part_event\"='pay_log'\n      -- 历史现金充值不套用战斗日期下限。\n      AND \"$part_date\" <= cast((SELECT max(date(battle_time)) FROM battle_dedup) AS varchar)\n      AND domain='release' AND change_reason='rmb充值' AND pay_result=1\n      AND try_cast(payment AS double)>0\n      AND \"#event_time\" IS NOT NULL\n      AND cast(\"#account_id\" AS varchar) IN (SELECT role_id FROM battle_dedup)\n    GROUP BY 1,2\n), timeline AS (\n    SELECT role_id,battle_time AS event_time,1 AS event_kind,server_id,map_id,battle_uid,total_damage,cast(0 AS double) AS payment_fen\n    FROM battle_dedup\n    UNION ALL\n    SELECT role_id,event_time,0 AS event_kind,cast(NULL AS bigint),cast(NULL AS bigint),cast(NULL AS varchar),cast(NULL AS double),payment_fen\n    FROM payment_by_time\n), battle_pay AS (\n    SELECT role_id,server_id,event_time AS battle_time,map_id,battle_uid,total_damage,cumulative_pay,\n       CASE WHEN cumulative_pay=0 THEN 'a_free'\n            WHEN cumulative_pay<=6 THEN 'b_(0,6]'\n            WHEN cumulative_pay<=30 THEN 'c_(6,30]'\n            WHEN cumulative_pay<=100 THEN 'd_(30,100]'\n            WHEN cumulative_pay<=300 THEN 'e_(100,300]'\n            WHEN cumulative_pay<=500 THEN 'f_(300,500]'\n            WHEN cumulative_pay<=1000 THEN 'g_(500,1000]'\n            ELSE 'h_(1000,+)' END AS pay_group\n    FROM (\n      SELECT t.*,sum(payment_fen) OVER (\n        PARTITION BY role_id ORDER BY event_time,event_kind\n        ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)/100.0 AS cumulative_pay\n      FROM timeline t\n    ) p WHERE event_kind=1\n), map_stats AS (\n    SELECT map_id,count(*) AS sample_count,approx_percentile(total_damage,0.99) AS p99_damage\n    FROM battle_pay GROUP BY map_id\n), pay_stats AS (\n    SELECT map_id,pay_group,count(*) AS sample_count,approx_percentile(total_damage,0.99) AS p99_damage\n    FROM battle_pay GROUP BY map_id,pay_group\n), battle_scored AS (\n    SELECT b.*,\n      CASE WHEN p.sample_count>=1000 AND p.p99_damage>0 THEN p.p99_damage ELSE m.p99_damage END AS p99_reference,\n      CASE WHEN p.sample_count>=1000 AND p.p99_damage>0 THEN p.sample_count ELSE m.sample_count END AS reference_sample_count,\n      CASE WHEN p.sample_count>=1000 AND p.p99_damage>0 THEN '同关卡同累计付费层' ELSE '同关卡全服' END AS reference_type\n    FROM battle_pay b\n    LEFT JOIN map_stats m ON b.map_id=m.map_id\n    LEFT JOIN pay_stats p ON b.map_id=p.map_id AND b.pay_group=p.pay_group\n), battle_ratio AS (\n    SELECT s.*,total_damage/nullif(p99_reference,0) AS damage_ratio\n    FROM battle_scored s\n), player_repeat AS (\n    SELECT role_id,count(DISTINCT CASE WHEN damage_ratio>5 THEN map_id END) AS abnormal_map_count,\n           count_if(damage_ratio>5) AS abnormal_battle_count\n    FROM battle_ratio GROUP BY role_id\n), risk_detail AS (\n    SELECT b.*,p.abnormal_map_count,p.abnormal_battle_count,\n      CASE WHEN damage_ratio>20 THEN 'S1_极高风险'\n           WHEN damage_ratio>10 THEN 'S2_高风险'\n           WHEN damage_ratio>5 AND p.abnormal_map_count>=2 THEN 'S3_多关卡异常'\n           WHEN damage_ratio>5 THEN 'S4_观察' ELSE '正常' END AS risk_level\n    FROM battle_ratio b LEFT JOIN player_repeat p ON b.role_id=p.role_id\n)\nSELECT role_id AS \"角色ID\",server_id AS \"服务器ID\",\n       round(cumulative_pay,2) AS \"战斗时累计现金充值（元）\",pay_group AS \"累计付费分层\",\n       battle_time AS \"战斗时间\",map_id AS \"主线关卡ID\",battle_uid AS \"battle_uid\",\n       round(total_damage,2) AS \"整场总伤害\",round(p99_reference,2) AS \"关卡P99基准\",\n       round(damage_ratio,2) AS \"伤害/P99倍率\",reference_type AS \"基准来源\",\n       reference_sample_count AS \"基准样本数\",abnormal_map_count AS \"超5倍关卡数\",\n       abnormal_battle_count AS \"超5倍战斗数\",risk_level AS \"伤害异常等级\"\nFROM risk_detail WHERE risk_level<>'正常'\nORDER BY damage_ratio DESC,battle_time DESC"
+        },
+        "eventView": {
+          "sqlViewParams": [
+            {
+              "paramType": "PartDate",
+              "recentDay": "1-7",
+              "startTime": "2026-11-19",
+              "paramName": "date1",
+              "endTime": "2026-11-25"
+            }
+          ],
+          "requireReferredProjectPrivilege": true,
+          "requiredEvents": []
+        }
+      },
+      "queryDurationMs": 2707,
+      "reportDesc": "主线20；战斗时现金累充8档；同关卡同层P99，样本<1000回退全服；5/10/20倍分级，需人工复核。",
+      "reportId": 6341,
+      "reportModel": 10,
+      "reportModelDesc": "SQL_IDE",
+      "reportName": "关卡伤害异常监测"
+    }
+  ],
+  "sharedSpaces": [
+    {
+      "children": [
+        {
+          "dashboard": {
+            "approximate_on": 0,
+            "businessFilter": {
+              "junctionKind": "and",
+              "taFilters": [
+                {
+                  "calcuSymbol": "C00",
+                  "clusterFilter": false,
+                  "clusterTagFilter": false,
+                  "columnDesc": "账户ID",
+                  "columnName": "#account_id",
+                  "columnType": "varchar",
+                  "csvSize": 0,
+                  "filterType": "SIMPLE",
+                  "ftv": [],
+                  "hasDeleted": false,
+                  "hasHide": false,
+                  "hasUpperCase": false,
+                  "isPreset": true,
+                  "lackValue": true,
+                  "ruleType": 0,
+                  "selectType": "string",
+                  "specifiedClusterDate": "2026-09-22",
+                  "subTableType": "",
+                  "tableType": "0",
+                  "tagFilter": false,
+                  "timeRelative": "",
+                  "userFilter": false
+                }
+              ]
+            },
+            "cacheConfig": "{\"unit\":\"MINUTE\",\"value\":10}",
+            "dashbord_name": "外挂治理V1",
+            "filter_show": 0,
+            "global_query_on": 0,
+            "index_order": 2147483647,
+            "noteMappings": [],
+            "refresh_type": 0,
+            "reportMappings": [
+              {
+                "aggregate_data": "{\"show\":false,\"typeList\":[]}",
+                "date_outside": -1,
+                "index_order": 0,
+                "report_graph_shape": "",
+                "report_id": 6339,
+                "report_width": 1,
+                "sort_type": "",
+                "table_format": 0
+              },
+              {
+                "aggregate_data": "{\"show\":false,\"typeList\":[]}",
+                "date_outside": -1,
+                "index_order": 1,
+                "report_graph_shape": "L4",
+                "report_id": 6341,
+                "report_width": 1,
+                "table_format": 0
+              }
+            ],
+            "tags": [],
+            "ui_config": "{\"layout\":[{\"i\":\"6339\",\"x\":0,\"y\":0,\"w\":20,\"h\":10},{\"i\":\"6341\",\"x\":0,\"y\":10,\"w\":20,\"h\":10}],\"version\":\"3.4.0\"}",
+            "zone_offset": 88
+          },
+          "isFolder": false
+        }
+      ],
+      "spaceDesc": "",
+      "spaceName": "外挂治理"
+    }
+  ]
+}
