@@ -1,0 +1,414 @@
+{
+  "dashboardFolders": [],
+  "notes": [],
+  "reports": [
+    {
+      "cacheSeconds": 0,
+      "openQuery": {
+        "visualView": {},
+        "events": {
+          "sqlVoParams": [
+            {
+              "paramType": "PartDate",
+              "paramDisplay": "注册日期",
+              "paramRemark": "",
+              "paramName": "date1",
+              "useTimezone": 0
+            },
+            {
+              "paramType": "Selector",
+              "paramDisplay": "媒体",
+              "paramRemark": "用户媒体ad_platform；空值归自然量；人数主体与原付费总览一致",
+              "paramName": "media",
+              "selectorItems": [
+                {
+                  "selectorName": "全部",
+                  "selectorValue": "1=1"
+                },
+                {
+                  "selectorName": "自然量",
+                  "selectorValue": "media_name = '自然量'"
+                },
+                {
+                  "selectorName": "tencent",
+                  "selectorValue": "media_name = 'tencent'"
+                }
+              ],
+              "useTimezone": 0
+            }
+          ],
+          "sql": "-- 萝卜4小游戏37：所选新增批次D1-D7按商品购买人数、去重订单次数。\n-- 新增=全历史register最早日期；D1=注册当天；各Dn分别成熟至昨日。\n-- 每个Dn成熟新增样本为0时输出NULL；已有成熟样本但未购买商品时输出0。\n-- 截至昨日全历史订单先去重，再关联注册日，避免日期筛选截断首日之外订单。\n-- 媒体Selector为完整条件，全部=1=1；新增样本和订单使用同一用户媒体映射。\nSELECT\n    m.product_id AS \"商品ID\",\n    m.product_name AS \"商品名称\",\n    c.n1 AS \"D1成熟新增人数\",\n    CASE WHEN c.n1 > 0 THEN m.u1 END AS \"D1购买人数\",\n    CASE WHEN c.n1 > 0 THEN m.o1 END AS \"D1购买次数\",\n    c.n2 AS \"D2成熟新增人数\",\n    CASE WHEN c.n2 > 0 THEN m.u2 END AS \"D2购买人数\",\n    CASE WHEN c.n2 > 0 THEN m.o2 END AS \"D2购买次数\",\n    c.n3 AS \"D3成熟新增人数\",\n    CASE WHEN c.n3 > 0 THEN m.u3 END AS \"D3购买人数\",\n    CASE WHEN c.n3 > 0 THEN m.o3 END AS \"D3购买次数\",\n    c.n4 AS \"D4成熟新增人数\",\n    CASE WHEN c.n4 > 0 THEN m.u4 END AS \"D4购买人数\",\n    CASE WHEN c.n4 > 0 THEN m.o4 END AS \"D4购买次数\",\n    c.n5 AS \"D5成熟新增人数\",\n    CASE WHEN c.n5 > 0 THEN m.u5 END AS \"D5购买人数\",\n    CASE WHEN c.n5 > 0 THEN m.o5 END AS \"D5购买次数\",\n    c.n6 AS \"D6成熟新增人数\",\n    CASE WHEN c.n6 > 0 THEN m.u6 END AS \"D6购买人数\",\n    CASE WHEN c.n6 > 0 THEN m.o6 END AS \"D6购买次数\",\n    c.n7 AS \"D7成熟新增人数\",\n    CASE WHEN c.n7 > 0 THEN m.u7 END AS \"D7购买人数\",\n    CASE WHEN c.n7 > 0 THEN m.o7 END AS \"D7购买次数\"\nFROM (\n    SELECT product_id, product_name,\n           count(DISTINCT CASE WHEN new_day = 1 THEN pid END) AS u1,\n           count_if(new_day = 1) AS o1,\n           count(DISTINCT CASE WHEN new_day = 2 THEN pid END) AS u2,\n           count_if(new_day = 2) AS o2,\n           count(DISTINCT CASE WHEN new_day = 3 THEN pid END) AS u3,\n           count_if(new_day = 3) AS o3,\n           count(DISTINCT CASE WHEN new_day = 4 THEN pid END) AS u4,\n           count_if(new_day = 4) AS o4,\n           count(DISTINCT CASE WHEN new_day = 5 THEN pid END) AS u5,\n           count_if(new_day = 5) AS o5,\n           count(DISTINCT CASE WHEN new_day = 6 THEN pid END) AS u6,\n           count_if(new_day = 6) AS o6,\n           count(DISTINCT CASE WHEN new_day = 7 THEN pid END) AS u7,\n           count_if(new_day = 7) AS o7\n    FROM (\n        SELECT p.pid, p.product_id, p.product_name,\n               date_diff('day', cohorts.reg_day, p.pay_day) + 1 AS new_day\n        FROM (\n            SELECT pid, product_id, product_name, pay_day\n            FROM (\n                SELECT s.*,\n                       row_number() OVER (\n                           PARTITION BY pid, order_key\n                           ORDER BY pay_time, product_id, product_name, pay_amount\n                       ) AS order_rn\n                FROM (\n                    SELECT cast(\"#user_id\" AS varchar) AS pid,\n                           coalesce(nullif(trim(cast(order_id AS varchar)), ''),\n                               concat('__missing__|', cast(\"#event_time\" AS varchar), '|',\n                                   coalesce(cast(product_id AS varchar), ''), '|',\n                                   coalesce(cast(product_name AS varchar), ''), '|',\n                                   cast(pay_amount AS varchar))) AS order_key,\n                           cast(product_id AS varchar) AS product_id,\n                           coalesce(nullif(cast(product_name AS varchar), ''), '未获取商品名称') AS product_name,\n                           try_cast(pay_amount AS double) AS pay_amount,\n                           cast(\"#event_time\" AS timestamp) AS pay_time,\n                           date(\"$part_date\") AS pay_day\n                    FROM ta.v_event_37\n                    WHERE \"$part_event\" = 'order_finish'\n                      AND \"$part_date\" <= cast(date_add('day', -1, current_date) AS varchar)\n                      AND date(\"#event_time\") < current_date\n                      AND \"#user_id\" IS NOT NULL\n                      AND \"#event_time\" IS NOT NULL\n                      AND try_cast(pay_amount AS double) > 0\n                ) s\n            ) ranked_orders\n            WHERE order_rn = 1\n        ) p\n        INNER JOIN (\n            SELECT c.pid, c.reg_day,\n                   coalesce(u.media_name, '自然量') AS media_name\n            FROM (\n                SELECT pid, reg_day\n                FROM (\n                    SELECT pid, reg_day, cast(reg_day AS varchar) AS \"$part_date\"\n                    FROM (\n                        SELECT cast(\"#user_id\" AS varchar) AS pid,\n                               min(date(\"$part_date\")) AS reg_day\n                        FROM ta.v_event_37\n                        WHERE \"$part_event\" = 'register'\n                          AND \"$part_date\" <= cast(date_add('day', -1, current_date) AS varchar)\n                          AND \"#user_id\" IS NOT NULL\n                        GROUP BY 1\n                    ) all_registration\n                ) registration_dates\n                WHERE ${PartDate:date1}\n            ) c\n            LEFT JOIN (\n                SELECT cast(\"#user_id\" AS varchar) AS pid,\n                       coalesce(max(nullif(cast(ad_platform AS varchar), '')), '自然量') AS media_name\n                FROM ta.v_user_37\n                WHERE \"#user_id\" IS NOT NULL\n                GROUP BY 1\n            ) u ON c.pid = u.pid\n        ) cohorts ON p.pid = cohorts.pid\n            AND p.pay_day BETWEEN cohorts.reg_day AND date_add('day', 6, cohorts.reg_day)\n        WHERE ${Selector:media}\n    ) purchase_days\n    GROUP BY product_id, product_name\n) m\nCROSS JOIN (\n    SELECT count_if(reg_day < current_date) AS n1,\n           count_if(date_add('day', 1, reg_day) < current_date) AS n2,\n           count_if(date_add('day', 2, reg_day) < current_date) AS n3,\n           count_if(date_add('day', 3, reg_day) < current_date) AS n4,\n           count_if(date_add('day', 4, reg_day) < current_date) AS n5,\n           count_if(date_add('day', 5, reg_day) < current_date) AS n6,\n           count_if(date_add('day', 6, reg_day) < current_date) AS n7\n    FROM (\n        SELECT c.pid, c.reg_day,\n               coalesce(u.media_name, '自然量') AS media_name\n        FROM (\n            SELECT pid, reg_day\n            FROM (\n                SELECT pid, reg_day, cast(reg_day AS varchar) AS \"$part_date\"\n                FROM (\n                    SELECT cast(\"#user_id\" AS varchar) AS pid,\n                           min(date(\"$part_date\")) AS reg_day\n                    FROM ta.v_event_37\n                    WHERE \"$part_event\" = 'register'\n                      AND \"$part_date\" <= cast(date_add('day', -1, current_date) AS varchar)\n                      AND \"#user_id\" IS NOT NULL\n                    GROUP BY 1\n                ) all_registration\n            ) registration_dates\n            WHERE ${PartDate:date1}\n        ) c\n        LEFT JOIN (\n            SELECT cast(\"#user_id\" AS varchar) AS pid,\n                   coalesce(max(nullif(cast(ad_platform AS varchar), '')), '自然量') AS media_name\n            FROM ta.v_user_37\n            WHERE \"#user_id\" IS NOT NULL\n            GROUP BY 1\n        ) u ON c.pid = u.pid\n    ) media_cohorts\n    WHERE ${Selector:media}\n) c\nORDER BY m.product_id, m.product_name\n"
+        },
+        "eventView": {
+          "sqlViewParams": [
+            {
+              "paramType": "PartDate",
+              "recentDay": "1-7",
+              "startTime": "2026-11-20",
+              "paramName": "date1",
+              "endTime": "2026-11-26"
+            },
+            {
+              "paramType": "Selector",
+              "paramExpress": "全部",
+              "paramName": "media"
+            }
+          ],
+          "requireReferredProjectPrivilege": true,
+          "requiredEvents": []
+        }
+      },
+      "queryDurationMs": 0,
+      "reportDesc": "按商品统计新增D1-D7购买人数和次数；逐日成熟；注册当天为D1；截至昨日",
+      "reportId": 6352,
+      "reportModel": 10,
+      "reportModelDesc": "SQL_IDE",
+      "reportName": "前7日每日付费路径（新增用户）"
+    },
+    {
+      "cacheSeconds": 0,
+      "openQuery": {
+        "visualView": {},
+        "events": {
+          "sqlVoParams": [
+            {
+              "paramType": "PartDate",
+              "paramDisplay": "数据日期",
+              "paramRemark": "",
+              "paramName": "date",
+              "useTimezone": 0
+            },
+            {
+              "paramType": "Selector",
+              "paramDisplay": "媒体",
+              "paramRemark": "用户媒体ad_platform；空值归自然量；人数主体与原付费总览一致",
+              "paramName": "media",
+              "selectorItems": [
+                {
+                  "selectorName": "全部",
+                  "selectorValue": "1=1"
+                },
+                {
+                  "selectorName": "自然量",
+                  "selectorValue": "media_name = '自然量'"
+                },
+                {
+                  "selectorName": "tencent",
+                  "selectorValue": "media_name = 'tencent'"
+                }
+              ],
+              "useTimezone": 0
+            }
+          ],
+          "sql": "-- 萝卜4小游戏37：每日商品购买，正金额完成订单按用户+订单号去重，金额为元。\n-- 全部统计截至昨日；媒体Selector完整条件在两个media_name作用域分别应用。\n-- GROUPING SETS同次聚合产生商品与当日全商品总计；总计在商品筛选之前求出。\n-- 付费率分母为login当日#user_id去重；商品人数占比分母为当日全部商品付费人数。\nSELECT\n    p.day AS \"日期\",\n    p.product_id AS \"商品ID\",\n    p.product_name AS \"商品名称\",\n    p.payers AS \"付费人数\",\n    p.orders AS \"付费次数\",\n    cast(round(p.payers * 1.0000 / nullif(a.active_users, 0), 4) AS decimal(18,4)) AS \"付费率\",\n    cast(round(p.payers * 1.0000 / nullif(p.total_payers, 0), 4) AS decimal(18,4)) AS \"付费人数占比\",\n    cast(round(p.amount, 2) AS decimal(18,2)) AS \"付费金额_元\",\n    cast(round(p.amount / nullif(p.total_amount, 0), 4) AS decimal(18,4)) AS \"付费金额占比\",\n    cast(round(p.amount / nullif(p.payers, 0), 2) AS decimal(18,2)) AS \"付费ARPPU_元\"\nFROM (\n    SELECT day, product_id, product_name, payers, orders, amount, is_total,\n           max(CASE WHEN is_total = 1 THEN payers END) OVER (PARTITION BY day) AS total_payers,\n           max(CASE WHEN is_total = 1 THEN amount END) OVER (PARTITION BY day) AS total_amount\n    FROM (\n        SELECT day, product_id, product_name,\n               grouping(product_id) AS is_total,\n               count(DISTINCT pid) AS payers,\n               count(*) AS orders,\n               sum(pay_amount) AS amount\n        FROM (\n            SELECT d.pid, d.day, d.product_id, d.product_name, d.pay_amount,\n                   coalesce(u.media_name, '自然量') AS media_name\n            FROM (\n                SELECT pid, date(\"$part_date\") AS day, product_id, product_name, pay_amount\n                FROM (\n                    SELECT s.*,\n                           row_number() OVER (\n                               PARTITION BY pid, order_key\n                               ORDER BY pay_time, product_id, product_name, pay_amount\n                           ) AS order_rn\n                    FROM (\n                        SELECT cast(\"#user_id\" AS varchar) AS pid,\n                               \"$part_date\",\n                               coalesce(nullif(trim(cast(order_id AS varchar)), ''),\n                                   concat('__missing__|', cast(\"#event_time\" AS varchar), '|',\n                                       coalesce(cast(product_id AS varchar), ''), '|',\n                                       coalesce(cast(product_name AS varchar), ''), '|',\n                                       cast(pay_amount AS varchar))) AS order_key,\n                               cast(product_id AS varchar) AS product_id,\n                               coalesce(nullif(cast(product_name AS varchar), ''), '未获取商品名称') AS product_name,\n                               try_cast(pay_amount AS double) AS pay_amount,\n                               cast(\"#event_time\" AS timestamp) AS pay_time\n                        FROM ta.v_event_37\n                        WHERE \"$part_event\" = 'order_finish'\n                          AND \"$part_date\" <= cast(date_add('day', -1, current_date) AS varchar)\n                          AND date(\"#event_time\") < current_date\n                          AND \"#user_id\" IS NOT NULL\n                          AND \"#event_time\" IS NOT NULL\n                          AND try_cast(pay_amount AS double) > 0\n                    ) s\n                ) ranked_orders\n                WHERE order_rn = 1\n                  AND ${PartDate:date}\n            ) d\n            LEFT JOIN (\n                SELECT cast(\"#user_id\" AS varchar) AS pid,\n                       coalesce(max(nullif(cast(ad_platform AS varchar), '')), '自然量') AS media_name\n                FROM ta.v_user_37\n                WHERE \"#user_id\" IS NOT NULL\n                GROUP BY 1\n            ) u ON d.pid = u.pid\n        ) media_orders\n        WHERE ${Selector:media}\n        GROUP BY GROUPING SETS ((day, product_id, product_name), (day))\n    ) daily_grouping\n) p\nLEFT JOIN (\n    SELECT day, count(DISTINCT pid) AS active_users\n    FROM (\n        SELECT e.\"$part_date\" AS day_string,\n               date(e.\"$part_date\") AS day,\n               cast(e.\"#user_id\" AS varchar) AS pid,\n               coalesce(u.media_name, '自然量') AS media_name\n        FROM ta.v_event_37 e\n        LEFT JOIN (\n            SELECT cast(\"#user_id\" AS varchar) AS pid,\n                   coalesce(max(nullif(cast(ad_platform AS varchar), '')), '自然量') AS media_name\n            FROM ta.v_user_37\n            WHERE \"#user_id\" IS NOT NULL\n            GROUP BY 1\n        ) u ON cast(e.\"#user_id\" AS varchar) = u.pid\n        WHERE e.\"$part_event\" = 'login'\n          AND e.\"$part_date\" <= cast(date_add('day', -1, current_date) AS varchar)\n          AND e.\"#user_id\" IS NOT NULL\n          AND ${PartDate:date}\n    ) media_active\n    WHERE ${Selector:media}\n    GROUP BY day\n) a ON p.day = a.day\nWHERE p.is_total = 0\nORDER BY p.day DESC, p.amount DESC, p.product_id, p.product_name\n"
+        },
+        "eventView": {
+          "sqlViewParams": [
+            {
+              "paramType": "PartDate",
+              "recentDay": "1-7",
+              "startTime": "2026-11-20",
+              "paramName": "date",
+              "endTime": "2026-11-26"
+            },
+            {
+              "paramType": "Selector",
+              "paramExpress": "全部",
+              "paramName": "media"
+            }
+          ],
+          "requireReferredProjectPrivilege": true,
+          "requiredEvents": []
+        }
+      },
+      "queryDurationMs": 0,
+      "reportDesc": "完成订单去重；付费率分母为登录用户；人数和金额占比按当日全部商品；截至昨日",
+      "reportId": 6353,
+      "reportModel": 10,
+      "reportModelDesc": "SQL_IDE",
+      "reportName": "礼包类型购买情况-每日"
+    },
+    {
+      "cacheSeconds": 0,
+      "openQuery": {
+        "visualView": {},
+        "events": {
+          "sqlVoParams": [
+            {
+              "paramType": "PartDate",
+              "paramDisplay": "注册日期",
+              "paramRemark": "",
+              "paramName": "date1",
+              "useTimezone": 0
+            },
+            {
+              "paramType": "Selector",
+              "paramDisplay": "媒体",
+              "paramRemark": "用户媒体ad_platform；空值归自然量；人数主体与原付费总览一致",
+              "paramName": "media",
+              "selectorItems": [
+                {
+                  "selectorName": "全部",
+                  "selectorValue": "1=1"
+                },
+                {
+                  "selectorName": "自然量",
+                  "selectorValue": "media_name = '自然量'"
+                },
+                {
+                  "selectorName": "tencent",
+                  "selectorValue": "media_name = 'tencent'"
+                }
+              ],
+              "useTimezone": 0
+            }
+          ],
+          "sql": "-- 新增按全历史register最早日期；D1为注册当天，统计至昨日。\n-- 保留现有时长SQL的CTE结构，先压到用户日，避免重复JOIN。\nWITH reg AS (\n    SELECT \"#user_id\",min(\"$part_date\") AS reg_day\n    FROM ta.v_event_37\n    WHERE \"$part_event\"='register' AND \"#user_id\" IS NOT NULL\n    GROUP BY 1\n), cohort AS (\n    SELECT \"#user_id\",reg_day,media_name\n    FROM (\n      SELECT r.\"#user_id\",r.reg_day,r.reg_day AS \"$part_date\",\n             coalesce(nullif(trim(u.media_name),''),'自然量') AS media_name\n      FROM reg r LEFT JOIN (\n        SELECT \"#user_id\",max(ad_platform) AS media_name\n        FROM ta.v_user_37 GROUP BY 1\n      ) u ON r.\"#user_id\"=u.\"#user_id\"\n    ) c\n    WHERE ${PartDate:date1} AND ${Selector:media}\n      AND date(reg_day)<current_date\n), daily AS (\n    SELECT \"$part_date\" AS day,\"#user_id\",\n           max(CASE WHEN \"$part_event\"='ta_mg_show' THEN 1 ELSE 0 END) AS active,\n           sum(CASE WHEN \"$part_event\"='ta_mg_hide' AND \"#duration\">=0 AND \"#duration\"<86400\n                    THEN \"#duration\" ELSE 0 END) AS seconds\n    FROM ta.v_event_37\n    WHERE \"$part_event\" IN ('ta_mg_show','ta_mg_hide')\n      AND \"$part_date\">=(SELECT min(reg_day) FROM cohort)\n      AND \"$part_date\"<=cast(least(\n            date_add('day',6,(SELECT max(date(reg_day)) FROM cohort)),\n            date_add('day',-1,current_date)) AS varchar)\n      AND \"#user_id\" IN (SELECT \"#user_id\" FROM cohort)\n    GROUP BY 1,2\n)\nSELECT date(c.reg_day) AS \"新增日期\",\n       count(DISTINCT c.\"#user_id\") AS \"新增人数\",\n       round(sum(CASE WHEN date_diff('day',date(c.reg_day),date(d.day))=0 AND d.active=1 THEN coalesce(d.seconds,0) ELSE 0 END)\n             /nullif(count(DISTINCT CASE WHEN date_diff('day',date(c.reg_day),date(d.day))=0 AND d.active=1 THEN c.\"#user_id\" END),0)/60.0,2)\n             AS \"D1人均在线时长（分钟）\",\n       round(sum(CASE WHEN date_diff('day',date(c.reg_day),date(d.day))=1 AND d.active=1 THEN coalesce(d.seconds,0) ELSE 0 END)\n             /nullif(count(DISTINCT CASE WHEN date_diff('day',date(c.reg_day),date(d.day))=1 AND d.active=1 THEN c.\"#user_id\" END),0)/60.0,2)\n             AS \"D2人均在线时长（分钟）\",\n       round(sum(CASE WHEN date_diff('day',date(c.reg_day),date(d.day))=2 AND d.active=1 THEN coalesce(d.seconds,0) ELSE 0 END)\n             /nullif(count(DISTINCT CASE WHEN date_diff('day',date(c.reg_day),date(d.day))=2 AND d.active=1 THEN c.\"#user_id\" END),0)/60.0,2)\n             AS \"D3人均在线时长（分钟）\",\n       round(sum(CASE WHEN date_diff('day',date(c.reg_day),date(d.day))=3 AND d.active=1 THEN coalesce(d.seconds,0) ELSE 0 END)\n             /nullif(count(DISTINCT CASE WHEN date_diff('day',date(c.reg_day),date(d.day))=3 AND d.active=1 THEN c.\"#user_id\" END),0)/60.0,2)\n             AS \"D4人均在线时长（分钟）\",\n       round(sum(CASE WHEN date_diff('day',date(c.reg_day),date(d.day))=4 AND d.active=1 THEN coalesce(d.seconds,0) ELSE 0 END)\n             /nullif(count(DISTINCT CASE WHEN date_diff('day',date(c.reg_day),date(d.day))=4 AND d.active=1 THEN c.\"#user_id\" END),0)/60.0,2)\n             AS \"D5人均在线时长（分钟）\",\n       round(sum(CASE WHEN date_diff('day',date(c.reg_day),date(d.day))=5 AND d.active=1 THEN coalesce(d.seconds,0) ELSE 0 END)\n             /nullif(count(DISTINCT CASE WHEN date_diff('day',date(c.reg_day),date(d.day))=5 AND d.active=1 THEN c.\"#user_id\" END),0)/60.0,2)\n             AS \"D6人均在线时长（分钟）\",\n       round(sum(CASE WHEN date_diff('day',date(c.reg_day),date(d.day))=6 AND d.active=1 THEN coalesce(d.seconds,0) ELSE 0 END)\n             /nullif(count(DISTINCT CASE WHEN date_diff('day',date(c.reg_day),date(d.day))=6 AND d.active=1 THEN c.\"#user_id\" END),0)/60.0,2)\n             AS \"D7人均在线时长（分钟）\"\nFROM cohort c LEFT JOIN daily d\n  ON c.\"#user_id\"=d.\"#user_id\"\n AND date(d.day) BETWEEN date(c.reg_day) AND date_add('day',6,date(c.reg_day))\nGROUP BY c.reg_day\nORDER BY c.reg_day DESC\n"
+        },
+        "eventView": {
+          "sqlViewParams": [
+            {
+              "paramType": "PartDate",
+              "recentDay": "1-7",
+              "startTime": "2026-11-20",
+              "paramName": "date1",
+              "endTime": "2026-11-26"
+            },
+            {
+              "paramType": "Selector",
+              "paramExpress": "全部",
+              "paramName": "media"
+            }
+          ],
+          "requireReferredProjectPrivilege": true,
+          "requiredEvents": []
+        }
+      },
+      "queryDurationMs": 0,
+      "reportDesc": "单位分钟；分母为该批新增当天仍活跃用户；缺失时长记0，未成熟留空；截至昨日",
+      "reportId": 6354,
+      "reportModel": 10,
+      "reportModelDesc": "SQL_IDE",
+      "reportName": "【汇总】新增D1-D7人均在线时长"
+    },
+    {
+      "cacheSeconds": 0,
+      "openQuery": {
+        "visualView": {},
+        "events": {
+          "sqlVoParams": [
+            {
+              "paramType": "PartDate",
+              "paramDisplay": "注册日期",
+              "paramRemark": "",
+              "paramName": "date1",
+              "useTimezone": 0
+            },
+            {
+              "paramType": "Selector",
+              "paramDisplay": "媒体",
+              "paramRemark": "用户媒体ad_platform；空值归自然量；人数主体与原付费总览一致",
+              "paramName": "media",
+              "selectorItems": [
+                {
+                  "selectorName": "全部",
+                  "selectorValue": "1=1"
+                },
+                {
+                  "selectorName": "自然量",
+                  "selectorValue": "media_name = '自然量'"
+                },
+                {
+                  "selectorName": "tencent",
+                  "selectorValue": "media_name = 'tencent'"
+                }
+              ],
+              "useTimezone": 0
+            }
+          ],
+          "sql": "-- 新增按全历史register最早日期；D1为注册当天，统计至昨日。\n-- 保留现有时长SQL的CTE结构，先压到用户日，避免重复JOIN。\nWITH reg AS (\n    SELECT \"#user_id\",min(\"$part_date\") AS reg_day\n    FROM ta.v_event_37\n    WHERE \"$part_event\"='register' AND \"#user_id\" IS NOT NULL\n    GROUP BY 1\n), cohort AS (\n    SELECT \"#user_id\",reg_day,media_name\n    FROM (\n      SELECT r.\"#user_id\",r.reg_day,r.reg_day AS \"$part_date\",\n             coalesce(nullif(trim(u.media_name),''),'自然量') AS media_name\n      FROM reg r LEFT JOIN (\n        SELECT \"#user_id\",max(ad_platform) AS media_name\n        FROM ta.v_user_37 GROUP BY 1\n      ) u ON r.\"#user_id\"=u.\"#user_id\"\n    ) c\n    WHERE ${PartDate:date1} AND ${Selector:media}\n      AND date(reg_day)<current_date\n), daily AS (\n    SELECT \"$part_date\" AS day,\"#user_id\",\n           max(CASE WHEN \"$part_event\"='ta_mg_show' THEN 1 ELSE 0 END) AS active,\n           sum(CASE WHEN \"$part_event\"='ta_mg_hide' AND \"#duration\">=0 AND \"#duration\"<86400\n                    THEN \"#duration\" ELSE 0 END) AS seconds\n    FROM ta.v_event_37\n    WHERE \"$part_event\" IN ('ta_mg_show','ta_mg_hide')\n      AND \"$part_date\">=(SELECT min(reg_day) FROM cohort)\n      AND \"$part_date\"<=cast(least(\n            date_add('day',6,(SELECT max(date(reg_day)) FROM cohort)),\n            date_add('day',-1,current_date)) AS varchar)\n      AND \"#user_id\" IN (SELECT \"#user_id\" FROM cohort)\n    GROUP BY 1,2\n)\nSELECT date(c.reg_day) AS \"新增日期\",c.media_name AS \"媒体平台\",\n       count(DISTINCT c.\"#user_id\") AS \"新增人数\",\n       round(sum(CASE WHEN date_diff('day',date(c.reg_day),date(d.day))=0 AND d.active=1 THEN coalesce(d.seconds,0) ELSE 0 END)\n             /nullif(count(DISTINCT CASE WHEN date_diff('day',date(c.reg_day),date(d.day))=0 AND d.active=1 THEN c.\"#user_id\" END),0)/60.0,2)\n             AS \"D1人均在线时长（分钟）\",\n       round(sum(CASE WHEN date_diff('day',date(c.reg_day),date(d.day))=1 AND d.active=1 THEN coalesce(d.seconds,0) ELSE 0 END)\n             /nullif(count(DISTINCT CASE WHEN date_diff('day',date(c.reg_day),date(d.day))=1 AND d.active=1 THEN c.\"#user_id\" END),0)/60.0,2)\n             AS \"D2人均在线时长（分钟）\",\n       round(sum(CASE WHEN date_diff('day',date(c.reg_day),date(d.day))=2 AND d.active=1 THEN coalesce(d.seconds,0) ELSE 0 END)\n             /nullif(count(DISTINCT CASE WHEN date_diff('day',date(c.reg_day),date(d.day))=2 AND d.active=1 THEN c.\"#user_id\" END),0)/60.0,2)\n             AS \"D3人均在线时长（分钟）\",\n       round(sum(CASE WHEN date_diff('day',date(c.reg_day),date(d.day))=3 AND d.active=1 THEN coalesce(d.seconds,0) ELSE 0 END)\n             /nullif(count(DISTINCT CASE WHEN date_diff('day',date(c.reg_day),date(d.day))=3 AND d.active=1 THEN c.\"#user_id\" END),0)/60.0,2)\n             AS \"D4人均在线时长（分钟）\",\n       round(sum(CASE WHEN date_diff('day',date(c.reg_day),date(d.day))=4 AND d.active=1 THEN coalesce(d.seconds,0) ELSE 0 END)\n             /nullif(count(DISTINCT CASE WHEN date_diff('day',date(c.reg_day),date(d.day))=4 AND d.active=1 THEN c.\"#user_id\" END),0)/60.0,2)\n             AS \"D5人均在线时长（分钟）\",\n       round(sum(CASE WHEN date_diff('day',date(c.reg_day),date(d.day))=5 AND d.active=1 THEN coalesce(d.seconds,0) ELSE 0 END)\n             /nullif(count(DISTINCT CASE WHEN date_diff('day',date(c.reg_day),date(d.day))=5 AND d.active=1 THEN c.\"#user_id\" END),0)/60.0,2)\n             AS \"D6人均在线时长（分钟）\",\n       round(sum(CASE WHEN date_diff('day',date(c.reg_day),date(d.day))=6 AND d.active=1 THEN coalesce(d.seconds,0) ELSE 0 END)\n             /nullif(count(DISTINCT CASE WHEN date_diff('day',date(c.reg_day),date(d.day))=6 AND d.active=1 THEN c.\"#user_id\" END),0)/60.0,2)\n             AS \"D7人均在线时长（分钟）\"\nFROM cohort c LEFT JOIN daily d\n  ON c.\"#user_id\"=d.\"#user_id\"\n AND date(d.day) BETWEEN date(c.reg_day) AND date_add('day',6,date(c.reg_day))\nGROUP BY c.reg_day,c.media_name\nORDER BY c.reg_day DESC,c.media_name\n"
+        },
+        "eventView": {
+          "sqlViewParams": [
+            {
+              "paramType": "PartDate",
+              "recentDay": "1-7",
+              "startTime": "2026-11-20",
+              "paramName": "date1",
+              "endTime": "2026-11-26"
+            },
+            {
+              "paramType": "Selector",
+              "paramExpress": "全部",
+              "paramName": "media"
+            }
+          ],
+          "requireReferredProjectPrivilege": true,
+          "requiredEvents": []
+        }
+      },
+      "queryDurationMs": 0,
+      "reportDesc": "按用户媒体划分；单位分钟；分母为该批新增当天仍活跃用户；未成熟留空；截至昨日",
+      "reportId": 6355,
+      "reportModel": 10,
+      "reportModelDesc": "SQL_IDE",
+      "reportName": "【分媒体平台】新增D1-D7人均在线时长"
+    },
+    {
+      "cacheSeconds": 0,
+      "openQuery": {
+        "visualView": {},
+        "events": {
+          "sqlVoParams": [
+            {
+              "paramType": "PartDate",
+              "paramDisplay": "注册日期",
+              "paramRemark": "",
+              "paramName": "date1",
+              "useTimezone": 0
+            },
+            {
+              "paramType": "Selector",
+              "paramDisplay": "媒体",
+              "paramRemark": "用户媒体ad_platform；空值归自然量；人数主体与原付费总览一致",
+              "paramName": "media",
+              "selectorItems": [
+                {
+                  "selectorName": "全部",
+                  "selectorValue": "1=1"
+                },
+                {
+                  "selectorName": "自然量",
+                  "selectorValue": "media_name = '自然量'"
+                },
+                {
+                  "selectorName": "tencent",
+                  "selectorValue": "media_name = 'tencent'"
+                }
+              ],
+              "useTimezone": 0
+            }
+          ],
+          "sql": "-- 萝卜4小游戏37：新增用户全历史首次有效完成订单，归因至首充前最近进入的关卡。\n-- 观察截至昨日；register全历史MIN后再筛选新增日期；支付金额原值为元。\n-- 先去重订单、选每人首笔、再将关卡关联压成每人一行，避免金额被关卡记录放大。\n-- 媒体Selector是完整条件：全部=1=1，指定媒体=media_name='自然量'等。\nSELECT\n    first_level AS \"首充前最近进入关卡\",\n    product_id AS \"商品ID\",\n    product_name AS \"商品名称\",\n    count(DISTINCT pid) AS \"首充人数\",\n    cast(round(sum(pay_amount), 2) AS decimal(18,2)) AS \"首充金额_元\"\nFROM (\n    SELECT\n        f.pid, f.order_key, f.product_id, f.product_name, f.pay_amount,\n        coalesce(max_by(l.level_id, ROW(l.level_time, l.level_id)), '未获取') AS first_level\n    FROM (\n        SELECT p.pid, p.order_key, p.product_id, p.product_name,\n               p.pay_amount, p.pay_time\n        FROM (\n            SELECT d.*,\n                   row_number() OVER (\n                       PARTITION BY pid\n                       ORDER BY pay_time, order_key, product_id, product_name\n                   ) AS first_rn\n            FROM (\n                SELECT pid, order_key, product_id, product_name, pay_amount, pay_time, pay_day\n                FROM (\n                    SELECT s.*,\n                           row_number() OVER (\n                               PARTITION BY pid, order_key\n                               ORDER BY pay_time, product_id, product_name, pay_amount\n                           ) AS order_rn\n                    FROM (\n                        SELECT cast(\"#user_id\" AS varchar) AS pid,\n                               coalesce(nullif(trim(cast(order_id AS varchar)), ''),\n                                   concat('__missing__|', cast(\"#event_time\" AS varchar), '|',\n                                       coalesce(cast(product_id AS varchar), ''), '|',\n                                       coalesce(cast(product_name AS varchar), ''), '|',\n                                       cast(pay_amount AS varchar))) AS order_key,\n                               cast(product_id AS varchar) AS product_id,\n                               coalesce(nullif(cast(product_name AS varchar), ''), '未获取商品名称') AS product_name,\n                               try_cast(pay_amount AS double) AS pay_amount,\n                               cast(\"#event_time\" AS timestamp) AS pay_time,\n                               date(\"$part_date\") AS pay_day\n                        FROM ta.v_event_37\n                        WHERE \"$part_event\" = 'order_finish'\n                          AND \"$part_date\" <= cast(date_add('day', -1, current_date) AS varchar)\n                          AND date(\"#event_time\") < current_date\n                          AND \"#user_id\" IS NOT NULL\n                          AND \"#event_time\" IS NOT NULL\n                          AND try_cast(pay_amount AS double) > 0\n                    ) s\n                ) ranked_orders\n                WHERE order_rn = 1\n            ) d\n        ) p\n        INNER JOIN (\n            SELECT c.pid, c.reg_day,\n                   coalesce(u.media_name, '自然量') AS media_name\n            FROM (\n                SELECT pid, reg_day\n                FROM (\n                    SELECT pid, reg_day, cast(reg_day AS varchar) AS \"$part_date\"\n                    FROM (\n                        SELECT cast(\"#user_id\" AS varchar) AS pid,\n                               min(date(\"$part_date\")) AS reg_day\n                        FROM ta.v_event_37\n                        WHERE \"$part_event\" = 'register'\n                          AND \"$part_date\" <= cast(date_add('day', -1, current_date) AS varchar)\n                          AND \"#user_id\" IS NOT NULL\n                        GROUP BY 1\n                    ) all_registration\n                ) registration_dates\n                WHERE ${PartDate:date1}\n            ) c\n            LEFT JOIN (\n                SELECT cast(\"#user_id\" AS varchar) AS pid,\n                       coalesce(max(nullif(cast(ad_platform AS varchar), '')), '自然量') AS media_name\n                FROM ta.v_user_37\n                WHERE \"#user_id\" IS NOT NULL\n                GROUP BY 1\n            ) u ON c.pid = u.pid\n        ) cohorts ON p.pid = cohorts.pid AND p.pay_day >= cohorts.reg_day\n        WHERE p.first_rn = 1\n          AND ${Selector:media}\n    ) f\n    LEFT JOIN (\n        SELECT cast(\"#user_id\" AS varchar) AS pid,\n               nullif(trim(cast(level_id AS varchar)), '') AS level_id,\n               cast(\"#event_time\" AS timestamp) AS level_time\n        FROM ta.v_event_37\n        WHERE \"$part_event\" = 'level_start'\n          AND \"$part_date\" <= cast(date_add('day', -1, current_date) AS varchar)\n          AND \"#event_time\" IS NOT NULL\n          AND nullif(trim(cast(level_id AS varchar)), '') IS NOT NULL\n    ) l ON f.pid = l.pid AND l.level_time <= f.pay_time\n    GROUP BY f.pid, f.order_key, f.product_id, f.product_name, f.pay_amount\n) first_payment_level\nGROUP BY first_level, product_id, product_name\nORDER BY\n    CASE WHEN first_level = '未获取' THEN 1 ELSE 0 END,\n    try_cast(split_part(first_level, '.', 1) AS bigint) ASC NULLS LAST,\n    try_cast(split_part(first_level, '.', 2) AS bigint) ASC NULLS FIRST,\n    first_level, product_id, product_name\n"
+        },
+        "eventView": {
+          "sqlViewParams": [
+            {
+              "paramType": "PartDate",
+              "recentDay": "1-7",
+              "startTime": "2026-11-20",
+              "paramName": "date1",
+              "endTime": "2026-11-26"
+            },
+            {
+              "paramType": "Selector",
+              "paramExpress": "全部",
+              "paramName": "media"
+            }
+          ],
+          "requireReferredProjectPrivilege": true,
+          "requiredEvents": []
+        }
+      },
+      "queryDurationMs": 0,
+      "reportDesc": "全历史首笔完成订单；首充前最近进入关卡，未取到标未获取；统计截至昨日",
+      "reportId": 6351,
+      "reportModel": 10,
+      "reportModelDesc": "SQL_IDE",
+      "reportName": "首充对应关卡位置（新增用户）"
+    }
+  ],
+  "sharedSpaces": [
+    {
+      "children": [
+        {
+          "dashboard": {
+            "approximate_on": 0,
+            "cacheConfig": "{\"unit\":\"MINUTE\",\"value\":10}",
+            "dashbord_name": "萝卜4小游戏-新增在线时长",
+            "filter_show": 0,
+            "global_query_on": 0,
+            "index_order": 0,
+            "noteMappings": [],
+            "refresh_type": 0,
+            "reportMappings": [
+              {
+                "aggregate_data": "{\"show\":false,\"typeList\":[]}",
+                "date_outside": -1,
+                "index_order": 0,
+                "report_graph_shape": "",
+                "report_id": 6354,
+                "report_width": 1,
+                "sort_type": "",
+                "table_format": 0
+              },
+              {
+                "aggregate_data": "{\"show\":false,\"typeList\":[]}",
+                "date_outside": -1,
+                "index_order": 1,
+                "report_graph_shape": "",
+                "report_id": 6355,
+                "report_width": 1,
+                "sort_type": "",
+                "table_format": 0
+              }
+            ],
+            "tags": [],
+            "ui_config": "{\"layout\":[{\"w\":20,\"x\":0,\"h\":10,\"i\":\"6354\",\"y\":0},{\"w\":20,\"x\":0,\"h\":10,\"i\":\"6355\",\"y\":10}],\"version\":\"3.4.0\"}",
+            "zone_offset": 88
+          },
+          "isFolder": false
+        },
+        {
+          "dashboard": {
+            "approximate_on": 0,
+            "cacheConfig": "{\"unit\":\"MINUTE\",\"value\":10}",
+            "dashbord_name": "萝卜4小游戏-付费分析",
+            "filter_show": 0,
+            "global_query_on": 0,
+            "index_order": 0,
+            "noteMappings": [],
+            "refresh_type": 0,
+            "reportMappings": [
+              {
+                "aggregate_data": "{\"show\":false,\"typeList\":[]}",
+                "date_outside": -1,
+                "index_order": 0,
+                "report_graph_shape": "L19",
+                "report_id": 6351,
+                "report_width": 1,
+                "sort_type": "",
+                "table_format": 0
+              },
+              {
+                "aggregate_data": "{\"show\":false,\"typeList\":[]}",
+                "date_outside": -1,
+                "index_order": 1,
+                "report_graph_shape": "",
+                "report_id": 6352,
+                "report_width": 1,
+                "sort_type": "",
+                "table_format": 0
+              },
+              {
+                "aggregate_data": "{\"show\":false,\"typeList\":[]}",
+                "date_outside": -1,
+                "index_order": 2,
+                "report_graph_shape": "",
+                "report_id": 6353,
+                "report_width": 1,
+                "sort_type": "",
+                "table_format": 0
+              }
+            ],
+            "tags": [],
+            "ui_config": "{\"layout\":[{\"i\":\"6351\",\"x\":0,\"y\":0,\"w\":20,\"h\":10},{\"i\":\"6352\",\"x\":0,\"y\":10,\"w\":20,\"h\":10},{\"i\":\"6353\",\"x\":0,\"y\":20,\"w\":20,\"h\":10}],\"version\":\"3.4.0\"}",
+            "zone_offset": 88
+          },
+          "isFolder": false
+        }
+      ],
+      "spaceName": "保卫萝卜4小游戏"
+    }
+  ]
+}
